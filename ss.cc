@@ -11,10 +11,15 @@ emk::SlideShow show;
 extern "C" int emkMain()
 {
   // Setup background for all images.
-  int stage_w = show.Stage().GetWidth() - 12;
-  int stage_h = show.Stage().GetHeight() - 12;  
+  int stage_w = show.Stage().GetScaledWidth() - 12;
+  int stage_h = show.Stage().GetScaledHeight() - 12;  
   show.BuildRect("white_bg", emk::Point(5, 5), stage_w, stage_h, "white", "black", 3);
   show.AddBackground(show.Rect());  
+
+
+  emk::ScheduleMethod<emk::Stage>(&(show.Stage()), &emk::Stage::ResizeMax, 5000);
+  show.Stage().SetScaledSize(1600,900);
+  AlertVar(show.Stage().GetWidth());
 
   // ---=== TITLE Slide ===---
   show.NewSlide(); // Create the title slide.
