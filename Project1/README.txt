@@ -1,4 +1,4 @@
-Name: <INSERT YOUR NAME>
+Name: WRONG NAME
 Summary:
 
 External Resources (if any):
