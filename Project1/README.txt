@@ -1,4 +1,4 @@
-Name: <INSERT YOUR NAME>
+Name: Brian Hart
 Summary:
 
 External Resources (if any):
