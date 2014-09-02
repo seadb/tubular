@@ -1,4 +1,4 @@
-Name: <INSERT YOUR NAME>
+Name: Joshua Curl
 Summary:
 
 External Resources (if any):
