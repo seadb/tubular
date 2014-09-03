@@ -1,4 +1,4 @@
-Name: <INSERT YOUR NAME>
+Name: Chelsea Bridson
 Summary:
 
 External Resources (if any):
