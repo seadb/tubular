@@ -1,4 +1,4 @@
-Name: <INSERT YOUR NAME>
+Name: Justin Grothe
 Summary:
 
 External Resources (if any):
