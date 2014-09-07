@@ -1,8 +1,11 @@
-tube1: proj11.driver.o proj11.support.o
-        g++ proj11.driver.o proj11.support.o -o tube1 
+GCC = g++
+LFLAGS = -ll
 
-proj11.driver.o: proj11.driver.c
-        g++ -c -Wall proj11.driver.c
+tube1: tube1-lexer.o
+	$(GCC) tube1-lexer.o -o tube1 $(LFLAGS)
 
-proj11.support.o: proj11.support.s
-        g++ -c proj11.support.s
+tube1-lexer.o: tube1-lexer.cc
+	$(GCC) $(CFLAGS) -c tube1-lexer.cc
+
+tube1-lexer.cc: tube1.lex
+	flex -o tube1-lexer.cc tube1.lex
