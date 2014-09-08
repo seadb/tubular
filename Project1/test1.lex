@@ -1,8 +1,19 @@
+%{
+#include <iostream>
+using namespace std;
+
+int line = 0;
+%}
 %%
-.|\n ECHO;
+int    { cout << "TYPE: " << yytext << endl; }
+print  { cout << "COMMAND_PRINT: " << yytext << endl; }
+random { cout << "COMMAND_RANDOM: " << yytext << endl; }
+\n     { line++; }
+.      ECHO;
 %%
 int main()
 {
     yylex();
+    cout << line << endl;
     return 0;
 }
