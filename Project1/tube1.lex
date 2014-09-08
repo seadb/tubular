@@ -1,15 +1,11 @@
 %{
-#include <typeinfo>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <algorithm>
 using namespace std;
 int temp=0, line_count=0;
-int printlex(string token, string lexeme){
-    cout << token << ": " << lexeme << endl;
-    return 0;}
+void printlex(string token, string lexeme){ cout << token << ": " << lexeme << endl;}
 %}
 %option c++ noyywrap
 eol         "\n"
@@ -71,7 +67,7 @@ unknown     .
                     }
                  }
 {comment1}       { line_count++; std::cout << "Comment newline" << std::endl; }
-{comment2}       {}
+{comment2}       { line_count++; }
 
                  
                   
