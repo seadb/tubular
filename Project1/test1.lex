@@ -1,10 +1,21 @@
 %{
 #include <iostream>
+#include <cstring>
 using namespace std;
 
 int line = 0;
 %}
 %%
+"/*"[.\n]*"*/" {
+    // Comment, ignore everything in between
+    // However, still increment line
+    for(int i = 0; i < yyleng; i++) {
+        if(yytext[i] == '\n') {
+            line++;
+        }
+    } 
+}
+#.*                  ; // Comment, ignore remainder of line
 int                  { cout << "TYPE: " << yytext << endl; }
 print                { cout << "COMMAND_PRINT: " << yytext << endl; }
 random               { cout << "COMMAND_RANDOM: " << yytext << endl; }
@@ -30,9 +41,8 @@ random               { cout << "COMMAND_RANDOM: " << yytext << endl; }
     cout << "Unknown token on line " << line << ": " << yytext << endl;
 }
 %%
-int main()
-{
+int main() {
     yylex();
-    cout << line << endl;
+    cout << "Line Count: " << line << endl;
     return 0;
 }
