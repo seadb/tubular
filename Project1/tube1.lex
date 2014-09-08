@@ -14,7 +14,7 @@ random {
   std::cout << "COMMAND_RANDOM: " << yytext << std::endl;  }
 [a-zA-Z_][a-zA-Z0-9_]* {
   std::cout << "ID: " << yytext << std::endl;  }
-[1-9][0-9]* {
+[0-9]+ {
   std::cout << "INT_LITERAL: " << yytext << std::endl;  }
 [+\-*/()=,}{.;%\[\]] {
   std::cout << "ASCII_CHAR: " << yytext << std::endl;  }
