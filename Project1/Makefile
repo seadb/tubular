@@ -5,23 +5,23 @@ LFLAGS = -ll
 
 # Link the object files together into the final executable.
 
-test1: test1-lexer.o	
-	$(GCC) test1-lexer.o -o test1 $(LFLAGS)
+tube1: tube1-lexer.o	
+	$(GCC) tube1-lexer.o -o tube1 $(LFLAGS)
 
 
 # Use the flex configuration to build the C++ code files.
 
-test1-lexer.o: test1-lexer.cc
-	$(GCC) $(CFLAGS) -c test1-lexer.cc
+tube1-lexer.o: tube1-lexer.cc
+	$(GCC) $(CFLAGS) -c tube1-lexer.cc
 
 
 # Compile the individual code files into object files.
 
-test1-lexer.cc: test1.lex
-	flex -o test1-lexer.cc test1.lex
+tube1-lexer.cc: tube1.lex
+	flex -+ -o tube1-lexer.cc tube1.lex
 
 # Cleanup all of the auto-generated files
 
 clean:
-	rm -f test1 *.o test1-lexer.cc *.tab.* *~
+	rm -f tube1 *.o tube1-lexer.cc *.tab.* *~
 

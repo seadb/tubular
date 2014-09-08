@@ -1,10 +1,12 @@
 %{
+#include <fstream>
 #include <iostream>
 #include <cstring>
 using namespace std;
 
-int line = 0;
+int line = 1;
 %}
+%option c++ noyywrap
 %%
 "/*"[.\n]*"*/" {
     // Comment, ignore everything in between
@@ -19,7 +21,9 @@ int line = 0;
 int                  { cout << "TYPE: " << yytext << endl; }
 print                { cout << "COMMAND_PRINT: " << yytext << endl; }
 random               { cout << "COMMAND_RANDOM: " << yytext << endl; }
-[a-zA-Z_][a-zA-Z]*   { cout << "ID: " << yytext << endl; }
+[a-zA-Z_][a-zA-Z0-9_]* {
+    cout << "ID: " << yytext << endl;
+}
 [0-9]+               { cout << "INT_LITERAL: " << yytext << endl; }
 "=="                 { cout << "COMP_EQU: " << yytext << endl; }
 "!="                 { cout << "COMP_NEQU: " << yytext << endl; }
@@ -39,10 +43,26 @@ random               { cout << "COMMAND_RANDOM: " << yytext << endl; }
 \n                   { line++; }
 . {
     cout << "Unknown token on line " << line << ": " << yytext << endl;
+    exit(3);
 }
 %%
-int main() {
-    yylex();
-    cout << "Line Count: " << line << endl;
+int main(int argc, char **argv) {
+    if(argc != 2) {
+        cout << "Format: " << argv[0] << " [source filename]" << endl;
+        return 1;
+    }
+
+    ifstream sfile(argv[1]);
+
+    if(sfile.fail()) {
+        cout << "Error: Unable to open '" << argv[1] << "'. Halting." << endl;
+        return 2;
+    }
+
+    FlexLexer* lexer = new yyFlexLexer(&sfile);
+    while(lexer->yylex());
+
+    cout << "Line Count: " << --line << endl;
+
     return 0;
 }
