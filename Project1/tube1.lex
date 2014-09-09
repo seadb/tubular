@@ -9,9 +9,9 @@ eol \n
 int { std::cout << "TYPE: " << yytext << std::endl; }
 print { std::cout << "COMMAND_PRINT: " << yytext << std::endl; }
 random { std::cout << "COMMAND_RANDOM: " << yytext  << std::endl; }
-[+\-*/%\(\)=,\{\}\[\].;] { std::cout << "ASCII_CHAR: " << yytext << std::endl; }
-[a-zA-z_][a-zA-Z0-9_]* { std::cout << "ID: " << yytext << std::endl; }
+[a-zA-Z_][a-zA-Z0-9_]* { std::cout << "ID: " << yytext << std::endl; }
 [0-9]+ { std::cout << "INT_LITERAL: " << yytext << std::endl; }
+[+\-*/%\(\)=,\{\}\[\].;] { std::cout << "ASCII_CHAR: " << yytext << std::endl; }
 "+=" { std::cout << "ASSIGN_ADD: " << yytext << std::endl; }
 "-=" { std::cout << "ASSIGN_SUB: " << yytext << std::endl; }
 "*=" { std::cout << "ASSIGN_MULT: " << yytext << std::endl; }
