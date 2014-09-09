@@ -1,4 +1,4 @@
 Name: Joshua Curl
-Summary:
+Summary: Project fully working, including extra credit
 
 External Resources (if any):
