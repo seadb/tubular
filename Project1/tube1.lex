@@ -3,9 +3,9 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-using namespace std;
 int temp=0, line_count=0;
-void printlex(string token, string lexeme){ cout << token << ": " << lexeme << endl;}
+void printlex(std::string token, std::string lexeme)
+ { std::cout << token << ": " << lexeme << std::endl;};
 %}
 %option c++ noyywrap
 eol         "\n"
@@ -34,7 +34,7 @@ comment2    "/*".*"*/"
 unknown     .
 %%
  /*COMMANDS*/
-{eol}           { line_count++;  printlex("EOL", yytext); }
+{eol}           { line_count++; /* printlex("EOL", yytext);*/ }
 {print}		    { printlex("COMMAND_PRINT", yytext);}
 {random} 	    { printlex("COMMAND_RANDOM", yytext);}
  /*TYPES*/
@@ -59,39 +59,34 @@ unknown     .
 {boolor}        { printlex("BOOL_OR", yytext);}
  /*SPECIAL CHARACTERS*/
 {ascii}		    { printlex("ASCII_CHAR", yytext);}
-{white}		    {for(int i=0; i<yyleng;i++){
-                    if(&yytext[i]=="\n")
-                      {line_count++; 
-                       std::cout << "White newline" << std::endl; 
-                      }
-                    }
+{white}		    { for(int i=0; i < yyleng;i++){
+                    if(yytext[i] == '\n') { line_count++; /*printlex("newline", "in consecutive ws");*/ }
+                   }
+                }
+{comment1}       { line_count++; /*printlex("newline", "in single line comment");*/} 
+{comment2}       { for(int j=0; j < yyleng; j++){
+                     if(yytext[j] == '\n') { line_count++; /*printlex("newline", "in multiline comment");*/} 
+                   }
                  }
-{comment1}       { line_count++; std::cout << "Comment newline" << std::endl; }
-{comment2}       { line_count++; }
-
-                 
-                  
-                 
-                      
-{unknown}	    { line_count++; printf("Unknown token on line %i: %s \n", line_count, yytext);}
+{unknown}	    {printf("Unknown token on line %i: %s \n", line_count, yytext);}
 %%
 int main(int argc, char* argv[]) {
 	if (argc != 2) { //Make sure the arguments are correct
-		cerr << "Format:" << argv[0] << " [source filename]" << endl;
+		std::cerr << "Format:" << argv[0] << " [source filename]" << std::endl;
 		exit(1);
 	}
 
-	ifstream sfile(argv[1]);	 	 	 // Open the file
+	std::ifstream sfile(argv[1]);	 	 	 // Open the file
 
 	if (sfile.fail()) {	 	 	 	 	 	 // If the open failed, give an error and exit.
-	cerr << "Error: Unable to open '" << argv[1] << "'. Halting." << std::endl;
+	std::cerr << "Error: Unable to open '" << argv[1] << "'. Halting." << std::endl;
 	exit(2);
 	}
 
 	FlexLexer* lexer = new yyFlexLexer(&sfile);
 	while (lexer->yylex());
 
-    stringstream ss;
+    std::stringstream ss;
     ss << line_count;
 
     printlex("Line Count",ss.str());
