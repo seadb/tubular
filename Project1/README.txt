@@ -1,7 +1,7 @@
 Name: Chelsea Bridson
 Summary: All functionality works as specified in the requirements
          I also implemented multiline comments: the extra credit
-         Developed and tested 
+         Developed and tested on arctic 
         
         |done?| Requirement
         +-----+---------------------------------------------------------------------+

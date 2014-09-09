@@ -15,7 +15,7 @@ if(gggg||hhhh){
 1=1
 1!=1
 tt && yy
-pr int 5; /*comment*/
+pr int 5; 
      
 @
 + - * / % ( ) = , { } [ ] . ;
