@@ -30,8 +30,10 @@ boolor      "||"
 ascii		[\+\-\*/=;\(\)%,{}[\]\.]
 white		[ \t\n]+
 comment1 	"#".*\n
-comment2    "/*".*"*/"
+%s IN_COMMENT
+comment2    \\/\\*[^(\\/\\*)]*?\\*\\/  
 unknown     .
+
 %%
  /*COMMANDS*/
 {eol}           { line_count++; /* printlex("EOL", yytext);*/ }
@@ -63,11 +65,18 @@ unknown     .
                     if(yytext[i] == '\n') { line_count++; /*printlex("newline", "in consecutive ws");*/ }
                    }
                 }
-{comment1}       { line_count++; /*printlex("newline", "in single line comment");*/} 
-{comment2}       { for(int j=0; j < yyleng; j++){
-                     if(yytext[j] == '\n') { line_count++; /*printlex("newline", "in multiline comment");*/} 
-                   }
-                 }
+{comment1}       { line_count++;} 
+
+<INITIAL>{
+     "/*"          BEGIN(IN_COMMENT);     
+}
+<IN_COMMENT>{
+     "*/"      BEGIN(INITIAL);
+     [^*\n]+   ; // eat comment in chunks
+     "*"       ;// eat the lone star
+     \n        line_count++;
+     }
+
 {unknown}	    { line_count++; printf("Unknown token on line %i: %s\n", line_count, yytext);
                   exit(3);
                 }

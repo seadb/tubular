@@ -22,7 +22,7 @@ Summary: All functionality works as specified in the requirements
         |  x  | Extra Credit: multiline comments                                    |
         +-----+---------------------------------------------------------------------+
 
-External Resources (if any): cplusplus.com, stackoverflow.com, stackexchange.com, piazza.com
+External Resources (if any): flex.sourceforge.net/manual/How-can-I-match-C_002dstyle-comments_003f.html, cplusplus.com, stackoverflow.com, stackexchange.com, piazza.com
 
 Test Log
 ----------
