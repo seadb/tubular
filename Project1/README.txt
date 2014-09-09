@@ -23,3 +23,16 @@ Summary: All functionality works as specified in the requirements
         +-----+---------------------------------------------------------------------+
 
 External Resources (if any): cplusplus.com, stackoverflow.com, stackexchange.com, piazza.com
+
+Test Log
+----------
+
+<296 arctic:~/bridsonc-tube/Project1 >bash run_tests.sh
+make: `tube1' is up to date.
+Test_Suite/test1.0.tube  passed
+Test_Suite/test1.1.tube  passed
+Test_Suite/test1.2.tube  passed
+Test_Suite/test1.3.tube  passed
+Test_Suite/test1.4.tube  passed
+Test_Suite/test1.5.tube  passed
+Test_Suite/test1.6.tube  passed 

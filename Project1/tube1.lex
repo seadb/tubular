@@ -5,7 +5,7 @@
 #include <sstream>
 int temp=0, line_count=0;
 void printlex(std::string token, std::string lexeme)
- { std::cout << token << ": " << lexeme << std::endl;};
+ { std::cout << token << ": " << lexeme << std::endl;}
 %}
 %option c++ noyywrap
 eol         "\n"
@@ -68,7 +68,9 @@ unknown     .
                      if(yytext[j] == '\n') { line_count++; /*printlex("newline", "in multiline comment");*/} 
                    }
                  }
-{unknown}	    {printf("Unknown token on line %i: %s \n", line_count, yytext);}
+{unknown}	    { line_count++; printf("Unknown token on line %i: %s\n", line_count, yytext);
+                  exit(3);
+                }
 %%
 int main(int argc, char* argv[]) {
 	if (argc != 2) { //Make sure the arguments are correct
