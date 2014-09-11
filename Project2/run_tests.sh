@@ -23,7 +23,7 @@ function run_test {
 for F in `ls Test_Suite | grep -v 'extra\|reference'`; do 
 	run_test Test_Suite/$F
 done
-echo Extra Credit Results
+echo Extra Credit Results:
 
 for F in Test_Suite/*extra*.tube; do 
 	run_test $F
