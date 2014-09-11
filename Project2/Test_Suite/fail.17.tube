@@ -1,0 +1,4 @@
+# Divide up a compound assignment.
+int a = 43;
+a %= 3;
+a *  = 3;

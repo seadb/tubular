@@ -1,0 +1,2 @@
+# More bad math on the left-hand-side
+int abc - 12 = 15;

@@ -1,0 +1,6 @@
+# Make sure random values can be used.
+int a = random(20);
+int b = random(20) + 5;
+print a;
+print b;
+print a > b;

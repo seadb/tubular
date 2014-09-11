@@ -1,0 +1,2 @@
+# Random cannot have more than one argument
+int x = random(2, 8);
