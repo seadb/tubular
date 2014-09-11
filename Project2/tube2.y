@@ -1,6 +1,7 @@
 %{
 #include <iostream>
 #include <string>
+#include <cstdlib>
 
 extern int line_num;
 extern int yylex();
@@ -8,6 +9,7 @@ extern int yylex();
 void yyerror(std::string err_string) {
   std::cout << "ERROR(line " << line_num << "): "
        << err_string << std::endl;
+  exit(1);
 }
 %}
 
@@ -23,7 +25,6 @@ void yyerror(std::string err_string) {
 
 program:        statement_list {
                   /* This is always the last rule to run! */
-                  std::cout << "Parse Successful!" << std::endl;
                 }
         ;
 
@@ -68,5 +69,6 @@ int main(int argc, char * argv[])
   LexMain(argc, argv);
 
   yyparse();
+  std::cout << "Parse Successful!" << std::endl;
   return 0;
 }
