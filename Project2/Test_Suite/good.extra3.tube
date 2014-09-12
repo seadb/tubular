@@ -1,0 +1,5 @@
+# Can we use variables that were all set on the same line.
+int a=1, b=2, c=3;
+
+int d=a+b+c, e=a*b*c;
+a = e / d;
