@@ -70,6 +70,7 @@
 
 #include <iostream>
 #include <string>
+#include <cstdlib>
 
 extern int line_num;
 extern int yylex();
@@ -77,11 +78,12 @@ extern int yylex();
 void yyerror(std::string err_string) {
   std::cout << "ERROR(line " << line_num << "): "
        << err_string << std::endl;
+  exit(1);
 }
 
 
 /* Line 268 of yacc.c  */
-#line 85 "tube2.tab.cc"
+#line 87 "tube2.tab.cc"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -121,14 +123,14 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 14 "tube2.y"
+#line 16 "tube2.y"
 
   char * lexeme;
 
 
 
 /* Line 293 of yacc.c  */
-#line 132 "tube2.tab.cc"
+#line 134 "tube2.tab.cc"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -140,7 +142,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 144 "tube2.tab.cc"
+#line 146 "tube2.tab.cc"
 
 #ifdef short
 # undef short
@@ -429,8 +431,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    24,    24,    30,    33,    38,    39,    42,    47,    51,
-      54,    57
+       0,    26,    26,    31,    34,    39,    40,    43,    48,    52,
+      55,    58
 };
 #endif
 
@@ -1362,17 +1364,16 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 24 "tube2.y"
+#line 26 "tube2.y"
     {
                   /* This is always the last rule to run! */
-                  std::cout << "Parse Successful!" << std::endl;
                 }
     break;
 
   case 3:
 
 /* Line 1806 of yacc.c  */
-#line 30 "tube2.y"
+#line 31 "tube2.y"
     {
                   /* This is always the first rule to run! */
                 }
@@ -1381,7 +1382,7 @@ yyreduce:
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 33 "tube2.y"
+#line 34 "tube2.y"
     {
                   /* This rule will run after each statement is created */
 		}
@@ -1390,21 +1391,21 @@ yyreduce:
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 38 "tube2.y"
+#line 39 "tube2.y"
     {  /* Determine if we have a variable declaration */  }
     break;
 
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 39 "tube2.y"
+#line 40 "tube2.y"
     {  /* Determine if we have a math expression */  }
     break;
 
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 42 "tube2.y"
+#line 43 "tube2.y"
     {
                   std::cout << "Do something other than printing var info here!"
                             << "Type=" << (yyvsp[(1) - (2)].lexeme) << " name=" << (yyvsp[(2) - (2)].lexeme) << std::endl;
@@ -1414,7 +1415,7 @@ yyreduce:
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 47 "tube2.y"
+#line 48 "tube2.y"
     {
                   std::cout << "Found int: " << (yyvsp[(1) - (1)].lexeme)
                             << " (but you shouldn't print it!)" << std::endl;
@@ -1424,7 +1425,7 @@ yyreduce:
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 51 "tube2.y"
+#line 52 "tube2.y"
     {
                   std::cout << "Doing addition! (but you shouldn't print it!)" << std::endl;
                 }
@@ -1433,7 +1434,7 @@ yyreduce:
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 54 "tube2.y"
+#line 55 "tube2.y"
     {
                   std::cout << "Doing subtraction! (but you shouldn't print it!)" << std::endl;
                 }
@@ -1442,7 +1443,7 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 57 "tube2.y"
+#line 58 "tube2.y"
     {
                   std::cout << "Instead of printing, check if '" << (yyvsp[(1) - (1)].lexeme)
                             << "' actually exists!" << std::endl;
@@ -1452,7 +1453,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 1456 "tube2.tab.cc"
+#line 1457 "tube2.tab.cc"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1683,7 +1684,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 62 "tube2.y"
+#line 63 "tube2.y"
 
 
 void LexMain(int argc, char * argv[]);
@@ -1693,6 +1694,7 @@ int main(int argc, char * argv[])
   LexMain(argc, argv);
 
   yyparse();
+  std::cout << "Parse Successful!" << std::endl;
   return 0;
 }
 

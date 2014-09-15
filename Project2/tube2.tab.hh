@@ -50,7 +50,7 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 14 "tube2.y"
+#line 16 "tube2.y"
 
   char * lexeme;
 
