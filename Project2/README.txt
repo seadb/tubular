@@ -1,4 +1,4 @@
-Group Member Names:
+Group Member Names:  Chelsea Bridson
 
 Contributions:
 
