@@ -1,0 +1,2 @@
+# Using inappropriate math symbols
+int foo = 12 ** 2;
