@@ -22,6 +22,7 @@ void yyerror(std::string err_string) {
 
 %token<lexeme> ID INT_LITERAL TYPE COMMAND_PRINT COMMAND_RANDOM
 
+%left '*' '/'
 %left '+' '-'
 
 %%

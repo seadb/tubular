@@ -5,6 +5,8 @@
 
 extern int line_num;
 extern int yylex();
+std::string symboltable= []
+
 
 void yyerror(std::string err_string) {
   std::cout << "ERROR(line " << line_num << "): "

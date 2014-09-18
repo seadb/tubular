@@ -1,9 +1,13 @@
 %{
 #include "tube2.tab.hh"
 #include <iostream>
+#include <string>
+#include <sstream>
 
+int temp = 0;
 int line_num = 1;
 %}
+
 
 id              [a-zA-Z_][a-zA-Z0-9_]*
 
