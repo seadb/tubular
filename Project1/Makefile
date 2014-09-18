@@ -1,3 +1,6 @@
+# This is an example Makefile.
+# It will convert a file named tube1.lex to an executable named tube1.
+
 # Setup some aliases to these can be easily altered in the future.
 GCC = g++
 CFLAGS = 
