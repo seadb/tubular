@@ -3,13 +3,13 @@
 #include <string>
 #include <cstdlib>
 
-extern int line_num;
+extern int line_count;
 extern int yylex();
 std::string symboltable= []
 
 
 void yyerror(std::string err_string) {
-  std::cout << "ERROR(line " << line_num << "): "
+  std::cout << "ERROR(line " << line_count << "): "
        << err_string << std::endl;
   exit(1);
 }
@@ -19,10 +19,10 @@ void yyerror(std::string err_string) {
   char * lexeme;
 }
 
-%token<lexeme> ID INT_LITERAL TYPE
+%token<lexeme> ID INT_LITERAL TYPE COMMAND_PRINT COMMAND_RANDOM ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD COMP_NEQU COMP_EQU COMP_LTE COMP_GTE BOOLAND BOOLOR
 
-%left '+' '-' '*' '/' '%' '+=' '-=' '*=' '/=' '%=' '==' '!=' '<' '<=' '>' '>=' '&&' '||' '(' ')'
 
+%left '+' '-' '*' '/' '%' '<' '>' '(' ')'
 %%
 
 program:        statement_list {
@@ -47,10 +47,7 @@ var_declare:	TYPE ID {
                   std::cout << "Do something other than printing var info here!"
                             << "Type=" << $1 << " name=" << $2 << std::endl;
                 }
-	|	expression {
-
-		}
-
+	;
 expression:     INT_LITERAL {
                   std::cout << "Found int: " << $1
                             << " (but you shouldn't print it!)" << std::endl;
@@ -61,52 +58,38 @@ expression:     INT_LITERAL {
         |       expression '-' expression {
                   std::cout << "Doing subtraction! (but you shouldn't print it!)" << std::endl;
                 }
-	|	expression '*' expression {
+	|	expression '*' expression { 
+		  std::cout << "NICE" << std::endl; 
+		}
+	|	expression '/' expression {}
+	|	expression '%' expression {}
+	|	ID ASSIGN_ADD expression {}
+	|	ID ASSIGN_SUB expression {}
+	|	ID ASSIGN_MULT expression {}
+	|	expression ASSIGN_DIV expression {}
+	|	expression ASSIGN_MOD expression {}
+	|	expression COMP_EQU expression {
 
 		}
-	|	expression '/' expression {
-
-		}
-	|	expression '%' expression {
-
-		}
-	|	expression '+=' expression {
-
-		}
-	|	expression '-=' expression {
-
-		}
-	|	expression '*=' expression {
-
-		}
-	|	expression '/=' expression {
-
-		}
-	|	expression '%=' expression {
-
-		}
-	|	expression '==' expression {
-
-		}
-	|	expression '!=' expression {
+	|	expression COMP_NEQU expression {
 
 		}
 	|	expression '<' expression {
 
 		}
-	|	expression '<=' expression {
+	|	expression COMP_LTE expression {
 
 		}
 	|	expression '>' expression {
 
 		}
-	|	expression '>=' expression {
+	|	expression COMP_GTE expression {
 
 		}
-	|	expression '&&' expression {
+	|	expression BOOLAND expression {
 
 		}
-	|	expression '||' expression {
+	|	expression BOOLOR expression {
 
 		}
 	|	'(' expression ')' {
@@ -116,10 +99,9 @@ expression:     INT_LITERAL {
                   std::cout << "Instead of printing, check if '" << $1
                             << "' actually exists!" << std::endl;
                 }
-printline:	expression {
+printline:	COMMAND_PRINT {
 
 		}
-	|	
         ;
 %%
 
