@@ -68,6 +68,17 @@ var_declare:	TYPE ID {
                     symbol sym = { symbol_num++, $1 };
                     symbol_table[$2] = sym;
                 }
+    |       TYPE ID '=' expression {
+                if(symbol_table.find($2) != symbol_table.end()) {
+                    string error = "redeclaration of variable '";
+                    error += $2;
+                    error += "'";
+                    yyerror(error);
+                }
+                symbol sym = { symbol_num++, $1 };
+                symbol_table[$2] = sym;
+            }
+    ;
 
 assign:         ID '=' expression {
                 }
