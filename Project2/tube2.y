@@ -1,7 +1,9 @@
 %{
 #include <iostream>
+#include <map>
 #include <string>
 #include <cstdlib>
+using namespace std;
 
 extern int line_num;
 extern int yylex();
@@ -11,6 +13,15 @@ void yyerror(std::string err_string) {
        << err_string << std::endl;
   exit(1);
 }
+
+struct symbol {
+    int symbol_num;
+    string type;
+};
+
+map<string, symbol> symbol_table;
+int symbol_num = 0;
+
 %}
 
 %union {
@@ -43,6 +54,8 @@ statement:      var_declare  {  /* Determine if we have a variable declaration *
 var_declare:	TYPE ID {
                   std::cout << "Do something other than printing var info here!"
                             << "Type=" << $1 << " name=" << $2 << std::endl;
+                    symbol sym = { symbol_num++, $1 };
+                    symbol_table[$2] = sym;
                 }
 
 expression:     INT_LITERAL {
@@ -58,6 +71,12 @@ expression:     INT_LITERAL {
         |       ID {
                   std::cout << "Instead of printing, check if '" << $1
                             << "' actually exists!" << std::endl;
+                    if(symbol_table.find($1) == symbol_table.end()) {
+                        string error = "unknown variable '";
+                        error += $1;
+                        error += "'";
+                        yyerror(error);
+                    }
                 }
         ;
 %%
