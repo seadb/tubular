@@ -29,6 +29,10 @@ int symbol_num = 0;
 }
 
 %token<lexeme> ID INT_LITERAL TYPE
+%token<lexeme> COMMAND_PRINT COMMAND_RANDOM
+%token<lexeme> COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE
+%token<lexeme> ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
+
 
 %left '+' '-'
 
@@ -67,10 +71,8 @@ expression:     INT_LITERAL {
                             << " (but you shouldn't print it!)" << std::endl;
                 }
         |       expression '+' expression {
-                  std::cout << "Doing addition! (but you shouldn't print it!)" << std::endl;
                 }
         |       expression '-' expression {
-                  std::cout << "Doing subtraction! (but you shouldn't print it!)" << std::endl;
                 }
         |       ID {
                     if(symbol_table.find($1) == symbol_table.end()) {

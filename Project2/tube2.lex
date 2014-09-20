@@ -6,6 +6,7 @@ int line_num = 1;
 %}
 
 id              [a-zA-Z_][a-zA-Z0-9_]*
+ascii           [+\-*/;]
 
 %%
 
@@ -24,7 +25,7 @@ id              [a-zA-Z_][a-zA-Z0-9_]*
           return INT_LITERAL;
         }
 
-[+\-;]  { /* Chars to return directly! */
+{ascii} { /* Chars to return directly! */
           return yytext[0];
         }
 
