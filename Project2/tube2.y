@@ -35,6 +35,7 @@ int symbol_num = 0;
 
 
 %left '+' '-'
+%left '*' '/' '%'
 
 %%
 
@@ -67,12 +68,16 @@ var_declare:	TYPE ID {
                 }
 
 expression:     INT_LITERAL {
-                  std::cout << "Found int: " << $1
-                            << " (but you shouldn't print it!)" << std::endl;
                 }
         |       expression '+' expression {
                 }
         |       expression '-' expression {
+                }
+        |       expression '*' expression {
+                }
+        |       expression '/' expression {
+                }
+        |       expression '%' expression {
                 }
         |       ID {
                     if(symbol_table.find($1) == symbol_table.end()) {
