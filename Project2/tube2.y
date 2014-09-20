@@ -31,6 +31,7 @@ int symbol_num = 0;
 %token<lexeme> ID INT_LITERAL TYPE
 %token<lexeme> COMMAND_PRINT COMMAND_RANDOM
 %token<lexeme> COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE
+%token<lexeme> BOOL_AND BOOL_OR
 %token<lexeme> ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 
 
@@ -54,6 +55,7 @@ statement_list:	{
 
 statement:      var_declare  {  /* Determine if we have a variable declaration */  }
 	|       expression   {  /* Determine if we have a math expression */  }
+    |       assign       {                                                }
 	;
 
 var_declare:	TYPE ID {
@@ -65,6 +67,9 @@ var_declare:	TYPE ID {
                     }
                     symbol sym = { symbol_num++, $1 };
                     symbol_table[$2] = sym;
+                }
+
+assign:         ID '=' expression {
                 }
 
 expression:     INT_LITERAL {

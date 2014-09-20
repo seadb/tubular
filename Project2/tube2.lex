@@ -6,7 +6,7 @@ int line_num = 1;
 %}
 
 id              [a-zA-Z_][a-zA-Z0-9_]*
-ascii           [+\-*/;]
+ascii           [+\-*/;=]
 
 %%
 
@@ -24,7 +24,19 @@ ascii           [+\-*/;]
           yylval.lexeme = strdup(yytext); 
           return INT_LITERAL;
         }
-
+"=="    { return COMP_EQU; }
+"!="    { return COMP_NEQU; }
+"<"     { return COMP_LESS; }
+"<="    { return COMP_LTE; }
+">"     { return COMP_GTR; }
+">="    { return COMP_GTE; }
+"&&"    { return BOOL_AND; }
+"||"    { return BOOL_OR; }
+"+="    { return ASSIGN_ADD; }
+"-="    { return ASSIGN_SUB; }
+"*="    { return ASSIGN_MULT; }
+"/="    { return ASSIGN_DIV; }
+"%="    { return ASSIGN_MOD; }
 {ascii} { /* Chars to return directly! */
           return yytext[0];
         }
