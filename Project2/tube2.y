@@ -52,8 +52,12 @@ statement:      var_declare  {  /* Determine if we have a variable declaration *
 	;
 
 var_declare:	TYPE ID {
-                  std::cout << "Do something other than printing var info here!"
-                            << "Type=" << $1 << " name=" << $2 << std::endl;
+                    if(symbol_table.find($2) != symbol_table.end()) {
+                        string error = "redeclaration of variable '";
+                        error += $2;
+                        error += "'";
+                        yyerror(error);
+                    }
                     symbol sym = { symbol_num++, $1 };
                     symbol_table[$2] = sym;
                 }
@@ -69,8 +73,6 @@ expression:     INT_LITERAL {
                   std::cout << "Doing subtraction! (but you shouldn't print it!)" << std::endl;
                 }
         |       ID {
-                  std::cout << "Instead of printing, check if '" << $1
-                            << "' actually exists!" << std::endl;
                     if(symbol_table.find($1) == symbol_table.end()) {
                         string error = "unknown variable '";
                         error += $1;
