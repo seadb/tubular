@@ -81,6 +81,13 @@ var_declare:	TYPE ID {
     ;
 
 assign:         ID '=' expression {
+                    if(symbol_table.find($1) == symbol_table.end()) {
+                        string error = "unknown variable '";
+                        error += $1;
+                        error += "'";
+                        yyerror(error);
+                    }
+
                 }
 
 expression:     INT_LITERAL {

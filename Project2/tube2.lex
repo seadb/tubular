@@ -10,14 +10,25 @@ ascii           [+\-*/;=]
 
 %%
 
-"int"   { /* Types; right now, just "int" */
+#.*     ; // Comment, ignore remainder of line
+int     { /* Types; right now, just "int" */
           yylval.lexeme = strdup(yytext); 
-	  return TYPE;
+	      return TYPE;
+        }
+
+print   {
+          yylval.lexeme = strdup(yytext);
+          return COMMAND_PRINT;
+        }
+
+random  {
+          yylval.lexeme = strdup(yytext);
+          return COMMAND_RANDOM;
         }
 
 {id}    { /* Identifier */
           yylval.lexeme = strdup(yytext); 
-	  return ID;
+	      return ID;
         }
 
 [0-9]+  { /* Int Literal */
