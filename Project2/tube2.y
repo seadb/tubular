@@ -63,19 +63,19 @@ statement:  assignment   {	/* Determine if we have an assignment */ }
 assignment:	var_any '=' expression { // ensures '=' starts with int Var or Var
 
 		}
-	|	var_any ASSIGN_ADD expression { // ensure '+=' starts correctly
+	|	var_usage ASSIGN_ADD expression { // ensure '+=' starts correctly
         //this allows var declare += expression
 		}
-	|	var_any ASSIGN_SUB expression { // ensure '-=' starts corrently
+	|	var_usage ASSIGN_SUB expression { // ensure '-=' starts corrently
 
 		}
-	|	var_any ASSIGN_MULT expression { // ensure '*=' starts correctly
+	|	var_usage ASSIGN_MULT expression { // ensure '*=' starts correctly
 
 		}
-	|	var_any ASSIGN_DIV expression { // ensure '/=' starts correctly
+	|	var_usage ASSIGN_DIV expression { // ensure '/=' starts correctly
 
 		}
-	|	var_any ASSIGN_MOD expression { // ensure '%=' starts correctly
+	|	var_usage ASSIGN_MOD expression { // ensure '%=' starts correctly
 
 		}
 	;
@@ -144,9 +144,9 @@ expression:     INT_LITERAL { // Integer
 	|	expression '%' expression { // Mod
 
 		}
-/*	|	var_usage '=' expression { // equals     isnt this already taken care of in assignment: var_any '=' expression line 62
+	|	var_usage '=' expression { // equals
 
-		}*/
+		}
 	|	var_usage ASSIGN_ADD expression { // +=
 
 		}
