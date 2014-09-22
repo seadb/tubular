@@ -1,0 +1,6 @@
+int x = 25;
+int b;
+int a;
+b = 10;
+int c = -4;
+a = (b=c);
