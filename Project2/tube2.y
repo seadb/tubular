@@ -34,7 +34,8 @@ int symbol_num = 0;
 %token<lexeme> BOOL_AND BOOL_OR
 %token<lexeme> ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 
-
+%right '=' ASSIGN_ADD ASSIGN_SUB
+%right ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %left '+' '-'
 %left '*' '/' '%'
 
@@ -56,6 +57,7 @@ statement_list:	{
 statement:      var_declare  {  /* Determine if we have a variable declaration */  }
 	|       expression   {  /* Determine if we have a math expression */  }
     |       assign       {                                                }
+	|	print {								}
 	;
 
 var_declare:	TYPE ID {
@@ -89,6 +91,13 @@ assign:         ID '=' expression {
                     }
 
                 }
+print:		COMMAND_PRINT RvalCommaListLoop 
+
+RvalCommaListLoop:	expression ',' RvalCommaListLoop {
+		}
+	| 	expression {
+		}
+	;
 
 expression:     INT_LITERAL {
                 }
@@ -102,6 +111,36 @@ expression:     INT_LITERAL {
                 }
         |       expression '%' expression {
                 }
+	|	expression ASSIGN_ADD expression {
+		}
+	|	expression ASSIGN_SUB expression {
+		}
+	|	expression ASSIGN_MOD expression {
+		}
+	|	expression ASSIGN_MULT expression {
+		}
+	|	expression ASSIGN_DIV expression {
+		}
+        |       expression COMP_EQU expression {
+                }
+        |       expression COMP_NEQU expression {
+                }
+        |       expression COMP_GTE expression {
+                }
+        |       expression COMP_LESS expression {
+                }
+        |       expression COMP_LTE expression {
+                }
+        |       expression COMP_GTR expression {
+                }
+        |       expression BOOL_AND expression {
+                }
+        |       expression BOOL_OR expression {
+                }
+	|	'(' expression ')' {
+		}
+	|	COMMAND_RANDOM '(' expression ')' {
+		}
         |       ID {
                     if(symbol_table.find($1) == symbol_table.end()) {
                         string error = "unknown variable '";
@@ -111,6 +150,7 @@ expression:     INT_LITERAL {
                     }
                 }
         ;
+
 %%
 
 void LexMain(int argc, char * argv[]);
