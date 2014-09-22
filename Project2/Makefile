@@ -15,4 +15,4 @@ tube2: tube2.tab.o tube2.yy.o
 	g++ -o tube2 tube2.tab.o tube2.yy.o -ll -ly
 
 clean:
-	rm -f tube2.tab.cc tube2.tab.hh tube2.yy.cc tube2.tab.o *~ *.o
+	rm -f tube2.tab.cc tube2.tab.hh tube2.yy.cc *~ *.o

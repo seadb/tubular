@@ -1,6 +1,9 @@
 %{
 #include <iostream>
+#include <map>
 #include <string>
+#include <cstdlib>
+using namespace std;
 
 extern int line_num;
 extern int yylex();
@@ -8,7 +11,17 @@ extern int yylex();
 void yyerror(std::string err_string) {
   std::cout << "ERROR(line " << line_num << "): "
        << err_string << std::endl;
+  exit(1);
 }
+
+struct symbol {
+    int symbol_num;
+    string type;
+};
+
+map<string, symbol> symbol_table;
+int symbol_num = 0;
+
 %}
 
 %union {
@@ -16,14 +29,19 @@ void yyerror(std::string err_string) {
 }
 
 %token<lexeme> ID INT_LITERAL TYPE
+%token<lexeme> COMMAND_PRINT COMMAND_RANDOM
+%token<lexeme> COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE
+%token<lexeme> BOOL_AND BOOL_OR
+%token<lexeme> ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
+
 
 %left '+' '-'
+%left '*' '/' '%'
 
 %%
 
 program:        statement_list {
                   /* This is always the last rule to run! */
-                  std::cout << "Parse Successful!" << std::endl;
                 }
         ;
 
@@ -37,26 +55,60 @@ statement_list:	{
 
 statement:      var_declare  {  /* Determine if we have a variable declaration */  }
 	|       expression   {  /* Determine if we have a math expression */  }
+    |       assign       {                                                }
 	;
 
 var_declare:	TYPE ID {
-                  std::cout << "Do something other than printing var info here!"
-                            << "Type=" << $1 << " name=" << $2 << std::endl;
+                    if(symbol_table.find($2) != symbol_table.end()) {
+                        string error = "redeclaration of variable '";
+                        error += $2;
+                        error += "'";
+                        yyerror(error);
+                    }
+                    symbol sym = { symbol_num++, $1 };
+                    symbol_table[$2] = sym;
+                }
+    |       TYPE ID '=' expression {
+                if(symbol_table.find($2) != symbol_table.end()) {
+                    string error = "redeclaration of variable '";
+                    error += $2;
+                    error += "'";
+                    yyerror(error);
+                }
+                symbol sym = { symbol_num++, $1 };
+                symbol_table[$2] = sym;
+            }
+    ;
+
+assign:         ID '=' expression {
+                    if(symbol_table.find($1) == symbol_table.end()) {
+                        string error = "unknown variable '";
+                        error += $1;
+                        error += "'";
+                        yyerror(error);
+                    }
+
                 }
 
 expression:     INT_LITERAL {
-                  std::cout << "Found int: " << $1
-                            << " (but you shouldn't print it!)" << std::endl;
                 }
         |       expression '+' expression {
-                  std::cout << "Doing addition! (but you shouldn't print it!)" << std::endl;
                 }
         |       expression '-' expression {
-                  std::cout << "Doing subtraction! (but you shouldn't print it!)" << std::endl;
+                }
+        |       expression '*' expression {
+                }
+        |       expression '/' expression {
+                }
+        |       expression '%' expression {
                 }
         |       ID {
-                  std::cout << "Instead of printing, check if '" << $1
-                            << "' actually exists!" << std::endl;
+                    if(symbol_table.find($1) == symbol_table.end()) {
+                        string error = "unknown variable '";
+                        error += $1;
+                        error += "'";
+                        yyerror(error);
+                    }
                 }
         ;
 %%
@@ -68,5 +120,6 @@ int main(int argc, char * argv[])
   LexMain(argc, argv);
 
   yyparse();
+  std::cout << "Parse Successful!" << std::endl;
   return 0;
 }

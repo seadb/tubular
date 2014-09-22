@@ -1,4 +1,4 @@
-Group Member Names:
+Group Member Names: Sean Rabaut, Joshua Curl, Justin Grothe
 
 Contributions:
 

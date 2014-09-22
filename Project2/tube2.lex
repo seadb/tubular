@@ -6,25 +6,49 @@ int line_num = 1;
 %}
 
 id              [a-zA-Z_][a-zA-Z0-9_]*
+ascii           [+\-*/;=]
 
 %%
 
-"int"   { /* Types; right now, just "int" */
+#.*     ; // Comment, ignore remainder of line
+int     { /* Types; right now, just "int" */
           yylval.lexeme = strdup(yytext); 
-	  return TYPE;
+	      return TYPE;
+        }
+
+print   {
+          yylval.lexeme = strdup(yytext);
+          return COMMAND_PRINT;
+        }
+
+random  {
+          yylval.lexeme = strdup(yytext);
+          return COMMAND_RANDOM;
         }
 
 {id}    { /* Identifier */
           yylval.lexeme = strdup(yytext); 
-	  return ID;
+	      return ID;
         }
 
 [0-9]+  { /* Int Literal */
           yylval.lexeme = strdup(yytext); 
           return INT_LITERAL;
         }
-
-[+\-;]  { /* Chars to return directly! */
+"=="    { return COMP_EQU; }
+"!="    { return COMP_NEQU; }
+"<"     { return COMP_LESS; }
+"<="    { return COMP_LTE; }
+">"     { return COMP_GTR; }
+">="    { return COMP_GTE; }
+"&&"    { return BOOL_AND; }
+"||"    { return BOOL_OR; }
+"+="    { return ASSIGN_ADD; }
+"-="    { return ASSIGN_SUB; }
+"*="    { return ASSIGN_MULT; }
+"/="    { return ASSIGN_DIV; }
+"%="    { return ASSIGN_MOD; }
+{ascii} { /* Chars to return directly! */
           return yytext[0];
         }
 
