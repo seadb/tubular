@@ -1,2 +1,4 @@
 int buffalo;
 buffalo = 2;
+
+int rhino = (buffalo = 3);
