@@ -1,0 +1,3 @@
+# Test printing a variable.
+int a = 20;
+print a;
