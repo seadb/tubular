@@ -1,0 +1,7 @@
+# Longer expression test...
+int in1 = 42;
+int in2 = 91;
+int output = (in2 - in1) % 7 * 2 + 52 % 15 + 4;
+output /= 50 / 10;
+output += output > 4 + 2;
+print output;                # should be 6

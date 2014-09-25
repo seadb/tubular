@@ -1,0 +1,27 @@
+# Ouput from Dr. Charles Ofria's sample compiler.
+  val_copy 4 s1 
+  val_copy 7 s2 
+  test_less s1 s2 s3 
+  out_int s3 
+  out_char '\n'                         # End print statements with a newline.
+  val_copy 4 s4 
+  val_copy 4 s5 
+  add s4 s5 s6 
+  val_copy 7 s7 
+  test_less s6 s7 s8 
+  out_int s8 
+  out_char '\n'                         # End print statements with a newline.
+  val_copy 4 s9 
+  val_copy 7 s10 
+  val_copy 4 s11 
+  sub s10 s11 s12 
+  test_less s9 s12 s13 
+  out_int s13 
+  out_char '\n'                         # End print statements with a newline.
+  val_copy 4 s14 
+  val_copy 7 s15 
+  test_less s14 s15 s16 
+  val_copy 4 s17 
+  sub s16 s17 s18 
+  out_int s18 
+  out_char '\n'                         # End print statements with a newline.
