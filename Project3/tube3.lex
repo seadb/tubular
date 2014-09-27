@@ -101,6 +101,16 @@ void LexMain(int argc, char * argv[])
   }
 
   yyin = file;
+  fclose(file);
+
+  //open file to write
+  FILE *file = fopen(argv[2], "w");
+  if (!file) {
+  std::cerr << "Error opening " << argv[1] << std::endl;
+  exit(3);
+  }
+
+  // TODO: write to file
 
   return;
 }
