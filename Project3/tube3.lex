@@ -32,9 +32,7 @@ white [ \t\n]+
 comment1 "#".*\n
 %s IN_COMMENT
 unknown .
-
-
-
+/*
     Assignment Operators (right associative)
     Conditional Operator (extra credit, '?' and ':' ; right-associative)
     Logical OR (left associative)
@@ -43,6 +41,7 @@ unknown .
     Add/Subtract (left associative)
     Muliply/Divide/Mod (left associative)
     Unary Minus (non-associative)
+*/
 
 %%
 {eol}       { line_count++; }
