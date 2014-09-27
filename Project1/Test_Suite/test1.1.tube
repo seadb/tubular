@@ -1,3 +1,0 @@
-int test_num = 3 * (7 + 12);  # This is my comment.
-
-int @invalid  # Should fail here!
