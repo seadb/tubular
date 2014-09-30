@@ -1,0 +1,5 @@
+# Test some math needs %right to be correct (mutliple assignements)
+int a = 7;
+int b = 8;
+a = b = 9;
+print a, b;
