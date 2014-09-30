@@ -1,0 +1,2 @@
+# Random without a value.
+int x = random();

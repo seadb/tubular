@@ -1,0 +1,3 @@
+This program is illegal in Tubular, but the lexer should not realize that
++-*%/#!
+The parser will, however, once we write it

@@ -1,0 +1,5 @@
+abc123 # This should be recognized as an identifier.
+123abc # This is a static int followed by an identifier
+456int # This is a static int followed by a type
+r2d2   # This is a single identifier again.
+_abc_  # So is this.

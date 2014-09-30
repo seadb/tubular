@@ -1,0 +1,4 @@
+int x=2;
+int y=x-7;
+print x*y;
+pr int 5;   # This is NOT "print"

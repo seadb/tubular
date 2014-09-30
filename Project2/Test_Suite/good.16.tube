@@ -1,0 +1,3 @@
+# Use an assignment inside of an expression.
+int a = 5;
+int b = (a = 10);
