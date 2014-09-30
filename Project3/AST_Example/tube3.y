@@ -22,8 +22,8 @@ void yyerror(std::string err_string) {
   ASTNode * ast_node;
 }
 
-%token<lexeme> ID INT_LITERAL TYPE
-%type<ast_node> statement_list statement var_declare var_declare_assign var_usage expression
+%token<lexeme> ID INT_LITERAL TYPE COMMAND_PRINT
+%type<ast_node> statement_list statement var_declare var_declare_assign var_usage expression command
 
 %right '='
 %left '+' '-'
@@ -31,8 +31,9 @@ void yyerror(std::string err_string) {
 %%
 
 program:        statement_list {
-                  // This is always the last rule to run so $$ is the full AST!
+                  // This is always the last rule to run so $$ is the full AST
                   $1->CompileTubeIC(symbol_table, std::cout);
+                  //$1->DebugPrint();
                 }
 
 statement_list:	{
@@ -47,6 +48,7 @@ statement_list:	{
 statement:      var_declare        { $$ = $1; }
         |       var_declare_assign { $$ = $1; }
 	|       expression         { $$ = $1; }
+        |       command { $$ = $1; }
 
 var_declare:	TYPE ID {
                   if (symbol_table.Lookup($2) != 0) {
@@ -92,6 +94,11 @@ expression:     INT_LITERAL {
         |       var_usage {
                   $$ = $1;
                 }
+
+command:    COMMAND_PRINT expression {
+              $$ = new ASTNode_Print();
+              $$->AddChild($2);
+            }
 
 %%
 

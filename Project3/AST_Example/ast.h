@@ -174,5 +174,22 @@ public:
   }
 };
 
+class ASTNode_Print : public ASTNode {
+public:
+  ASTNode_Print() { ; }
+  virtual ~ASTNode_Print() { ; }
+
+  virtual tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) 
+  {
+    for (int i = 0; i < (int) children.size(); i++) {
+      tableEntry * in_var = children[i]->CompileTubeIC(table, out);
+      out << "out_int s" << in_var->GetVarID() << std::endl;
+    }
+    out << "out_char '\\n'" << std::endl;
+
+    return NULL;
+  }
+};
+
 
 #endif

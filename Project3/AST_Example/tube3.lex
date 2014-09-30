@@ -18,6 +18,12 @@ id              [a-zA-Z_][a-zA-Z0-9_]*
 	  return TYPE;
         }
 
+"print" {
+          yylval.lexeme = strdup(yytext); 
+	  return COMMAND_PRINT;
+        }
+       
+
 {id}    { /* Identifier */
           yylval.lexeme = strdup(yytext); 
 	  return ID;
