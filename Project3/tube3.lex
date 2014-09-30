@@ -29,7 +29,7 @@ booland "&&"
 boolor "||"
 ascii [\+\-\*/=;\(\)%,{}[\]\.]
 white [ \t\n]+
-comment1 "#".*\n
+comment "#".*\n
 %s IN_COMMENT
 unknown .
 /*
@@ -71,7 +71,7 @@ unknown .
 	  }
 	}
 }
-{comment1} { line_count++;}
+{comment} { line_count++;}
 <INITIAL>{
 "/*" BEGIN(IN_COMMENT);
 }
@@ -89,7 +89,7 @@ unknown .
 void LexMain(int argc, char * argv[])
 {
   int arg_id = 0;
-  if (argc != 2) {
+  if (argc != 3) {
     std::cerr << "Format: " << argv[0] << " [filename]" << std::endl;
     exit(1);
   }
@@ -99,14 +99,12 @@ void LexMain(int argc, char * argv[])
     std::cerr << "Error opening " << argv[1] << std::endl;
     exit(2);
   }
-
   yyin = file;
-  fclose(file);
 
   //open file to write
-  FILE *file = fopen(argv[2], "w");
-  if (!file) {
-  std::cerr << "Error opening " << argv[1] << std::endl;
+  FILE *output = fopen(argv[2], "w");
+  if (!output) {
+  std::cerr << "Error opening " << argv[2] << std::endl;
   exit(3);
   }
 
