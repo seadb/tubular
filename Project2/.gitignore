@@ -2,6 +2,7 @@
 ################
 tube2_notes.y
 tube2
+tube2_example.lex
 
 # Text Editor Backups #
 ###########################

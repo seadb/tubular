@@ -109,6 +109,6 @@ void LexMain(int argc, char * argv[])
   }
 
   // TODO: write to file
-
+  
   return;
 }
