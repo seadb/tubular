@@ -26,7 +26,9 @@ protected:
 public:
   ASTNode(int in_line_num=-1) : line_num(in_line_num) { ; }
   virtual ~ASTNode() {
-    for (int i = 0; i < (int) children.size(); i++) delete children[i];
+    for (int i = 0; i < (int) children.size(); i++) {
+      if (children[i] != NULL) delete children[i];
+    }
   }
 
   // Accessors
@@ -35,6 +37,11 @@ public:
   unsigned int GetNumChildren() const { return children.size(); }
 
   void SetLineNum(int _in) { line_num = _in; }
+  ASTNode * RemoveChild(int id) {
+    ASTNode * out_child = children[id];
+    children[id] = NULL;
+    return out_child;
+  }
 
   // Add a new child to this node, at the end of the vector.
   void AddChild(ASTNode * in_child) { children.push_back(in_child); }
@@ -56,6 +63,18 @@ public:
   }
 };
 
+
+// A temporary node used to transfer children...
+class ASTNode_Temp : public ASTNode {
+public:
+  ASTNode_Temp() { ; }
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) {
+    std::cerr << "Internal Compiler Error: Trying to run CompileTubeIC on a temporary node!!" << std::endl;
+    return NULL;
+  }
+
+  std::string GetName() { return "ASTNode_Temp (temporary container class)"; }
+};
 
 // Block...
 class ASTNode_Block : public ASTNode {

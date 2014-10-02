@@ -23,7 +23,7 @@ void yyerror(std::string err_string) {
 }
 
 %token<lexeme> ID INT_LITERAL TYPE COMMAND_PRINT
-%type<ast_node> statement_list statement var_declare var_declare_assign var_usage expression command
+%type<ast_node> statement_list statement var_declare var_declare_assign var_usage expression command param_list
 
 %right '='
 %left '+' '-'
@@ -95,11 +95,22 @@ expression:     INT_LITERAL {
                   $$ = $1;
                 }
 
-command:    COMMAND_PRINT expression {
+command:    COMMAND_PRINT param_list {
               $$ = new ASTNode_Print();
-              $$->AddChild($2);
+              for (int i = 0; i < $2->GetNumChildren(); i++) {
+                $$->AddChild($2->RemoveChild(i));
+              }
+              delete $2;
             }
 
+param_list:  expression {
+              $$ = new ASTNode_Temp();
+              $$->AddChild($1);
+            }
+         |   param_list ',' expression {
+              $$ = $1;
+              $$->AddChild($3);
+            }
 %%
 
 void LexMain(int argc, char * argv[]);
