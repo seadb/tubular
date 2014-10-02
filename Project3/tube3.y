@@ -20,8 +20,6 @@ struct Var {
     int line_count;
 };
 
-
-
 std::map <std::string, Var *> symbol_table; //symbol table
 
 %}
