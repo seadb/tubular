@@ -1,6 +1,16 @@
+<<<<<<< HEAD
 int x = 25;
 int b;
 int a;
 b = 10;
 int c = -4;
 a = (b=c);
+=======
+int a = 5;
+int b = (a *= 2);
+print (a == b) && (a != b) && (a < b) && (a <= b) && (a > b) && (a >= b);
+print (a == b) || (a != b) || (a < b) || (a <= b) || (a > b) || (a >= b);
+a += 5;
+b *= a;
+a %= 2;
+>>>>>>> 735614092b91214f2d48b80b58ba308aa4393f98

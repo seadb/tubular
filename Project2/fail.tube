@@ -1,2 +1,9 @@
+<<<<<<< HEAD
 int x = 9;
 b == 8;
+=======
+int x = random;
+int cur_var = 15;
+cur_var2 = cur_var + 1;
+int fail = 0
+>>>>>>> 735614092b91214f2d48b80b58ba308aa4393f98
