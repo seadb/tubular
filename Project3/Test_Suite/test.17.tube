@@ -1,0 +1,14 @@
+# Make sure we can use random values (such as dice!).
+int die0 = random(6) + 1;
+int die1 = random(6) + 1;
+int die2 = random(6) + 1;
+int die3 = random(6) + 1;
+int die4 = random(6) + 1;
+int die5 = random(6) + 1;
+int die6 = random(6) + 1;
+int die7 = random(6) + 1;
+int die8 = random(6) + 1;
+int die9 = random(6) + 1;
+
+# Print 10 random values between 1 and 6.
+print die0, die1, die2, die3, die4, die5, die6, die7, die8, die9;
