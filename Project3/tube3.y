@@ -1,80 +1,75 @@
+/*
+ * Authors: Chelsea Bridson
+ */
 %{
 #include <iostream>
 #include <string>
 #include <cstdlib>
 #include <cstdio>
-#include <map>
+//#include <map>
+
+#include "symbol_table.h"
+#include "ast.h"
 
 extern int line_count;
 extern int yylex();
 
+//std::map <std::string, Var *> symbol_table; //symbol table
+symbolTable symbol_table;
+
 void yyerror(std::string err_string) {
-  std::cout << "ERROR(line " << line_count << "): "
-       << err_string << std::endl;
+  std::cout << "ERROR(line " << line_count << "): " << err_string << std::endl;
   exit(1);
 }
-
-struct Var {
-    std::string name;
-    std::string type;
-    int line_count;
-};
-
-std::map <std::string, Var *> symbol_table; //symbol table
-
 %}
 
 %union {
   char * lexeme;
+  ASTNode * ast_node;
 }
-/*
-    Assignment Operators (right associative)
-    Conditional Operator (extra credit, '?' and ':' ; right-associative)
-    Logical OR (left associative)
-    Logical AND (left associative)
-    Relationship Operators (non-associative)
-    Add/Subtract (left associative)
-    Muliply/Divide/Mod (left associative)
-    Unary Minus (non-associative)
-*/
 
-%token<lexeme> ID INT_LITERAL TYPE 
 
-%token COMMAND_PRINT
+%token<lexeme> ID INT_LITERAL TYPE COMMAND_PRINT COMMAND_RANDOM
+%type<ast_node> statement_list statement var_declare var_any assignment var_usage expression command parameter_list command_print command_random
 
-%left COMMAND_RANDOM 
-
-%left '<' '>' COMP_NEQU COMP_EQU COMP_LTE COMP_GTE BOOLAND BOOLOR
-%left '*' '/' '%'
-%left '+' '-'
 %right ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD '='
+%right '?' ':'
+%left BOOLOR
+%left BOOLAND
+%left '<' '>' COMP_NEQU COMP_EQU COMP_LTE COMP_GTE
+%left '+' '-'
+%left '*' '/' '%'
 
 %%
 
 program:        statement_list {
-                  /* This is always the last rule to run! */
+                // This is always the last rule to run so $$ is the full AST
+                $1->CompileTubeIC(symbol_table, std::cout);
+                //$1->DebugPrint();
                 }
-        ;
 
 statement_list:	{
-                  /* This is always the first rule to run! */
+                  // Start the statement list by creating a block.
+                  $$ = new ASTNode_Block();
                 }
 	|	statement_list statement ';' {
-                  /* This rule will run after each statement is created */
+                  $1->AddChild($2); // Add each statement to the block
+                  $$ = $1;          // Pass the block along
 		}
-	;
 
-statement:  assignment   {	/* Determine if we have an assignment */ }
-	     |  expression   {  /* Determine if we have a math expression (the right of =) */  }
-        |	var_any      {  /* Determine if we have a variable declaration or usage */  }
-	     |	printlist    {  /* Determine if we have a print statement */  }
-	    ;
 
-// These statements are causing the shift/reduce warnings, they are harmless
-assignment:	var_any '=' expression { // ensures '=' starts with int Var or Var
+statement:      var_any            { $$ = $1; }
+        |       assignment         { $$ = $1; }
+	|       expression         { $$ = $1; }
+        |       command            { $$ = $1; }
 
+command:        command_print {}
+                command_random{}
+
+assignment:	var_declare '=' expression {
+                  $$ = new ASTNode_Assign($1, $3);
 		}
-	|	var_usage ASSIGN_ADD expression { // ensure '+=' starts correctly
+	|	var_usage ASSIGN_ADD expression {
         //this allows var declare += expression
 		}
 	|	var_usage ASSIGN_SUB expression { // ensure '-=' starts corrently
@@ -91,72 +86,65 @@ assignment:	var_any '=' expression { // ensures '=' starts with int Var or Var
 		}
 	;
 
+
 var_any:	var_declare{
-                  //std::cout << "Declaration left of all " << std::endl;                  
+
+                  //std::cout << "Declaration left of all " << std::endl;
 		}
 	|	var_usage {
 		  //std::cout << "Just the ID left of all " << std::endl;
-		}
-	;
+		};
+
 var_usage:	ID { // Identifier
-	 	  //std::cout << "Just the ID " << $1 << std::endl; 
-		  //std::cout << "No fear!" << std::endl;
+                  tableEntry * entry = symbol_table.Lookup($1);
+                  if (entry == 0) {
+                    char buff[100];
+                    sprintf(buff,"unknown variable '%s'", $1);
+                    std::string err = buff;
+                    yyerror(err);
+                    exit(1);
+                  }
 
-            if(symbol_table.find($1) == symbol_table.end()) //ID not found in symbol table
-            {     
-                char buff[100];      
-                sprintf(buff,"unknown variable '%s'", $1);
-                std::string err = buff;
-                yyerror(err);
-            }
+                  $$ = new ASTNode_Variable( entry );
+                }
 
-}
-	;
-var_declare:	TYPE ID { // int Identifier
-	          //std::cout << "Do something other than printing var info here!" << "Type=" << $1 << " name=" << $2 << std::endl; 
-		      //std::cout << "Var declare" << "Type=" << $1 << " name=" << $2 << std::endl; 
 
-            std::map<std::string, Var *>::iterator match;
-            match = symbol_table.find($2);
-            if(match == symbol_table.end())     //ID not found in symbol table
-            {                                   // New Variable declared
-                struct Var temp; 
-                temp.type = $1;
-                temp.name = $2;
-                temp.line_count = line_count;
-                symbol_table[$2]= &temp; 
+var_declare:	TYPE ID { // a new variable
+            tableEntry * entry = symbol_table.Lookup($2);
+            if(entry == 0){               //ID not found in symbol table
+                // New Variable declared
+                $$ = new ASTNode_Variable( entry );
+                symbol_table.AddEntry($2);
             }
             else
             {
                 char buff[100];
                 sprintf(buff, "redeclaration of variable '%s'", $2);
-                std::string err = buff; 
+                std::string err = buff;
                 yyerror(err);
-            } 
+                exit(2);
+            }
         }
-
-	;
 expression:     INT_LITERAL { // Integer
-                  //std::cout << "Found int: " << $1
-                    //        << " (but you shouldn't print it!)" << std::endl;
+                  $$ = new ASTNode_Literal($1);
                 }
         |       expression '+' expression { // Addition
-                  //std::cout << "Doing addition! (but you shouldn't print it!)" << std::endl;
+                  $$ = new ASTNode_Math2($1, $3, '+');
                 }
         |       expression '-' expression { // Subtraction
-                  //std::cout << "Doing subtraction! (but you shouldn't print it!)" << std::endl;
+                  $$ = new ASTNode_Math2($1, $3, '-');
                 }
-	|	expression '*' expression { // Multiplication 
-		  //std::cout << "Doing multiplication!" << std::endl; 
-		}
+	|	expression '*' expression { // Multiplication
+		  $$ = new ASTNode_Math2($1, $3, '*');
+                }
 	|	expression '/' expression { // Division
-
+                  $$ = new ASTNode_Math2($1, $3, '/');
 		}
 	|	expression '%' expression { // Mod
-
+                  $$ = new ASTNode_Math2($1, $3, '%');
 		}
 	|	var_usage '=' expression { // equals
-
+                  $$ = new ASTNode_Assign($1, $3);
 		}
 	|	var_usage ASSIGN_ADD expression { // +=
 
@@ -200,25 +188,32 @@ expression:     INT_LITERAL { // Integer
 	|	'(' expression ')' { // parentheses
 
 		}
-	|	COMMAND_RANDOM '(' expression ')' { // random(x)
+/*	|	COMMAND_RANDOM '(' expression ')' { // random(x)
 
-		}
-	// this is causing the reduce/reduce warning; aka when this is called,
-	// both this and the code within var_usage will execute; for our program
-	// I don't think this will cause an issue (for now, at least)
+		}*/
 	|	var_usage { // variable
-		  //std::cout << "Instead of printing, check if '" << $1
-		  //          << "' actually exists!" << std::endl;
-		  //std::cout << "Why not both? " << std::endl;
-		}
-	;
+		  $$ = $1;
+                }
 
-printlist:	/*empty*/
-	|	printlist COMMAND_PRINT printing {}
-        ;
-printing:	expression
-	|	printing ',' expression
-	;
+command_print:    COMMAND_PRINT parameter_list {
+              $$ = new ASTNode_Print();
+              for (int i = 0; i < $2->GetNumChildren(); i++) {
+                $$->AddChild($2->RemoveChild(i));
+              }
+              delete $2;
+            }
+
+command_random:     COMMAND_RANDOM  { }
+
+parameter_list:  expression {
+              $$ = new ASTNode_Temp();
+              $$->AddChild($1);
+            }
+         |   parameter_list ',' expression {
+              $$ = $1;
+              $$->AddChild($3);
+            }
+
 %%
 
 void LexMain(int argc, char * argv[]);
