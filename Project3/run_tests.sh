@@ -5,6 +5,7 @@
 # each tube file in the test-suite
 project=tube3
 make
+chmod a+x Test_Suite/reference_$project
 if [ ! -f $project ]; then 
 	echo $project "not correctly compiled";
 	exit 1;
