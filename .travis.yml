@@ -1,6 +1,4 @@
 language: cpp
-compiler:
-  - gcc
-  - clang
-script: source Test_Suite/test.sh
+compiler: clang
+script: source test.sh
 
