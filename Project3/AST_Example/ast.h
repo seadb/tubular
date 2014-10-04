@@ -133,7 +133,7 @@ public:
 
 class ASTNode_Assign : public ASTNode {
 public:
-  ASTNode_Assign(ASTNode * lhs, ASTNode * rhs) { 
+  ASTNode_Assign(ASTNode * lhs, ASTNode * rhs) {
     children.push_back(lhs);
     children.push_back(rhs);
   }
@@ -171,7 +171,7 @@ public:
     const int i2 = in_var2->GetVarID();
     const int o3 = out_var->GetVarID();
 
-    // Determine the correct operation...  
+    // Determine the correct operation...
     if (math_op == '+') {
       out << "add s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
     } else if (math_op == '-') {
@@ -198,7 +198,7 @@ public:
   ASTNode_Print() { ; }
   virtual ~ASTNode_Print() { ; }
 
-  virtual tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) 
+  virtual tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out)
   {
     for (int i = 0; i < (int) children.size(); i++) {
       tableEntry * in_var = children[i]->CompileTubeIC(table, out);
