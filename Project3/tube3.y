@@ -22,11 +22,17 @@ void yyerror(std::string err_string) {
   ASTNode * ast_node;
 }
 
-%token<lexeme> ID INT_LITERAL TYPE COMMAND_PRINT
+%token<lexeme> ID INT_LITERAL TYPE
+%token<lexeme> COMMAND_PRINT COMMAND_RANDOM
+%token<lexeme> COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE
+%token<lexeme> BOOL_AND BOOL_OR
+%token<lexeme> ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
+
 %type<ast_node> statement_list statement var_declare var_declare_assign var_usage expression command param_list
 
 %right '='
 %left '+' '-'
+%left '*' '/' '%'
 
 %%
 

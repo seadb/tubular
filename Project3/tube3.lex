@@ -13,6 +13,8 @@ id              [a-zA-Z_][a-zA-Z0-9_]*
 
 %%
 
+#.* ; // Comment, ignore remainder of line
+
 "int"   { /* Types; right now, just "int" */
           yylval.lexeme = strdup(yytext); 
 	  return TYPE;
@@ -22,7 +24,11 @@ id              [a-zA-Z_][a-zA-Z0-9_]*
           yylval.lexeme = strdup(yytext); 
 	  return COMMAND_PRINT;
         }
-       
+
+random  {
+ 	  yylval.lexeme = strdup(yytext);
+	  return COMMAND_RANDOM;
+        }
 
 {id}    { /* Identifier */
           yylval.lexeme = strdup(yytext); 
@@ -33,6 +39,20 @@ id              [a-zA-Z_][a-zA-Z0-9_]*
           yylval.lexeme = strdup(yytext); 
           return INT_LITERAL;
         }
+
+"==" { return COMP_EQU; }
+"!=" { return COMP_NEQU; }
+"<" { return COMP_LESS; }
+"<=" { return COMP_LTE; }
+">" { return COMP_GTR; }
+">=" { return COMP_GTE; }
+"&&" { return BOOL_AND; }
+"||" { return BOOL_OR; }
+"+=" { return ASSIGN_ADD; }
+"-=" { return ASSIGN_SUB; }
+"*=" { return ASSIGN_MULT; }
+"/=" { return ASSIGN_DIV; }
+"%=" { return ASSIGN_MOD; }
 
 [+\-=;,] { /* Chars to return directly! */
           return yytext[0];
