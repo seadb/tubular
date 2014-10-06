@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include <fstream>
 
 #include "symbol_table.h"
 #include "ast.h"
@@ -9,8 +10,6 @@
 extern int line_num;
 extern int yylex();
 std::ofstream fs;
-
-symbolTable symbol_table;
 
 symbolTable symbol_table;
 
@@ -27,7 +26,6 @@ void yyerror(std::string err_string) {
 
 %token<lexeme> ID INT_LITERAL TYPE COMMAND_PRINT COMMAND_RANDOM
 %token<lexeme> COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE
-<<<<<<< HEAD
 %token<lexeme> BOOL_AND BOOL_OR ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT
 %token<lexeme> ASSIGN_DIV ASSIGN_MOD
 %type<ast_node> program statement_list statement var_declare var_declare_assign var_usage expression command param_list
@@ -37,15 +35,6 @@ void yyerror(std::string err_string) {
 %left BOOL_OR
 %left BOOL_AND
 %nonassoc COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE
-=======
-%token<lexeme> BOOL_AND BOOL_OR
-%token<lexeme> ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
-
-%type<ast_node> statement_list statement var_declare var_declare_assign var_usage expression command param_list
-
-%right '='
-%right ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
->>>>>>> 061dc361b5226c7a3f03b91b2930a0c9c00409dd
 %left '+' '-'
 %left '*' '/' '%'
 %nonassoc UMINUS
@@ -54,11 +43,7 @@ void yyerror(std::string err_string) {
 
 program:        statement_list {
                   // This is always the last rule to run so $$ is the full AST
-<<<<<<< HEAD
                   $1->CompileTubeIC(symbol_table, fs);
-=======
-                  $1->CompileTubeIC(symbol_table, std::cout);
->>>>>>> 061dc361b5226c7a3f03b91b2930a0c9c00409dd
                   //$1->DebugPrint();
                 }
 
@@ -73,11 +58,7 @@ statement_list:	{
 
 statement:      var_declare        { $$ = $1; }
         |       var_declare_assign { $$ = $1; }
-<<<<<<< HEAD
-	|       expression         { $$ = $1; }
-=======
         |       expression         { $$ = $1; }
->>>>>>> 061dc361b5226c7a3f03b91b2930a0c9c00409dd
         |       command { $$ = $1; }
 
 var_declare:	TYPE ID {
@@ -118,7 +99,6 @@ expression:     INT_LITERAL {
         |       expression '-' expression {
                   $$ = new ASTNode_Math2($1, $3, '-');
                 }
-<<<<<<< HEAD
 	|	expression '*' expression {
 		  $$ = new ASTNode_Math2($1, $3, '*');
 		}
@@ -191,50 +171,6 @@ command:        COMMAND_PRINT param_list {
 
 		}
 
-=======
-        |       expression '*' expression {
-                  $$ = new ASTNode_Math2($1, $3, '*');
-                }
-        |       expression '/' expression {
-                  $$ = new ASTNode_Math2($1, $3, '/');
-                }
-        |       expression '%' expression {
-                  $$ = new ASTNode_Math2($1, $3, '/');
-                }
-        |       var_usage ASSIGN_ADD expression {
-                  $$ = new ASTNode_MathAssign($1, $3, '+');
-                }
-        |       var_usage ASSIGN_SUB expression {
-                  $$ = new ASTNode_MathAssign($1, $3, '-');
-                }
-        |       var_usage ASSIGN_MULT expression {
-                  $$ = new ASTNode_MathAssign($1, $3, '*');
-                }
-        |       var_usage ASSIGN_DIV expression {
-                  $$ = new ASTNode_MathAssign($1, $3, '/');
-                }
-        |       var_usage ASSIGN_MOD expression {
-                  $$ = new ASTNode_MathAssign($1, $3, '%');
-                }
-        |       var_usage '=' expression {
-                  $$ = new ASTNode_Assign($1, $3);
-                }
-        |       COMMAND_RANDOM '(' expression ')' {
-                  $$ = new ASTNode_Random($3);
-                }
-        |       var_usage {
-                  $$ = $1;
-                }
-
-command:    COMMAND_PRINT param_list {
-              $$ = new ASTNode_Print();
-              for (int i = 0; i < $2->GetNumChildren(); i++) {
-                $$->AddChild($2->RemoveChild(i));
-              }
-              delete $2;
-            }
-
->>>>>>> 061dc361b5226c7a3f03b91b2930a0c9c00409dd
 param_list:  expression {
               $$ = new ASTNode_Temp();
               $$->AddChild($1);
