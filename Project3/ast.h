@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <ostream>
-#include <fstream>
 #include <string>
 #include <vector>
 
@@ -49,7 +48,7 @@ public:
 
   // Convert a single node to TubeIC and return information about the
   // variable where the results are saved.  Call children recursively.
-  virtual tableEntry * CompileTubeIC(symbolTable & table, std::ofstream & out) = 0;
+  virtual tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) = 0;
 
   // Return the name of the node being called.  This function is useful for debbing the AST.
   virtual std::string GetName() { return "ASTNode (base class)"; }
@@ -69,7 +68,7 @@ public:
 class ASTNode_Temp : public ASTNode {
 public:
   ASTNode_Temp() { ; }
-  tableEntry * CompileTubeIC(symbolTable & table, std::ofstream & out) {
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) {
     std::cerr << "Internal Compiler Error: Trying to run CompileTubeIC on a temporary node!!" << std::endl;
     return NULL;
   }
@@ -81,7 +80,7 @@ public:
 class ASTNode_Block : public ASTNode {
 public:
   ASTNode_Block() { ; }
-  tableEntry * CompileTubeIC(symbolTable & table, std::ofstream & out) {
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) {
     // Compile the code for each sub-tree in this block
     for (int i = 0; i < (int) children.size(); i++) {
       children[i]->CompileTubeIC(table, out);
@@ -100,7 +99,7 @@ public:
   ASTNode_Variable(tableEntry * in_entry) : var_entry(in_entry) {;}
 
   tableEntry * GetVarEntry() { return var_entry; }
-  tableEntry * CompileTubeIC(symbolTable & table, std::ofstream & out) { return var_entry; }
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) { return var_entry; }
 
   std::string GetName() {
     std::string out_string = "ASTNode_Variable (";
@@ -116,7 +115,7 @@ private:
 public:
   ASTNode_Literal(std::string in_lex) : lexeme(in_lex) { ; }
 
-  tableEntry * CompileTubeIC(symbolTable & table, std::ofstream & out) {
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) {
     tableEntry * out_var = table.AddTempEntry();
     out << "val_copy " << lexeme << " s" << out_var->GetVarID() << std::endl;
     return out_var;
@@ -141,7 +140,7 @@ public:
 
   ~ASTNode_Assign() { ; }
 
-  tableEntry * CompileTubeIC(symbolTable & table, std::ofstream & out) {
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) {
     tableEntry * lhs_var = children[0]->CompileTubeIC(table, out);
     tableEntry * rhs_var = children[1]->CompileTubeIC(table, out);
 
@@ -151,6 +150,53 @@ public:
   }
 
   std::string GetName() { return "ASTNode_Assign (operator=)"; }
+};
+
+class ASTNode_MathAssign : public ASTNode {
+protected:
+  int math_op;
+public:
+  ASTNode_MathAssign(ASTNode * lhs, ASTNode * rhs, int op) { 
+    children.push_back(lhs);
+    children.push_back(rhs);
+    math_op = op;
+  }
+
+  ~ASTNode_MathAssign() { ; }
+
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) {
+    tableEntry * lhs_var = children[0]->CompileTubeIC(table, out);
+    tableEntry * rhs_var = children[1]->CompileTubeIC(table, out);
+
+    const int l = lhs_var->GetVarID();
+    const int r = rhs_var->GetVarID();
+
+    // Determine the correct operation...  
+    if (math_op == '+') {
+      out << "add s" << l << " s" << r << " s" << l << std::endl;
+    } else if (math_op == '-') {
+      out << "sub s" << l << " s" << r << " s" << l << std::endl;
+    } else if (math_op == '*') {
+      out << "mult s" << l << " s" << r << " s" << l << std::endl;
+    } else if (math_op == '-') {
+      out << "div s" << l << " s" << r << " s" << l << std::endl;
+    } else if (math_op == '%') {
+      out << "mod s" << l << " s" << r << " s" << l << std::endl;
+    }
+    else {
+      std::cerr << "INTERNAL COMPILER ERROR: Unknown MathAssign operator '"
+                << math_op << "'" << std::endl;
+    }
+
+    return lhs_var;
+  }
+
+  std::string GetName() {
+    std::string out_string = "ASTNode_MathAssign (operator";
+    out_string += (char) math_op;
+    out_string += ")";
+    return out_string;
+  }
 };
 
 class ASTNode_Math2 : public ASTNode {
@@ -163,7 +209,7 @@ public:
   }
   ~ASTNode_Math2() { ; }
 
-  tableEntry * CompileTubeIC(symbolTable & table, std::ofstream & out) {
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) {
     tableEntry * in_var1 = children[0]->CompileTubeIC(table, out);
     tableEntry * in_var2 = children[1]->CompileTubeIC(table, out);
     tableEntry * out_var = table.AddTempEntry();
@@ -177,11 +223,14 @@ public:
       out << "add s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
     } else if (math_op == '-') {
       out << "sub s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
-    } else if (math_op == '/') {
-      out << "div s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
     } else if (math_op == '*') {
-      out << "mult s" << i1 << " s" << i2 << " s" << o3 << std::endl;
-    } else {
+      out << "mult s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+    } else if (math_op == '-') {
+      out << "div s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+    } else if (math_op == '%') {
+      out << "mod s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+    }
+    else {
       std::cerr << "INTERNAL COMPILER ERROR: Unknown Math2 operator '"
                 << math_op << "'" << std::endl;
     }
@@ -202,7 +251,7 @@ public:
   ASTNode_Print() { ; }
   virtual ~ASTNode_Print() { ; }
 
-  virtual tableEntry * CompileTubeIC(symbolTable & table, std::ofstream & out) 
+  virtual tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) 
   {
     for (int i = 0; i < (int) children.size(); i++) {
       tableEntry * in_var = children[i]->CompileTubeIC(table, out);
@@ -214,5 +263,22 @@ public:
   }
 };
 
+class ASTNode_Random : public ASTNode {
+public:
+  ASTNode_Random(ASTNode * in) { 
+    children.push_back(in);
+  }
+
+  ~ASTNode_Random() { ; }
+
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) {
+    tableEntry * in_var = children[0]->CompileTubeIC(table, out);
+    tableEntry * out_var = table.AddTempEntry();
+
+    out << "random s" <<  in_var->GetVarID() << " s" << out_var->GetVarID() << std::endl;
+
+    return out_var;
+  }
+};
 
 #endif

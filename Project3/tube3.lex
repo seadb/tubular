@@ -13,6 +13,7 @@ id              [a-zA-Z_][a-zA-Z0-9_]*
 
 %%
 
+<<<<<<< HEAD
 #.*	; // Ignore comments
 
 "int"   { /* Types; right now, just "int" */
@@ -23,6 +24,23 @@ id              [a-zA-Z_][a-zA-Z0-9_]*
 "print" {
           yylval.lexeme = strdup(yytext); 
 	  return COMMAND_PRINT;
+=======
+#.* ; // Comment, ignore remainder of line
+
+"int"   { /* Types; right now, just "int" */
+          yylval.lexeme = strdup(yytext); 
+	  return TYPE;
+        }
+
+"print" {
+          yylval.lexeme = strdup(yytext); 
+	  return COMMAND_PRINT;
+        }
+
+random  {
+ 	  yylval.lexeme = strdup(yytext);
+	  return COMMAND_RANDOM;
+>>>>>>> 061dc361b5226c7a3f03b91b2930a0c9c00409dd
         }
        
 "random" {
@@ -40,6 +58,7 @@ id              [a-zA-Z_][a-zA-Z0-9_]*
           return INT_LITERAL;
         }
 
+<<<<<<< HEAD
 "=="    { return COMP_EQU; }
 "!="    { return COMP_NEQU; }
 "<"     { return COMP_LESS; }
@@ -55,6 +74,23 @@ id              [a-zA-Z_][a-zA-Z0-9_]*
 "%="    { return ASSIGN_MOD; }
 
 [\:\?+\-=;,\(\)\[\]*/%] { /* Chars to return directly! */
+=======
+"==" { return COMP_EQU; }
+"!=" { return COMP_NEQU; }
+"<" { return COMP_LESS; }
+"<=" { return COMP_LTE; }
+">" { return COMP_GTR; }
+">=" { return COMP_GTE; }
+"&&" { return BOOL_AND; }
+"||" { return BOOL_OR; }
+"+=" { return ASSIGN_ADD; }
+"-=" { return ASSIGN_SUB; }
+"*=" { return ASSIGN_MULT; }
+"/=" { return ASSIGN_DIV; }
+"%=" { return ASSIGN_MOD; }
+
+{ascii} { /* Chars to return directly! */
+>>>>>>> 061dc361b5226c7a3f03b91b2930a0c9c00409dd
           return yytext[0];
         }
 
