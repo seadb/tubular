@@ -1,72 +1,66 @@
 %{
-#include "tube3.tab.hh"
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
 
+#include "ast.h"
+#include "symbol_table.h"
+#include "tube3.tab.hh"
+
 int line_count = 1;
 %}
 
-eol "\n"
-print "print"
-type "int"
-random "random"
-id [a-zA-Z_]+[a-zA-Z0-9_]*
-int_lit [0-9]+
-assignadd "+="
-assignsub "-="
-assignmult "*="
-assigndiv "/="
-assignmod "%="
-compequ "=="
-compnequ "!="
-complte "<="
-compless "<"
-compgte ">="
-compgtr ">"
-booland "&&"
-boolor "||"
+EOL           "\n"
+print         "print"
+type          "int"
+random        "random"
+id            [a-zA-Z_]+[a-zA-Z0-9_]*
+int_lit       [0-9]+
+assign_add   "+="
+assign_sub    "-="
+assign_mult   "*="
+assign_div    "/="
+assign_mod    "%="
+compare_equ "=="
+compare_nequ "!="
+compare_lte         "<="
+compare_less  "<"
+compare_gte   ">="
+compare_gtr   ">"
+bool_and   "&&"
+bool_or    "||"
+sign    [-+]
 ascii [\+\-\*/=;\(\)%,{}[\]\.]
 white [ \t\n]+
 comment "#".*\n
 %s IN_COMMENT
 unknown .
-/*
-    Assignment Operators (right associative)
-    Conditional Operator (extra credit, '?' and ':' ; right-associative)
-    Logical OR (left associative)
-    Logical AND (left associative)
-    Relationship Operators (non-associative)
-    Add/Subtract (left associative)
-    Muliply/Divide/Mod (left associative)
-    Unary Minus (non-associative)
-*/
 
 %%
-{eol}       { line_count++; }
-{print}     { return COMMAND_PRINT; }
-{random}    { return COMMAND_RANDOM; }
-{type}      { yylval.lexeme = strdup(yytext); return TYPE; }
-{id}        { yylval.lexeme = strdup(yytext); return ID;}
-{int_lit}   { yylval.lexeme = strdup(yytext); return INT_LITERAL; }
-{assignadd} { return ASSIGN_ADD;  } 
-{assignsub} { return ASSIGN_SUB;  }
-{assignmult} { return ASSIGN_MULT;  }
-{assigndiv} { return ASSIGN_DIV;  }
-{assignmod} { return ASSIGN_MOD;  }
-{compnequ}  { return COMP_NEQU;  }
-{compequ}   { return COMP_EQU;  }
-{complte}   { return COMP_LTE;  }
-{compless}  { return yytext[0]; }
-{compgte}   { return COMP_GTE;  }
-{compgtr}   { return yytext[0];}
-{booland}   { return BOOLAND;  }
-{boolor}    { return BOOLOR; }
+{EOL}           { line_count++; }
+{print}         { return COMMAND_PRINT; }
+{random}        { return COMMAND_RANDOM; }
+{type}          { yylval.lexeme = strdup(yytext); return TYPE; }
+{id}            { yylval.lexeme = strdup(yytext); return ID;}
+{int_lit}       { yylval.lexeme = strdup(yytext); return INT_LITERAL; }
+{assign_add}    { return ASSIGN_ADD; }
+{assign_sub}    { return ASSIGN_SUB; }
+{assign_mult}   { return ASSIGN_MULT; }
+{assign_div}    { return ASSIGN_DIV; }
+{assign_mod}    { return ASSIGN_MOD; }
+{compare_nequ}  { return COMP_NEQU; }
+{compare_equ}   { return COMP_EQU; }
+{compare_lte}   { return COMP_LTE; }
+{compare_less}  { return COMP_LESS; } //return yytext[0];
+{compare_gte}   { return COMP_GTE; }
+{compare_gtr}   { return COMP_GTR; }
+{bool_and}   { return BOOLAND;  }
+{bool_or}    { return BOOLOR; }
 {ascii}     { return yytext[0];}
-{white}     { 
+{white}     {
 	for(int i=0; i < yyleng;i++){
-	  if(yytext[i] == '\n') { 
+	  if(yytext[i] == '\n') {
 	    line_count++;
 	  }
 	}
@@ -90,7 +84,7 @@ void LexMain(int argc, char * argv[])
 {
   int arg_id = 0;
   if (argc != 3) {
-    std::cerr << "Format: " << argv[0] << " [filename]" << std::endl;
+    std::cerr << "Format: " << argv[0] << " [input] [output]" << std::endl;
     exit(1);
   }
   // The only thing left to do is assume the current argument is the filename.
@@ -109,6 +103,6 @@ void LexMain(int argc, char * argv[])
   }
 
   // TODO: write to file
-  
+
   return;
 }

@@ -7,7 +7,6 @@
 #include <cstdlib>
 #include <cstdio>
 //#include <map>
-
 #include "symbol_table.h"
 #include "ast.h"
 
@@ -16,6 +15,8 @@ extern int yylex();
 
 //std::map <std::string, Var *> symbol_table; //symbol table
 symbolTable symbol_table;
+
+
 
 void yyerror(std::string err_string) {
   std::cout << "ERROR(line " << line_count << "): " << err_string << std::endl;
@@ -30,13 +31,13 @@ void yyerror(std::string err_string) {
 
 
 %token<lexeme> ID INT_LITERAL TYPE COMMAND_PRINT COMMAND_RANDOM
-%type<ast_node> statement_list statement var_declare var_any assignment var_usage expression command parameter_list command_print command_random
+%type<ast_node> statement_list statement var_declare var_declare_assign compound_assign var_usage expression command parameter_list command_print command_random literal operation compare
 
 %right ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD '='
 %right '?' ':'
 %left BOOLOR
 %left BOOLAND
-%left '<' '>' COMP_NEQU COMP_EQU COMP_LTE COMP_GTE
+%left COMP_NEQU COMP_EQU COMP_LTE COMP_GTE COMP_GTR COMP_LESS
 %left '+' '-'
 %left '*' '/' '%'
 
@@ -45,8 +46,9 @@ void yyerror(std::string err_string) {
 program:        statement_list {
                 // This is always the last rule to run so $$ is the full AST
                 $1->CompileTubeIC(symbol_table, std::cout);
-                //$1->DebugPrint();
+                $1->DebugPrint();
                 }
+
 
 statement_list:	{
                   // Start the statement list by creating a block.
@@ -58,60 +60,26 @@ statement_list:	{
 		}
 
 
-statement:      var_any            { $$ = $1; }
-        |       assignment         { $$ = $1; }
-	|       expression         { $$ = $1; }
-        |       command            { $$ = $1; }
-
-command:        command_print {}
-                command_random{}
-
-assignment:	var_declare '=' expression {
-                  $$ = new ASTNode_Assign($1, $3);
-		}
-	|	var_usage ASSIGN_ADD expression {
-        //this allows var declare += expression
-		}
-	|	var_usage ASSIGN_SUB expression { // ensure '-=' starts corrently
-
-		}
-	|	var_usage ASSIGN_MULT expression { // ensure '*=' starts correctly
-
-		}
-	|	var_usage ASSIGN_DIV expression { // ensure '/=' starts correctly
-
-		}
-	|	var_usage ASSIGN_MOD expression { // ensure '%=' starts correctly
-
-		}
-	;
+statement:      var_declare { $$ = $1; }
+        |       var_declare_assign  { $$ = $1; }
+	|       expression  { $$ = $1; }
+        |       command     { $$ = $1; }
 
 
-var_any:	var_declare{
-
-                  //std::cout << "Declaration left of all " << std::endl;
-		}
-	|	var_usage {
-		  //std::cout << "Just the ID left of all " << std::endl;
-		};
-
-var_usage:	ID { // Identifier
-                  tableEntry * entry = symbol_table.Lookup($1);
-                  if (entry == 0) {
-                    char buff[100];
-                    sprintf(buff,"unknown variable '%s'", $1);
-                    std::string err = buff;
-                    yyerror(err);
-                    exit(1);
+var_declare:	TYPE ID {
+                  if (symbol_table.Lookup($2) != 0) {
+		    std::string err_string = "re-declaring variable '";
+		    err_string += $2;
+                    err_string += "'";
+                    yyerror(err_string);
+		    exit(1);
                   }
 
-                  $$ = new ASTNode_Variable( entry );
-                }
-
-
-var_declare:	TYPE ID { // a new variable
+                  $$ = new ASTNode_Variable( symbol_table.AddEntry($2) );
+              }
+/*var_declare:  TYPE $1 { // a new variable
             tableEntry * entry = symbol_table.Lookup($2);
-            if(entry == 0){               //ID not found in symbol table
+            if(entry == 0){               //$1 not found in symbol table
                 // New Variable declared
                 $$ = new ASTNode_Variable( entry );
                 symbol_table.AddEntry($2);
@@ -124,11 +92,39 @@ var_declare:	TYPE ID { // a new variable
                 yyerror(err);
                 exit(2);
             }
-        }
-expression:     INT_LITERAL { // Integer
+          }
+*/
+
+var_declare_assign:	var_declare '=' expression {
+
+                $$ = new ASTNode_Assign($1, $3);
+		}
+
+var_usage:  ID { // Identifier
+                tableEntry * entry = symbol_table.Lookup($1);
+                if (entry == 0) {
+                  char buff[100];
+                  sprintf(buff,"unknown variable '%s'", $1);
+                  std::string err = buff;
+                  yyerror(err);
+                  exit(1);
+                }
+
+                $$ = new ASTNode_Variable( entry );
+               }
+
+ /*----------EXPRESSION---------------------------------------------*/
+expression:   literal     {}
+          |   operation   {}
+          |   compare     {}
+          |   compound_assign    {}
+
+
+literal:        INT_LITERAL { // Integer
                   $$ = new ASTNode_Literal($1);
                 }
-        |       expression '+' expression { // Addition
+
+operation:      expression '+' expression { // Addition
                   $$ = new ASTNode_Math2($1, $3, '+');
                 }
         |       expression '-' expression { // Subtraction
@@ -140,40 +136,29 @@ expression:     INT_LITERAL { // Integer
 	|	expression '/' expression { // Division
                   $$ = new ASTNode_Math2($1, $3, '/');
 		}
-	|	expression '%' expression { // Mod
-                  $$ = new ASTNode_Math2($1, $3, '%');
-		}
-	|	var_usage '=' expression { // equals
-                  $$ = new ASTNode_Assign($1, $3);
-		}
-	|	var_usage ASSIGN_ADD expression { // +=
+	|	expression '%' expression {//$1 - ($1/expression)*expression
+                  ASTNode * divv = new ASTNode_Math2($1,$3,'/');
+                  ASTNode * mult = new ASTNode_Math2(divv,$3,'*');
+                  ASTNode * mod = new ASTNode_Math2($1,mult,'-');
+                  $$ = mod;
+                }
+	|	'(' expression ')' { // parentheses
 
 		}
-	|	var_usage ASSIGN_SUB expression { // -=
 
-		}
-	|	var_usage ASSIGN_MULT expression { // *=
-
-		}
-	|	var_usage ASSIGN_DIV expression { // /=
-
-		}
-	|	var_usage ASSIGN_MOD expression { // %=
-
-		}
-	|	expression COMP_EQU expression { // ==
+ compare:       expression COMP_EQU expression { // ==
 
 		}
 	|	expression COMP_NEQU expression { // !=
 
 		}
-	|	expression '<' expression { // less than
+	|	expression COMP_LESS expression { // less than
 
 		}
 	|	expression COMP_LTE expression { // <=
 
 		}
-	|	expression '>' expression { // greater than
+	|	expression COMP_GTR expression { // greater than
 
 		}
 	|	expression COMP_GTE expression { // >=
@@ -185,25 +170,57 @@ expression:     INT_LITERAL { // Integer
 	|	expression BOOLOR expression { // ||
 
 		}
-	|	'(' expression ')' { // parentheses
 
-		}
-/*	|	COMMAND_RANDOM '(' expression ')' { // random(x)
 
-		}*/
-	|	var_usage { // variable
-		  $$ = $1;
+compound_assign:
+        	var_usage ASSIGN_ADD expression { // $1 '+=' expression
+                  ASTNode * add = new ASTNode_Math2($1,$3,'+');
+                  $$ = add;
+                  $$ = new ASTNode_Assign($1, add);
+                }
+	|	var_usage ASSIGN_SUB expression {
+                  ASTNode * sub = new ASTNode_Math2($1,$3,'-');
+                  $$ = sub;
+                  $$ = new ASTNode_Assign($1, sub);
                 }
 
-command_print:    COMMAND_PRINT parameter_list {
-              $$ = new ASTNode_Print();
-              for (int i = 0; i < $2->GetNumChildren(); i++) {
-                $$->AddChild($2->RemoveChild(i));
-              }
-              delete $2;
-            }
+	|	var_usage ASSIGN_MULT expression { // ensure '*=' starts correctly
+                  ASTNode * mult = new ASTNode_Math2($1,$3,'*');
+                  $$ = mult;
+                  $$ = new ASTNode_Assign($1, mult);
+		}
+	|	var_usage ASSIGN_DIV expression { // ensure '/=' starts correctly
+                  ASTNode * divv = new ASTNode_Math2($1,$3,'/');
+                  $$ = divv;
+                  $$ = new ASTNode_Assign($1, divv);
+		}
+	|	var_usage ASSIGN_MOD expression { // ensure '%=' starts correctly
+                  //$1 = $1 - ($1/expression)*expression
+                  ASTNode * divv = new ASTNode_Math2($1,$3,'/');
+                  ASTNode * mult = new ASTNode_Math2(divv,$3,'*');
+                  ASTNode * mod = new ASTNode_Math2($1,mult,'-');
+                  $$ = mod;
+                  $$ = new ASTNode_Assign($1, mod);
+		}
+	;
 
-command_random:     COMMAND_RANDOM  { }
+
+/*------------COMMANDS----------------------------------------------*/
+command:        command_print {}
+                command_random{}
+
+command_print:  COMMAND_PRINT parameter_list {
+
+                  $$ = new ASTNode_Print();
+                  for (int i = 0; i < $2->GetNumChildren(); i++) {
+                    $$->AddChild($2->RemoveChild(i));
+                  }
+                  delete $2;
+                }
+
+command_random:     COMMAND_RANDOM '(' expression ')' {
+
+              }
 
 parameter_list:  expression {
               $$ = new ASTNode_Temp();
