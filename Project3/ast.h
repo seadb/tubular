@@ -225,7 +225,7 @@ public:
       out << "sub s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
     } else if (math_op == '*') {
       out << "mult s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
-    } else if (math_op == '-') {
+    } else if (math_op == '/') {
       out << "div s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
     } else if (math_op == '%') {
       out << "mod s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;

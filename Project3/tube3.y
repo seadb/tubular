@@ -104,7 +104,7 @@ expression:     INT_LITERAL {
                   $$ = new ASTNode_Math2($1, $3, '/');
                 }
         |       expression '%' expression {
-                  $$ = new ASTNode_Math2($1, $3, '/');
+                  $$ = new ASTNode_Math2($1, $3, '%');
                 }
         |       var_usage ASSIGN_ADD expression {
                   $$ = new ASTNode_MathAssign($1, $3, '+');
