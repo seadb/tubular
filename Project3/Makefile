@@ -5,7 +5,7 @@ default: all
 
 all: tube3
 
-tube3.tab.cc: tube3.y
+tube3.tab.cc: tube3.y ast.h
 	bison -o tube3.tab.cc -b tube3 -d tube3.y
 
 tube3.yy.cc: tube3.lex
