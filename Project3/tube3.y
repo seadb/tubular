@@ -31,6 +31,7 @@ void yyerror(std::string err_string) {
 %type<ast_node> statement_list statement var_declare var_declare_assign var_usage expression command param_list
 
 %right '='
+%right ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %left '+' '-'
 %left '*' '/' '%'
 
@@ -53,7 +54,7 @@ statement_list:	{
 
 statement:      var_declare        { $$ = $1; }
         |       var_declare_assign { $$ = $1; }
-	|       expression         { $$ = $1; }
+        |       expression         { $$ = $1; }
         |       command { $$ = $1; }
 
 var_declare:	TYPE ID {
@@ -94,6 +95,30 @@ expression:     INT_LITERAL {
         |       expression '-' expression {
                   $$ = new ASTNode_Math2($1, $3, '-');
                 }
+        |       expression '*' expression {
+                  $$ = new ASTNode_Math2($1, $3, '*');
+                }
+        |       expression '/' expression {
+                  $$ = new ASTNode_Math2($1, $3, '/');
+                }
+        |       expression '%' expression {
+                  $$ = new ASTNode_Math2($1, $3, '/');
+                }
+        |       var_usage ASSIGN_ADD expression {
+                  $$ = new ASTNode_MathAssign($1, $3, '+');
+                }
+        |       var_usage ASSIGN_SUB expression {
+                  $$ = new ASTNode_MathAssign($1, $3, '-');
+                }
+        |       var_usage ASSIGN_MULT expression {
+                  $$ = new ASTNode_MathAssign($1, $3, '*');
+                }
+        |       var_usage ASSIGN_DIV expression {
+                  $$ = new ASTNode_MathAssign($1, $3, '/');
+                }
+        |       var_usage ASSIGN_MOD expression {
+                  $$ = new ASTNode_MathAssign($1, $3, '%');
+                }
         |       var_usage '=' expression {
                   $$ = new ASTNode_Assign($1, $3);
                 }
@@ -126,6 +151,6 @@ int main(int argc, char * argv[])
   LexMain(argc, argv);
 
   yyparse();
-  std::cout << "Parse Successful!" << std::endl;
+  std::cout << "#Parse Successful!" << std::endl;
   return 0;
 }

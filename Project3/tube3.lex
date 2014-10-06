@@ -10,6 +10,7 @@ int line_num = 1;
 %}
 
 id              [a-zA-Z_][a-zA-Z0-9_]*
+ascii           [+\-*/;\(\)=,]
 
 %%
 
@@ -54,7 +55,7 @@ random  {
 "/=" { return ASSIGN_DIV; }
 "%=" { return ASSIGN_MOD; }
 
-[+\-=;,] { /* Chars to return directly! */
+{ascii} { /* Chars to return directly! */
           return yytext[0];
         }
 

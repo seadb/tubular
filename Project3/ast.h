@@ -152,6 +152,53 @@ public:
   std::string GetName() { return "ASTNode_Assign (operator=)"; }
 };
 
+class ASTNode_MathAssign : public ASTNode {
+protected:
+  int math_op;
+public:
+  ASTNode_MathAssign(ASTNode * lhs, ASTNode * rhs, int op) { 
+    children.push_back(lhs);
+    children.push_back(rhs);
+    math_op = op;
+  }
+
+  ~ASTNode_MathAssign() { ; }
+
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) {
+    tableEntry * lhs_var = children[0]->CompileTubeIC(table, out);
+    tableEntry * rhs_var = children[1]->CompileTubeIC(table, out);
+
+    const int l = lhs_var->GetVarID();
+    const int r = rhs_var->GetVarID();
+
+    // Determine the correct operation...  
+    if (math_op == '+') {
+      out << "add s" << l << " s" << r << " s" << l << std::endl;
+    } else if (math_op == '-') {
+      out << "sub s" << l << " s" << r << " s" << l << std::endl;
+    } else if (math_op == '*') {
+      out << "mult s" << l << " s" << r << " s" << l << std::endl;
+    } else if (math_op == '-') {
+      out << "div s" << l << " s" << r << " s" << l << std::endl;
+    } else if (math_op == '%') {
+      out << "mod s" << l << " s" << r << " s" << l << std::endl;
+    }
+    else {
+      std::cerr << "INTERNAL COMPILER ERROR: Unknown MathAssign operator '"
+                << math_op << "'" << std::endl;
+    }
+
+    return lhs_var;
+  }
+
+  std::string GetName() {
+    std::string out_string = "ASTNode_MathAssign (operator";
+    out_string += (char) math_op;
+    out_string += ")";
+    return out_string;
+  }
+};
+
 class ASTNode_Math2 : public ASTNode {
 protected:
   int math_op;
@@ -176,6 +223,12 @@ public:
       out << "add s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
     } else if (math_op == '-') {
       out << "sub s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+    } else if (math_op == '*') {
+      out << "mult s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+    } else if (math_op == '-') {
+      out << "div s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+    } else if (math_op == '%') {
+      out << "mod s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
     }
     else {
       std::cerr << "INTERNAL COMPILER ERROR: Unknown Math2 operator '"
