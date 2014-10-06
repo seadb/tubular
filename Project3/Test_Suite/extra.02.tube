@@ -1,0 +1,3 @@
+int a = 8;
+int b = (a < 4) ? a += 5 : a += 8; 
+print a, b;
