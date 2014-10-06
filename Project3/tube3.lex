@@ -1,40 +1,45 @@
 %{
-#include "tube3.tab.hh"
 #include <iostream>
+
+#include "ast.h"
+#include "symbol_table.h"
+
+#include "tube3.tab.hh"
 
 int line_num = 1;
 %}
 
 id              [a-zA-Z_][a-zA-Z0-9_]*
-ascii           [+\-*/;\(\)=,]
 
 %%
 
-#.*     ; // Comment, ignore remainder of line
-int     { /* Types; right now, just "int" */
+#.*	; // Ignore comments
+
+"int"   { /* Types; right now, just "int" */
           yylval.lexeme = strdup(yytext); 
-	      return TYPE;
+	  return TYPE;
         }
 
-print   {
-          yylval.lexeme = strdup(yytext);
-          return COMMAND_PRINT;
+"print" {
+          yylval.lexeme = strdup(yytext); 
+	  return COMMAND_PRINT;
         }
-
-random  {
-          yylval.lexeme = strdup(yytext);
-          return COMMAND_RANDOM;
-        }
+       
+"random" {
+	  yylval.lexeme = strdup(yytext);
+	  return COMMAND_RANDOM;
+	}
 
 {id}    { /* Identifier */
           yylval.lexeme = strdup(yytext); 
-	      return ID;
+	  return ID;
         }
 
 [0-9]+  { /* Int Literal */
           yylval.lexeme = strdup(yytext); 
           return INT_LITERAL;
         }
+
 "=="    { return COMP_EQU; }
 "!="    { return COMP_NEQU; }
 "<"     { return COMP_LESS; }
@@ -48,7 +53,8 @@ random  {
 "*="    { return ASSIGN_MULT; }
 "/="    { return ASSIGN_DIV; }
 "%="    { return ASSIGN_MOD; }
-{ascii} { /* Chars to return directly! */
+
+[\:\?+\-=;,\(\)\[\]*/%] { /* Chars to return directly! */
           return yytext[0];
         }
 
@@ -70,8 +76,8 @@ void LexMain(int argc, char * argv[])
 {
   int arg_id = 0;
 
-  if (argc != 2) {
-    std::cerr << "Format: " << argv[0] << " [filename]" << std::endl;
+  if (argc != 3) {
+    std::cerr << "Format: " << argv[0] << " [filename] [filename]" << std::endl;
     exit(1);
   }
   
