@@ -246,6 +246,55 @@ public:
   }
 };
 
+class ASTNode_Comparison : public ASTNode {
+protected:
+  std::string comp_op;
+public:
+  ASTNode_Comparison(ASTNode * in1, ASTNode * in2, std::string op) : comp_op(op) {
+    children.push_back(in1);
+    children.push_back(in2);
+  }
+  ~ASTNode_Comparison() { ; }
+
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) {
+    tableEntry * in_var1 = children[0]->CompileTubeIC(table, out);
+    tableEntry * in_var2 = children[1]->CompileTubeIC(table, out);
+    tableEntry * out_var = table.AddTempEntry();
+
+    const int i1 = in_var1->GetVarID();
+    const int i2 = in_var2->GetVarID();
+    const int o3 = out_var->GetVarID();
+
+    // Determine the correct operation...  
+    if (comp_op == "<") {
+      out << "test_less s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+    } else if (comp_op == ">") {
+      out << "test_gtr s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+    } else if (comp_op == "<=") {
+      out << "test_lte s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+    } else if (comp_op == ">=") {
+      out << "test_gte s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+    } else if (comp_op == "==") {
+      out << "test_equ s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+    } else if (comp_op == "!=") {
+      out << "test_nequ s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+    }
+    else {
+      std::cerr << "INTERNAL COMPILER ERROR: Unknown Comparison operator '"
+                << comp_op << "'" << std::endl;
+    }
+
+    return out_var;
+  }
+
+  std::string GetName() {
+    std::string out_string = "ASTNode_Comparison (operator";
+    out_string += comp_op;
+    out_string += ")";
+    return out_string;
+  }
+};
+
 class ASTNode_Print : public ASTNode {
 public:
   ASTNode_Print() { ; }

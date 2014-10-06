@@ -32,8 +32,11 @@ void yyerror(std::string err_string) {
 
 %type<ast_node> statement_list statement var_declare var_declare_assign var_usage expression command param_list
 
-%right '='
-%right ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
+%right '=' ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
+%right '?' ':'
+%left BOOL_OR
+%left BOOL_AND
+%nonassoc COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE
 %left '+' '-'
 %left '*' '/' '%'
 
@@ -120,6 +123,30 @@ expression:     INT_LITERAL {
                 }
         |       var_usage ASSIGN_MOD expression {
                   $$ = new ASTNode_MathAssign($1, $3, '%');
+                }
+        |       expression COMP_EQU expression {
+                  $$ = new ASTNode_Comparison($1, $3, "==");
+                }
+        |       expression COMP_NEQU expression {
+                  $$ = new ASTNode_Comparison($1, $3, "!=");
+                }
+        |       expression COMP_GTE expression {
+                  $$ = new ASTNode_Comparison($1, $3, ">=");
+                }
+        |       expression COMP_LESS expression {
+                  $$ = new ASTNode_Comparison($1, $3, "<");
+                }
+        |       expression COMP_LTE expression {
+                  $$ = new ASTNode_Comparison($1, $3, "<=");
+                }
+        |       expression COMP_GTR expression {
+                  $$ = new ASTNode_Comparison($1, $3, ">");
+                }
+        |       expression BOOL_AND expression {
+                }
+        |       expression BOOL_OR expression {
+                }
+        |       '(' expression ')' {
                 }
         |       var_usage '=' expression {
                   $$ = new ASTNode_Assign($1, $3);
