@@ -77,8 +77,8 @@ void LexMain(int argc, char * argv[])
 {
   int arg_id = 0;
 
-  if (argc != 2) {
-    std::cerr << "Format: " << argv[0] << " [filename]" << std::endl;
+  if (argc != 3) {
+    std::cerr << "Format: " << argv[0] << " [filename] [filename]" << std::endl;
     exit(1);
   }
   

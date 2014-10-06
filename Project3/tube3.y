@@ -1,5 +1,6 @@
 %{
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <cstdlib>
 
@@ -8,6 +9,7 @@
 
 extern int line_num;
 extern int yylex();
+std::ofstream fs;
 
 symbolTable symbol_table;
 
@@ -39,7 +41,7 @@ void yyerror(std::string err_string) {
 
 program:        statement_list {
                   // This is always the last rule to run so $$ is the full AST
-                  $1->CompileTubeIC(symbol_table, std::cout);
+                  $1->CompileTubeIC(symbol_table, fs);
                   //$1->DebugPrint();
                 }
 
@@ -152,8 +154,12 @@ void LexMain(int argc, char * argv[]);
 int main(int argc, char * argv[])
 {
   LexMain(argc, argv);
-
+  fs.open(argv[2]);
+  if (!fs.is_open()) {
+    std::cerr << "Error opening file " << argv[2] << std::endl;
+    exit(2);
+  }
   yyparse();
-  std::cout << "#Parse Successful!" << std::endl;
+  std::cout << "Parse Successful!" << std::endl;
   return 0;
 }
