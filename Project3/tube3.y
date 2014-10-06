@@ -122,6 +122,9 @@ expression:     INT_LITERAL {
         |       var_usage '=' expression {
                   $$ = new ASTNode_Assign($1, $3);
                 }
+        |       COMMAND_RANDOM '(' expression ')' {
+                  $$ = new ASTNode_Random($3);
+                }
         |       var_usage {
                   $$ = $1;
                 }

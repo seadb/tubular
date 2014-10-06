@@ -263,5 +263,22 @@ public:
   }
 };
 
+class ASTNode_Random : public ASTNode {
+public:
+  ASTNode_Random(ASTNode * in) { 
+    children.push_back(in);
+  }
+
+  ~ASTNode_Random() { ; }
+
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) {
+    tableEntry * in_var = children[0]->CompileTubeIC(table, out);
+    tableEntry * out_var = table.AddTempEntry();
+
+    out << "random s" <<  in_var->GetVarID() << " s" << out_var->GetVarID() << std::endl;
+
+    return out_var;
+  }
+};
 
 #endif
