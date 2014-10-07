@@ -9,7 +9,7 @@ int line_num = 1;
 %}
 
 id              [a-zA-Z_][a-zA-Z0-9_]*
-ascii           [+\-*/;\(\)=,%]
+ascii           [+\-*/;\(\)=,%?:]
 
 %%
 

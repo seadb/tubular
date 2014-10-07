@@ -153,6 +153,9 @@ expression:     INT_LITERAL {
         |       expression BOOL_OR expression {
                   $$ = new ASTNode_Logical($1, $3, "||");
                 }
+        |       expression '?' expression ':' expression {
+                  $$ = new ASTNode_Conditional($1, $3, $5);
+                }
         |       '(' expression ')' {
                   $$ = $2;
                 }

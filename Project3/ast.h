@@ -364,6 +364,47 @@ public:
   }
 };
 
+class ASTNode_Conditional : public ASTNode {
+public:
+  ASTNode_Conditional(ASTNode * in1, ASTNode * in2, ASTNode * in3) {
+    children.push_back(in1);
+    children.push_back(in2);
+    children.push_back(in3);
+  }
+  ~ASTNode_Conditional() { ; }
+
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) {
+    tableEntry * in_var1 = children[0]->CompileTubeIC(table, out);
+    tableEntry * out_var = table.AddTempEntry();
+
+    const int i1 = in_var1->GetVarID();
+    const int o4 = out_var->GetVarID();
+
+    out << "test_nequ s" << i1 << " 0 s" << o4 << std::endl;
+    out << "jump_if_n0 s" << o4 << " cond_true" << o4 << std::endl;
+
+    // False
+    tableEntry * in_var3 = children[2]->CompileTubeIC(table, out);
+    const int i3 = in_var3->GetVarID();
+    out << "val_copy s" << i3 << " s" << o4 << std::endl;
+    out << "jump cond_end" << o4 << std::endl;
+
+    // True
+    out << "cond_true" << o4 << ":" << std::endl;
+    tableEntry * in_var2 = children[1]->CompileTubeIC(table, out);
+    const int i2 = in_var2->GetVarID();
+    out << "val_copy s" << i2 << " s" << o4 << std::endl;
+
+    out << "cond_end" << o4 << ":" << std::endl;
+
+    return out_var;
+  }
+
+  std::string GetName() {
+    return "ASTNode_Conditional";
+  }
+};
+
 class ASTNode_Print : public ASTNode {
 public:
   ASTNode_Print() { ; }
