@@ -178,7 +178,7 @@ public:
       out << "sub s" << l << " s" << r << " s" << l << std::endl;
     } else if (math_op == '*') {
       out << "mult s" << l << " s" << r << " s" << l << std::endl;
-    } else if (math_op == '-') {
+    } else if (math_op == '/') {
       out << "div s" << l << " s" << r << " s" << l << std::endl;
     } else if (math_op == '%') {
       out << "mod s" << l << " s" << r << " s" << l << std::endl;
