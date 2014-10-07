@@ -1,0 +1,6 @@
+int a = 123;
+{
+	print(a);
+	char a = 'x';
+	print(a);
+}

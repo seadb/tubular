@@ -1,0 +1,6 @@
+int x = 2;
+while (x) {
+      print x;
+      x -= 1;
+}
+print x;
