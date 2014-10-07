@@ -112,19 +112,19 @@ expression:     INT_LITERAL {
 
 		}
 	|	expression ASSIGN_ADD expression {
-
+		  $$ = new ASTNode_MathAssign($1, $3, '+');
 		}
         |       expression ASSIGN_SUB expression {
-
+		  $$ = new ASTNode_MathAssign($1, $3, '-');
                 }
         |       expression ASSIGN_MOD expression {
-
+                  $$ = new ASTNode_MathAssign($1, $3, '%');
                 }
         |       expression ASSIGN_MULT expression {
-
+                  $$ = new ASTNode_MathAssign($1, $3, '*');
                 }
         |       expression ASSIGN_DIV expression {
-
+                  $$ = new ASTNode_MathAssign($1, $3, '/');
                 }
         |       expression COMP_EQU expression {
 
