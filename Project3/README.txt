@@ -1,9 +1,12 @@
-Group Member Names: Sean Rabaut, Joshua Curl, Justin Grothe
+Group Member Names: Joshua Curl, Justin Grothe
 
 Contributions:
 
+Justin added project 2 code to instructors skeleton code and added the ofstream for output of tube3.
+Joshua finished the rest of the project as Justin had some personal problems
+
 Summary of Functionality (or Disfunctionality):
 
-Everything works except for test case good #16. Not sure why at this point.
+Everything works except the extra credit. 
 
 External Resources and Other Notes:
