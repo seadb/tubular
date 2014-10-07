@@ -39,6 +39,7 @@ void yyerror(std::string err_string) {
 %nonassoc COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE
 %left '+' '-'
 %left '*' '/' '%'
+%nonassoc UMINUS
 
 %%
 
@@ -109,6 +110,9 @@ expression:     INT_LITERAL {
         |       expression '%' expression {
                   $$ = new ASTNode_Math2($1, $3, '%');
                 }
+        |       '-' expression %prec UMINUS {
+                  $$ = new ASTNode_Negation($2); 
+                }
         |       var_usage ASSIGN_ADD expression {
                   $$ = new ASTNode_MathAssign($1, $3, '+');
                 }
@@ -143,10 +147,13 @@ expression:     INT_LITERAL {
                   $$ = new ASTNode_Comparison($1, $3, ">");
                 }
         |       expression BOOL_AND expression {
+                  $$ = new ASTNode_Logical($1, $3, "&&");
                 }
         |       expression BOOL_OR expression {
+                  $$ = new ASTNode_Logical($1, $3, "||");
                 }
         |       '(' expression ')' {
+                  $$ = $2;
                 }
         |       var_usage '=' expression {
                   $$ = new ASTNode_Assign($1, $3);

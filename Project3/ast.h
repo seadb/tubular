@@ -246,6 +246,31 @@ public:
   }
 };
 
+class ASTNode_Negation : public ASTNode {
+public:
+  ASTNode_Negation(ASTNode * in) {
+    children.push_back(in);
+  }
+  ~ASTNode_Negation() { ; }
+
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) {
+    tableEntry * in_var = children[0]->CompileTubeIC(table, out);
+    tableEntry * out_var = table.AddTempEntry();
+
+    const int i = in_var->GetVarID();
+    const int o = out_var->GetVarID();
+
+    out << "val_copy -1 s" << o << std::endl;
+    out << "mult s" << o << " s" << i << " s" << o << std::endl;
+
+    return out_var;
+  }
+
+  std::string GetName() {
+    return "ASTNode_Negation";
+  }
+};
+
 class ASTNode_Comparison : public ASTNode {
 protected:
   std::string comp_op;
@@ -290,6 +315,50 @@ public:
   std::string GetName() {
     std::string out_string = "ASTNode_Comparison (operator";
     out_string += comp_op;
+    out_string += ")";
+    return out_string;
+  }
+};
+
+class ASTNode_Logical : public ASTNode {
+protected:
+  std::string log_op;
+public:
+  ASTNode_Logical(ASTNode * in1, ASTNode * in2, std::string op) : log_op(op) {
+    children.push_back(in1);
+    children.push_back(in2);
+  }
+  ~ASTNode_Logical() { ; }
+
+  tableEntry * CompileTubeIC(symbolTable & table, std::ostream & out) {
+    tableEntry * in_var1 = children[0]->CompileTubeIC(table, out);
+    tableEntry * in_var2 = children[1]->CompileTubeIC(table, out);
+    tableEntry * out_var = table.AddTempEntry();
+
+    const int i1 = in_var1->GetVarID();
+    const int i2 = in_var2->GetVarID();
+    const int o3 = out_var->GetVarID();
+
+    // Determine the correct operation...  
+    if (log_op == "&&") {
+      out << "mult s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+    } else if (log_op == "||") {
+      out << "test_nequ s" << i1 << " 0 s" << o3 << std::endl;
+      out << "jump_if_n0 s" << o3 << " or" << o3 << std::endl;
+      out << "test_nequ s" << i2 << " 0 s" << o3 << std::endl;
+      out << "or" << o3 << ":" << std::endl;
+    }
+    else {
+      std::cerr << "INTERNAL COMPILER ERROR: Unknown Logical operator '"
+                << log_op << "'" << std::endl;
+    }
+
+    return out_var;
+  }
+
+  std::string GetName() {
+    std::string out_string = "ASTNode_Logical (operator";
+    out_string += log_op;
     out_string += ")";
     return out_string;
   }
