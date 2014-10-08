@@ -1,1 +1,2 @@
-int example;
+int var;
+var = 10;

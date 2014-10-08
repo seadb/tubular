@@ -8,7 +8,8 @@
 #include "symbol_table.h"
 #include "tube3.tab.hh"
 
-int line_count = 1;
+std::string out_filename;
+int line_count = 0;
 %}
 
 EOL           "\n"
@@ -22,20 +23,21 @@ assign_sub    "-="
 assign_mult   "*="
 assign_div    "/="
 assign_mod    "%="
-compare_equ "=="
-compare_nequ "!="
-compare_lte         "<="
+compare_equ   "=="
+compare_nequ  "!="
+compare_lte   "<="
 compare_less  "<"
 compare_gte   ">="
 compare_gtr   ">"
-bool_and   "&&"
-bool_or    "||"
-sign    [-+]
-ascii [\+\-\*/=;\(\)%,{}[\]\.]
-white [ \t\n]+
-comment "#".*\n
-%s IN_COMMENT
-unknown .
+bool_and      "&&"
+bool_or       "||"
+sign          [-+]
+ascii         [\+\-/=;\(\)%,{}[\]\.]
+star          "*"
+white         [ \t\n]+
+comment       "#".*\n
+%s            IN_COMMENT
+unknown       .
 
 %%
 {EOL}           { line_count++; }
@@ -52,7 +54,7 @@ unknown .
 {compare_nequ}  { return COMP_NEQU; }
 {compare_equ}   { return COMP_EQU; }
 {compare_lte}   { return COMP_LTE; }
-{compare_less}  { return COMP_LESS; } //return yytext[0];
+{compare_less}  { return COMP_LESS; }
 {compare_gte}   { return COMP_GTE; }
 {compare_gtr}   { return COMP_GTR; }
 {bool_and}   { return BOOLAND;  }
@@ -66,14 +68,16 @@ unknown .
 	}
 }
 {comment} { line_count++;}
+
+
+
 <INITIAL>{
-"/*" BEGIN(IN_COMMENT);
+"/*"              BEGIN(IN_COMMENT);
 }
 <IN_COMMENT>{
- "*/" BEGIN(INITIAL);
-  [^*\n]+ ; // eat comment in chunks
-  "*" ;// eat the lone star
-  \n line_count++;
+"*/"      BEGIN(INITIAL);
+[^*\n]+   // eat comment in chunks
+{star}     { return yytext[0];}  // eat the lone star
 }
 {unknown} { line_count++; printf("Unknown token on line %i: %s\n", line_count, yytext);
   exit(3);
@@ -87,21 +91,28 @@ void LexMain(int argc, char * argv[])
     std::cerr << "Format: " << argv[0] << " [input] [output]" << std::endl;
     exit(1);
   }
-  // The only thing left to do is assume the current argument is the filename.
+
+  // open input file
   FILE *file = fopen(argv[1], "r");
   if (!file) {
     std::cerr << "Error opening " << argv[1] << std::endl;
     exit(2);
   }
+
   yyin = file;
 
-  //open file to write
-  FILE *output = fopen(argv[2], "w");
-  if (!output) {
-  std::cerr << "Error opening " << argv[2] << std::endl;
-  exit(3);
-  }
+  out_filename = argv[2];
+  //open output file
+ // output_file.open(argv[2]);
 
+/*  OLD CODE
+#  //open file to write
+#  FILE *output = fopen(argv[2], "w");
+#  if (!output) {
+#  std::cerr << "Error opening " << argv[2] << std::endl;
+#  exit(3);
+#  }
+*/
   // TODO: write to file
 
   return;

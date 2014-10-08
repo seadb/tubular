@@ -19,7 +19,7 @@ AST_Example/*
 *.tab.cc
 *.tab.hh
 *.yy.cc
-*.swo
+*.swp
 
 # Packages #
 ############

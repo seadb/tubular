@@ -28,11 +28,12 @@ std::map <std::string, Var *> symbol_table; //symbol table
   char * lexeme;
 }
 
-%token<lexeme> ID INT_LITERAL TYPE 
+%token<lexeme> ID INT_LITERAL TYPE
+%type<ast_node> statement_list statement var_declare var_any assignment var_usage expression command parameter_list command_print command_random
 
 %token COMMAND_PRINT
 
-%left COMMAND_RANDOM 
+%left COMMAND_RANDOM
 %left '<' '>' COMP_NEQU COMP_EQU COMP_LTE COMP_GTE BOOLAND BOOLOR
 %left '*' '/' '%'
 %left '+' '-'
@@ -81,19 +82,19 @@ assignment:	var_any '=' expression { // ensures '=' starts with int Var or Var
 	;
 
 var_any:	var_declare{
-                  //std::cout << "Declaration left of all " << std::endl;                  
+                  //std::cout << "Declaration left of all " << std::endl;
 		}
 	|	var_usage {
 		  //std::cout << "Just the ID left of all " << std::endl;
 		}
 	;
 var_usage:	ID { // Identifier
-	 	  //std::cout << "Just the ID " << $1 << std::endl; 
+	 	  //std::cout << "Just the ID " << $1 << std::endl;
 		  //std::cout << "No fear!" << std::endl;
 
             if(symbol_table.find($1) == symbol_table.end()) //ID not found in symbol table
-            {     
-                char buff[100];      
+            {
+                char buff[100];
                 sprintf(buff,"unknown variable '%s'", $1);
                 std::string err = buff;
                 yyerror(err);
@@ -102,26 +103,26 @@ var_usage:	ID { // Identifier
 }
 	;
 var_declare:	TYPE ID { // int Identifier
-	          //std::cout << "Do something other than printing var info here!" << "Type=" << $1 << " name=" << $2 << std::endl; 
-		      //std::cout << "Var declare" << "Type=" << $1 << " name=" << $2 << std::endl; 
+	          //std::cout << "Do something other than printing var info here!" << "Type=" << $1 << " name=" << $2 << std::endl;
+		      //std::cout << "Var declare" << "Type=" << $1 << " name=" << $2 << std::endl;
 
             std::map<std::string, Var *>::iterator match;
             match = symbol_table.find($2);
             if(match == symbol_table.end())     //ID not found in symbol table
             {                                   // New Variable declared
-                struct Var temp; 
+                struct Var temp;
                 temp.type = $1;
                 temp.name = $2;
                 temp.line_count = line_count;
-                symbol_table[$2]= &temp; 
+                symbol_table[$2]= &temp;
             }
             else
             {
                 char buff[100];
                 sprintf(buff, "redeclaration of variable '%s'", $2);
-                std::string err = buff; 
+                std::string err = buff;
                 yyerror(err);
-            } 
+            }
         }
 
 	;
@@ -135,8 +136,8 @@ expression:     INT_LITERAL { // Integer
         |       expression '-' expression { // Subtraction
                   //std::cout << "Doing subtraction! (but you shouldn't print it!)" << std::endl;
                 }
-	|	expression '*' expression { // Multiplication 
-		  //std::cout << "Doing multiplication!" << std::endl; 
+	|	expression '*' expression { // Multiplication
+		  //std::cout << "Doing multiplication!" << std::endl;
 		}
 	|	expression '/' expression { // Division
 
