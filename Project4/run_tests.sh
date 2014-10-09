@@ -4,6 +4,7 @@
 # It will then test tube1 against the reference_implementation for
 # each tube file in the test-suite
 project=tube4
+make clean
 make
 if [ ! -f $project ]; then 
 	echo $project "not correctly compiled";
@@ -13,7 +14,8 @@ if [ ! -f example.tube ]; then
 	echo "example.tube doesn't exist";
 	exit 1;
 fi;
-
+chmod a+x Test_Suite/reference_$project
+chmod a+x Test_Suite/TubeIC
 function run_error_test {
     ./$project $1 $project.tic > $project.cout;
     Test_Suite/reference_$project $1 ref.tic > ref.cout;
@@ -21,9 +23,9 @@ function run_error_test {
     result=$?;
     rm $project.cout ref.cout;
     if [ $result -ne 0 ]; then
-	echo $1 "failed different error messages";
+	echo $1 "failed different stdout messages";
 	rm $project.tic ref.tic;
-	#exit 1;
+	return 1;
     fi;
 
     Test_Suite/TubeIC $project.tic > $project.out
@@ -33,7 +35,7 @@ function run_error_test {
     rm $project.out ref.out;
     if [ $result -ne 0 ]; then
 	echo $1 "failed different executed result on TubeIC";
-	#exit 1;
+	return 1;
     else
 	echo $1 "passed";
     fi;
@@ -42,6 +44,12 @@ function run_error_test {
 }
 
 
+for F in Test_Suite/good*.tube; do 
+	run_error_test $F
+done
+for F in Test_Suite/fail*.tube; do 
+	run_error_test $F
+done
 for F in Test_Suite/test.*.tube; do 
 	run_error_test $F
 done

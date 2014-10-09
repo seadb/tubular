@@ -1,0 +1,4 @@
+# Try including escape characters...
+
+print '\'', '\\', 't', '\'', '=', 't', 'a', 'b', '\n', '\t', 't', 'a', 'b', 'b', 'e', 'd', '!';
+

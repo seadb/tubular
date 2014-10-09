@@ -1,0 +1,7 @@
+# You cannot use a variable after it has gone out of scope.
+
+int a = 20;
+{
+  int b = 0;
+}
+print a, b;
