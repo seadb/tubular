@@ -184,6 +184,9 @@ public:
       case '/':
         out << "div s" << i1 << " s" << i2 << " s" << o3 << std::endl;
         break;
+      case '%':
+        out << "mod s" << i1 << " s" << i2 << " s" << o3 << std::endl;
+        break;
       default:
         std::cerr << "INTERNAL COMPILER ERROR: Unknown Math2 operator '"
                 << math_op << "'" << std::endl;
@@ -220,17 +223,27 @@ public:
 
 class ASTNode_Random : public ASTNode {
 public:
-  ASTNode_Random() { ; }
+  ASTNode_Random(ASTNode * in1) {
+    children.push_back(in1);
+     }
   virtual ~ASTNode_Random() { ; }
 
   virtual tableEntry * CompileTubeIC(symbolTable & table, std::ofstream & out)
   {
+    /*
     for (int i = 0; i < (int) children.size(); i++) {
       tableEntry * in_var = children[i]->CompileTubeIC(table, out);
       out << "out_int s" << in_var->GetVarID() << std::endl;
     }
     out << "out_char '\\n'" << std::endl;
+*/
+    tableEntry * in_var1 = children[0]->CompileTubeIC(table, out);
+    tableEntry * out_var = table.AddTempEntry();
 
+    const int i1 = in_var1->GetVarID();
+    const int o3 = out_var->GetVarID();
+
+    out << "random s " << i1 << " " << o3;
     return NULL;
   }
 };
@@ -238,9 +251,9 @@ public:
 
 class ASTNode_Compare : public ASTNode {
 protected:
-  int math_op;
+   int compare_op;
 public:
-  ASTNode_Compare(ASTNode * in1, ASTNode * in2, char op) : math_op(op) {
+  ASTNode_Compare(ASTNode * in1, ASTNode * in2, int op) : compare_op(op) {
     children.push_back(in1);
     children.push_back(in2);
   }
@@ -256,7 +269,7 @@ public:
     const int o3 = out_var->GetVarID();
 
     // Determine the correct operation...
-    switch( math_op ){
+    switch( compare_op ){
       case '>':
         out << "test_gtr s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
         break;
@@ -275,21 +288,73 @@ public:
       case '<=':
         out << "test_lte s" << i1 << " s" << i2 << " s" << o3 ;
         break;
+      case '&&':
+        out << "add s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+        break;
+      case '||':
+        out << "sub s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+        break;
+      case '|':
+        out <<
+      case '&':
+          out <<
       default:
         std::cerr << "INTERNAL COMPILER ERROR: Unknown Math2 operator '"
-                << math_op << "'" << std::endl;
+                << compare_op << "'" << std::endl;
     }
 
     return out_var;
   }
 
   std::string GetName() {
-    std::string out_string = "ASTNode_Math2 (operator";
-    out_string += (char) math_op;
+    std::string out_string = "ASTNode_Compare (operator";
+    out_string += (char) compare_op;
     out_string += ")";
     return out_string;
   }
 };
 
+/*
+class ASTNode_Bool : public ASTNode {
+protected:
+  int bool_op;
+public:
+  ASTNode_Bool(ASTNode * in1, ASTNode * in2, int op) : bool_op(op) {
+    children.push_back(in1);
+    children.push_back(in2);
+  }
+  ~ASTNode_Bool() { ; }
 
+  tableEntry * CompileTubeIC(symbolTable & table, std::ofstream & out) {
+    tableEntry * in_var1 = children[0]->CompileTubeIC(table, out);
+    tableEntry * in_var2 = children[1]->CompileTubeIC(table, out);
+    tableEntry * out_var = table.AddTempEntry();
+
+    const int i1 = in_var1->GetVarID();
+    const int i2 = in_var2->GetVarID();
+    const int o3 = out_var->GetVarID();
+
+    // Determine the correct operation...
+    switch( bool_op ){
+      case '&&':
+        out << "add s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+        break;
+      case '||':
+        out << "sub s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+        break;
+      default:
+        std::cerr << "INTERNAL COMPILER ERROR: Unknown Bool operator '"
+                << bool_op << "'" << std::endl;
+    }
+
+    return out_var;
+
+  std::string GetName() {
+    std::string out_string = "ASTNode_Bool (operator";
+    out_string += (char) bool_op;
+    out_string += ")";
+    return out_string;
+  }
+};
+*/
 #endif

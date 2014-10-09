@@ -6,11 +6,11 @@
 project=tube3
 make
 chmod a+x Test_Suite/reference_$project
-if [ ! -f $project ]; then 
+if [ ! -f $project ]; then
 	echo $project "not correctly compiled";
 	exit 1;
 fi;
-if [ ! -f example.tube ]; then 
+if [ ! -f example.tube ]; then
 	echo "example.tube doesn't exist";
 	exit 1;
 fi;
@@ -43,14 +43,14 @@ function run_error_test {
 }
 
 
-for F in Test_Suite/test.*.tube; do 
+for F in Test_Suite/test.*.tube; do
 	run_error_test $F
 done
 
 
 echo Extra Credit Results:
 
-for F in Test_Suite/extra.*.tube; do 
+for F in Test_Suite/extra.*.tube; do
 	run_error_test $F
 done
 

@@ -31,7 +31,8 @@ compare_gte   ">="
 compare_gtr   ">"
 bool_and      "&&"
 bool_or       "||"
-sign          [-+]
+logic_and     "&"
+logic_or      "|"
 ascii         [\+\-/=;\(\)%,{}[\]\*\.]
 star          "*"
 white         [ \t\n]+
@@ -57,8 +58,10 @@ unknown       .
 {compare_less}  { return COMP_LESS; }
 {compare_gte}   { return COMP_GTE; }
 {compare_gtr}   { return COMP_GTR; }
-{bool_and}   { return BOOLAND;  }
-{bool_or}    { return BOOLOR; }
+{bool_and}   { return BOOL_AND;  }
+{bool_or}    { return BOOL_OR; }
+{logic_and}  { return LOGIC_AND; }
+{logic_or}   { return LOGIC_OR; }
 {ascii}     { return yytext[0];}
 {white}     {
 	for(int i=0; i < yyleng;i++){

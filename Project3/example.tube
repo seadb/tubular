@@ -1,2 +1,2 @@
-int var;
-var = 10;
+int a;
+a * -2;
