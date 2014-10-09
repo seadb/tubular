@@ -240,7 +240,7 @@ class ASTNode_Compare : public ASTNode {
 protected:
   int math_op;
 public:
-  ASTNode_Compare(ASTNode * in1, ASTNode * in2, int op) : math_op(op) {
+  ASTNode_Compare(ASTNode * in1, ASTNode * in2, char op) : math_op(op) {
     children.push_back(in1);
     children.push_back(in2);
   }

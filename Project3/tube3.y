@@ -40,6 +40,7 @@ void yyerror(std::string err_string) {
 %left COMP_NEQU COMP_EQU COMP_LTE COMP_GTE COMP_GTR COMP_LESS
 %left '+' '-'
 %left '*' '/' '%'
+%nonassoc UMINUS
 
 %%
 
@@ -49,7 +50,8 @@ program:        statement_list {
                 std::ofstream out_file;
                 out_file.open(out_filename.c_str());
                 std::ofstream & out = out_file;
-                $1->CompileTubeIC(symbol_table, out_file);
+                out_file << $1->CompileTubeIC(symbol_table, out_file);
+                out_file.close();
                 }
 
 
@@ -199,8 +201,8 @@ assignment:
 
 
 /*------------COMMANDS----------------------------------------------*/
-command:        command_print {}
-       |        command_random{}
+command:        command_print { $$ = $1; }
+       |        command_random{ $$ = $1; }
 
 command_print:  COMMAND_PRINT parameter_list {
 

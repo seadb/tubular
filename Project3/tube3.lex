@@ -32,7 +32,7 @@ compare_gtr   ">"
 bool_and      "&&"
 bool_or       "||"
 sign          [-+]
-ascii         [\+\-/=;\(\)%,{}[\]\.]
+ascii         [\+\-/=;\(\)%,{}[\]\*\.]
 star          "*"
 white         [ \t\n]+
 comment       "#".*\n
