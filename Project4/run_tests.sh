@@ -14,8 +14,7 @@ if [ ! -f example.tube ]; then
 	echo "example.tube doesn't exist";
 	exit 1;
 fi;
-chmod a+x Test_Suite/reference_$project
-chmod a+x Test_Suite/TubeIC
+
 function run_error_test {
     ./$project $1 $project.tic > $project.cout;
     Test_Suite/reference_$project $1 ref.tic > ref.cout;
@@ -23,27 +22,26 @@ function run_error_test {
     result=$?;
     rm $project.cout ref.cout;
     if [ $result -ne 0 ]; then
-	echo $1 "failed different stdout messages";
-	rm $project.tic ref.tic;
+	echo $1 "failed different error messages";
+	rm $project.tic;
 	return 1;
     fi;
 
-    Test_Suite/TubeIC $project.tic > $project.out
-    Test_Suite/TubeIC ref.tic > ref.out
-    diff -w ref.out $project.out;
-    result=$?;
-    rm $project.out ref.out;
-    if [ $result -ne 0 ]; then
-	echo $1 "failed different executed result on TubeIC";
-	return 1;
-    else
-	echo $1 "passed";
-    fi;
-
+    if [ -e ref.tic ] ; then
+	    Test_Suite/TubeIC $project.tic > $project.out
+	    Test_Suite/TubeIC ref.tic > ref.out
+	    diff -w ref.out $project.out;
+	    result=$?;
+	    rm $project.out ref.out;
+	    if [ $result -ne 0 ]; then
+		echo $1 "failed different executed result on TubeIC";
+		return 1;
+	    else
+		echo $1 "passed";
+	    fi;
+    fi
 
 }
-
-
 for F in Test_Suite/good*.tube; do 
 	run_error_test $F
 done
@@ -60,7 +58,6 @@ echo Extra Credit Results:
 for F in Test_Suite/extra.*.tube; do 
 	run_error_test $F
 done
-
 
 
 
