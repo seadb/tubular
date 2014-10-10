@@ -30,6 +30,7 @@ function run_error_test {
     if [ -e ref.tic ] ; then
 	    Test_Suite/TubeIC $project.tic > $project.out
 	    Test_Suite/TubeIC ref.tic > ref.out
+	    rm  ref.tic $project.tic;
 	    diff -w ref.out $project.out;
 	    result=$?;
 	    rm $project.out ref.out;
