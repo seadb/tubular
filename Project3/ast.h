@@ -203,6 +203,7 @@ public:
   }
 };
 
+
 class ASTNode_Print : public ASTNode {
 public:
   ASTNode_Print() { ; }
@@ -230,28 +231,29 @@ public:
 
   virtual tableEntry * CompileTubeIC(symbolTable & table, std::ofstream & out)
   {
-    /*
+   /*
     for (int i = 0; i < (int) children.size(); i++) {
       tableEntry * in_var = children[i]->CompileTubeIC(table, out);
       out << "out_int s" << in_var->GetVarID() << std::endl;
     }
     out << "out_char '\\n'" << std::endl;
 */
+
     tableEntry * in_var1 = children[0]->CompileTubeIC(table, out);
     tableEntry * out_var = table.AddTempEntry();
 
     const int i1 = in_var1->GetVarID();
     const int o3 = out_var->GetVarID();
 
-    out << "random s " << i1 << " " << o3;
-    return NULL;
+    out << "random s" << i1 << " s" << o3 << std::endl;
+    return out_var;
   }
 };
 
 
 class ASTNode_Compare : public ASTNode {
 protected:
-   int compare_op;
+  int compare_op;
 public:
   ASTNode_Compare(ASTNode * in1, ASTNode * in2, int op) : compare_op(op) {
     children.push_back(in1);
@@ -286,20 +288,21 @@ public:
         out << "test_gte s" << i1 << " s" << i2 << " s" << o3 << std::endl;
         break;
       case '<=':
-        out << "test_lte s" << i1 << " s" << i2 << " s" << o3 ;
+        out << "test_lte s" << i1 << " s" << i2 << " s" << o3<<std::endl ;
         break;
       case '&&':
-        out << "add s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+        out << "test_nequ s" << i1 << " 0 s" << o3 << std::endl;
+        out << "test_nequ s" << i2 << " 0 s" << o3 + 1<<std::endl;
+        out << "mult s" << o3 << " s" <<  o3+1 << " s" << o3 << std::endl;
         break;
       case '||':
-        out << "sub s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+        out << "test_nequ s" << i1 << " 0 s" << o3 << std::endl;
+        out << "test_nequ s" << i2 << " 0 s" << o3+1 << std::endl;
+        out << "add s" << o3 << " s" <<  o3 +1 << " s" << o3 << std::endl;
+        out << "test_nequ s" << o3 << " 0 s" << o3 << std::endl;
         break;
-      case '|':
-        out <<
-      case '&':
-          out <<
       default:
-        std::cerr << "INTERNAL COMPILER ERROR: Unknown Math2 operator '"
+        std::cerr << "INTERNAL COMPILER ERROR: Unknown Compare operator '"
                 << compare_op << "'" << std::endl;
     }
 

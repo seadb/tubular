@@ -30,7 +30,7 @@ void yyerror(std::string err_string) {
 }
 
 %token<lexeme> ID INT_LITERAL TYPE COMMAND_PRINT COMMAND_RANDOM
-%type<ast_node> statement_list statement declare variable expression command declaration declare_assign literal operation compare assignment parameter_list command_print command_random
+%type<ast_node> statement_list statement declare variable expression command declaration declare_assign literal operation compare assignment parameter_list command_print
 /*negative*/
 
 %right ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD '='
@@ -48,14 +48,13 @@ void yyerror(std::string err_string) {
 
 program:        statement_list {
                 // This is always the last rule to run so $$ is the full AST
-                //1->DebugPrint();
+                //$1->DebugPrint();
                 std::ofstream out_file;
                 out_file.open(out_filename.c_str());
                 std::ofstream & out = out_file;
                 $1->CompileTubeIC(symbol_table, out_file);
                 out_file.close();
                 }
-
 
 statement_list:  {
                   // Start the statement list by creating a block.
@@ -64,7 +63,7 @@ statement_list:  {
   |  statement_list statement ';' {
                   $1->AddChild($2); // Add each statement to the block
                   $$ = $1;          // Pass the block along
-   }
+   };
 
 
 statement:
@@ -101,7 +100,6 @@ variable:  ID { // Identifier
                   yyerror(err_string);
                   exit(2);
                 }
-
                 $$ = new ASTNode_Variable( entry );
          }
 
@@ -149,6 +147,10 @@ expression:   literal     { $$ = $1; }
   |     variable {
           $$ = $1;
     }
+   |  COMMAND_RANDOM '(' expression ')' {
+           
+              $$ = new ASTNode_Random($3);
+              }
   ;
 
  compare:
@@ -162,13 +164,13 @@ expression:   literal     { $$ = $1; }
       $$ = new ASTNode_Compare($1, $3, '<');
     }
   |  expression COMP_LTE expression { // <=
-      $$ = new ASTNode_Compare($1, $3, '<');
+      $$ = new ASTNode_Compare($1, $3, '<=');
     }
   |  expression COMP_GTR expression { // greater than
-      $$ = new ASTNode_Compare($1, $3, '<');
+      $$ = new ASTNode_Compare($1, $3, '>');
     }
   |  expression COMP_GTE expression { // >=
-      $$ = new ASTNode_Compare($1, $3, '<');
+      $$ = new ASTNode_Compare($1, $3, '>=');
     }
   |  expression BOOL_AND expression { // &&
       $$ = new ASTNode_Compare($1, $3, '&&');
@@ -176,12 +178,12 @@ expression:   literal     { $$ = $1; }
   |  expression BOOL_OR expression { // ||
       $$ = new ASTNode_Compare($1, $3, '||');
     }
-  |  expression LOGIC_AND expression {
-      $$ = new ASTNode_Compare($1, $3, '&');
+/*  |  expression LOGIC_AND expression {
+      $$ = new ASTNode_Compare($1, $3, "&");
     }
   | expression LOGIC_OR expression {
-      $$ = new ASTNode_Compare($1, $3, '|');
-    }
+      $$ = new ASTNode_Compare($1, $3, "|");
+    }*/
   ;
 /*-----------ASSIGNMENT----------------------------------------------*/
 
@@ -222,7 +224,6 @@ assignment:
 
 /*------------COMMANDS----------------------------------------------*/
 command:        command_print { $$ = $1; }
-       |        command_random{ $$ = $1; }
 
 command_print:  COMMAND_PRINT parameter_list {
 
@@ -233,9 +234,6 @@ command_print:  COMMAND_PRINT parameter_list {
                   delete $2;
                 }
 
-command_random:  COMMAND_RANDOM '(' expression ')' {
-              $$ = new ASTNode_Random($3);
-              }
 
 parameter_list:  expression {
               $$ = new ASTNode_Temp();

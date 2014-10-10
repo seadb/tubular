@@ -80,7 +80,7 @@ unknown       .
 <IN_COMMENT>{
 "*/"      BEGIN(INITIAL);
 [^*\n]+   // eat comment in chunks
-{star}     { return yytext[0];}  // eat the lone star
+"*"     { return yytext[1];}  // eat the lone star
 }
 {unknown} { line_count++; printf("Unknown token on line %i: %s\n", line_count, yytext);
   exit(3);
