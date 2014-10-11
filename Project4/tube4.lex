@@ -3,7 +3,7 @@
 
 #include "ast.h"
 #include "symbol_table.h"
-#include "tube3.tab.hh"
+#include "tube4.tab.hh"
 
 int line_num = 1;
 %}
