@@ -1,0 +1,3 @@
+# Simple type-error in assignment
+
+int a = 'a';
