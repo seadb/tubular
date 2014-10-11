@@ -1,0 +1,4 @@
+# You cannot redeclare a variable in the same scope.
+
+int a = 20;
+int a = 0;
