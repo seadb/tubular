@@ -66,8 +66,8 @@ public:
 
 class symbolTables {
 private:
-  std::vector<symbolTable> tables;
-  std::vector<symbolTable> discarded;
+  std::vector<symbolTable*> tables;
+  std::vector<symbolTable*> discarded;
   int scope;
   int next_var_id;                // Next variable ID to use.
   int next_label_id;              // Next label ID to use.
@@ -75,7 +75,7 @@ private:
   // Figure out the next memory position to use. Ideally, we should recycle these!
 
 public:
-  symbolTables() : next_var_id(1), next_label_id(0), scope(0) { ; }
+  symbolTables() : next_var_id(1), next_label_id(0), scope(-1) { ; }
   ~symbolTables() { ; }
   int GetNextID() { return next_var_id++; }
 
@@ -83,19 +83,15 @@ public:
   tableEntry * AddEntry(std::string in_name)
 	{ return current()->AddEntry(in_name, GetNextID());}
 
-symbolTable * current() { return &tables[scope];}
+symbolTable * current() { return tables[scope];}
 
   void AddTable() {
-    symbolTable temp(this);
-    std::vector<symbolTable>::iterator it = tables.begin();
-    tables.insert(it+scope, temp);
+    tables.push_back(new symbolTable(this));
     scope +=1;
     }
 
   void PopTable() {
-    symbolTable temp = tables.back(); //grab last element
-    std::vector<symbolTable>::iterator it = discarded.begin();
-    discarded.insert(it+scope, temp);
+    discarded.push_back(tables[scope]);
     tables.pop_back();
     scope -=1;
   }
@@ -113,8 +109,8 @@ symbolTable * current() { return &tables[scope];}
   // If that entry is not in the table, it will return NULL
   tableEntry * Lookup(std::string in_name) {
     for(int i = scope - 1; i >= 0; i--) {
-      tableEntry * result = tables[i].Lookup(in_name);
-      if(tables[i].Visible() && result != 0) {
+      tableEntry * result = tables[i]->Lookup(in_name);
+      if(tables[i]->Visible() && result != 0) {
         return result;
         }
     }
