@@ -56,6 +56,7 @@ program:        statement_list {
 
 statement_list:	{
                   // Start the statement list by creating a block.
+						symbol_tables.AddTable();
                   $$ = new ASTNode_Block();
                 }
 	|	statement_list statement ';' {
@@ -98,17 +99,8 @@ statement:      var_declare        { $$ = $1; }
         |       command { $$ = $1; }
 
 var_declare:	TYPE ID {
-                  /*if (symbol_table.Lookup($2) != 0) {
-		    std::string err_string = "re-declaring variable '";
-		    err_string += $2;
-                    err_string += "'";
-                    yyerror(err_string);
-		    exit(1);
-                  }
 
-                  $$ = new ASTNode_Variable( symbol_table.AddEntry($2) );*/
-
-	if (symbol_tables.Lookup($2) != 0) {
+    if (symbol_tables.Lookup($2) != 0) {
       std::string err_string = "re-declaring variable '";
       err_string += $2;
       err_string += "'";
@@ -116,7 +108,7 @@ var_declare:	TYPE ID {
       exit(1);
       }
 
-      $$ = new ASTNode_Variable( symbol_tables.current()->AddEntry($2) );
+      $$ = new ASTNode_Variable( symbol_tables.AddEntry($2) );
 
                 }
 

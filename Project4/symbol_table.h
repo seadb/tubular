@@ -55,7 +55,12 @@ public:
   }
 
   // Insert an entry into the symbol table.
-  tableEntry * AddEntry(std::string in_name);
+  tableEntry * AddEntry(std::string in_name, int next_var_id){
+    tableEntry * new_entry = new tableEntry(in_name);
+    new_entry->SetVarID( next_var_id );
+    tbl_map[in_name] = new_entry;
+    return new_entry;
+  }
 
 };
 
@@ -75,7 +80,10 @@ public:
   int GetNextID() { return next_var_id++; }
 
 
-	symbolTable * current() { return &tables[scope];}
+  tableEntry * AddEntry(std::string in_name)
+	{ return current()->AddEntry(in_name, GetNextID());}
+
+symbolTable * current() { return &tables[scope];}
 
   void AddTable() {
     symbolTable temp(this);
@@ -127,11 +135,11 @@ public:
 
 #endif
 // Insert an entry into the symbol table.
-tableEntry * symbolTable::AddEntry(std::string in_name) {
+/*tableEntry * symbolTable::AddEntry(std::string in_name) {
   tableEntry * new_entry = new tableEntry(in_name);
   new_entry->SetVarID( tables->GetNextID() );
   tbl_map[in_name] = new_entry;
   return new_entry;
-};
+};*/
 
 

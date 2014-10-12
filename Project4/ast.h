@@ -133,7 +133,7 @@ public:
 
 class ASTNode_Assign : public ASTNode {
 public:
-  ASTNode_Assign(ASTNode * lhs, ASTNode * rhs) { 
+  ASTNode_Assign(ASTNode * lhs, ASTNode * rhs) {
     children.push_back(lhs);
     children.push_back(rhs);
   }
@@ -156,7 +156,7 @@ class ASTNode_MathAssign : public ASTNode {
 protected:
   int math_op;
 public:
-  ASTNode_MathAssign(ASTNode * lhs, ASTNode * rhs, int op) { 
+  ASTNode_MathAssign(ASTNode * lhs, ASTNode * rhs, int op) {
     children.push_back(lhs);
     children.push_back(rhs);
     math_op = op;
@@ -171,7 +171,7 @@ public:
     const int l = lhs_var->GetVarID();
     const int r = rhs_var->GetVarID();
 
-    // Determine the correct operation...  
+    // Determine the correct operation...
     if (math_op == '+') {
       out << "add s" << l << " s" << r << " s" << l << std::endl;
     } else if (math_op == '-') {
@@ -218,7 +218,7 @@ public:
     const int i2 = in_var2->GetVarID();
     const int o3 = out_var->GetVarID();
 
-    // Determine the correct operation...  
+    // Determine the correct operation...
     if (math_op == '+') {
       out << "add s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
     } else if (math_op == '-') {
@@ -290,7 +290,7 @@ public:
     const int i2 = in_var2->GetVarID();
     const int o3 = out_var->GetVarID();
 
-    // Determine the correct operation...  
+    // Determine the correct operation...
     if (comp_op == "<") {
       out << "test_less s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
     } else if (comp_op == ">") {
@@ -339,7 +339,7 @@ public:
     const int i2 = in_var2->GetVarID();
     const int o3 = out_var->GetVarID();
 
-    // Determine the correct operation...  
+    // Determine the correct operation...
     if (log_op == "&&") {
       out << "mult s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
     } else if (log_op == "||") {
@@ -410,7 +410,7 @@ public:
   ASTNode_Print() { ; }
   virtual ~ASTNode_Print() { ; }
 
-  virtual tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) 
+  virtual tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out)
   {
     for (int i = 0; i < (int) children.size(); i++) {
       tableEntry * in_var = children[i]->CompileTubeIC(tables, out);
@@ -424,7 +424,7 @@ public:
 
 class ASTNode_Random : public ASTNode {
 public:
-  ASTNode_Random(ASTNode * in) { 
+  ASTNode_Random(ASTNode * in) {
     children.push_back(in);
   }
 
