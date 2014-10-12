@@ -4,6 +4,9 @@
 # It will then test tube1 against the reference_implementation for
 # each tube file in the test-suite
 project=tube4
+chmod a+x Test_Suite/reference_$project
+chmod a+x Test_Suite/TubeIC
+
 make clean
 make
 if [ ! -f $project ]; then 
