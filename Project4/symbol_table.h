@@ -1,0 +1,141 @@
+#ifndef SYMBOL_TABLE_H
+#define SYMBOL_TABLE_H
+
+#include <map>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <vector>
+
+using namespace std;
+
+// A tableEntry contains all of the stored information about a single variable.
+
+class tableEntry {
+protected:
+  std::string name;       // Variable name used by sourcecode.
+  int var_id;        // What is the intermediate code ID for this variable?
+  // NOTE: This is also where you want to track other var info like
+  //       type, line it was declared on, array status, etc.
+
+public:
+  tableEntry() : name(""), var_id(-1) { ; }
+  tableEntry(const std::string & in_name) : name(in_name), var_id(-1) { ; }
+  ~tableEntry() { ; }
+
+  const std::string & GetName() const { return name; }
+  int GetVarID() const { return var_id; }
+
+  void SetName(std::string in_name) { name = in_name; }
+  void SetVarID(int in_id) { var_id = in_id; }
+};
+
+class symbolTables;
+
+// The symbolTable allows easy lookup of tableEntry objects.
+class symbolTable {
+private:
+  bool visible;
+  std::map<std::string, tableEntry *> tbl_map;
+  symbolTables *tables;
+public:
+  symbolTable(symbolTables *t) : tables(t) { ; }
+  ~symbolTable() { ; }
+
+  int GetSize() { return tbl_map.size(); }
+
+  int SetVisible(bool value) { visible = value; }
+  int Visible() { return visible; }
+
+  // Lookup will find an entry and return it.
+  // If that entry is not in the table, it will return NULL
+  tableEntry * Lookup(std::string in_name) {
+    if (tbl_map.find(in_name) == tbl_map.end()) return NULL;
+    return tbl_map[in_name];
+  }
+
+  // Insert an entry into the symbol table.
+  tableEntry * AddEntry(std::string in_name, int next_var_id){
+    tableEntry * new_entry = new tableEntry(in_name);
+    new_entry->SetVarID( next_var_id );
+    tbl_map[in_name] = new_entry;
+    return new_entry;
+  }
+
+};
+
+class symbolTables {
+private:
+  std::vector<symbolTable*> tables;
+  std::vector<symbolTable*> discarded;
+  int scope;
+  int next_var_id;                // Next variable ID to use.
+  int next_label_id;              // Next label ID to use.
+
+  // Figure out the next memory position to use. Ideally, we should recycle these!
+
+public:
+  symbolTables() : next_var_id(1), next_label_id(0), scope(-1) { ; }
+  ~symbolTables() { ; }
+  int GetNextID() { return next_var_id++; }
+
+
+  tableEntry * AddEntry(std::string in_name)
+	{ return current()->AddEntry(in_name, GetNextID());}
+
+symbolTable * current() { return tables[scope];}
+
+  void AddTable() {
+    tables.push_back(new symbolTable(this));
+    scope +=1;
+    }
+
+  void PopTable() {
+    discarded.push_back(tables[scope]);
+    tables.pop_back();
+    scope -=1;
+  }
+
+  int NextLabelID() { return next_label_id++; }
+  std::string NextLabelID(std::string prefix) {
+    std::stringstream ss;
+    ss << prefix << next_label_id++;
+    return ss.str();
+  }
+
+  int GetNumVars() { return next_var_id; }
+
+  // Lookup will find an entry and return it.
+  // If that entry is not in the table, it will return NULL
+  tableEntry * Lookup(std::string in_name) {
+    for(int i = scope - 1; i >= 0; i--) {
+      tableEntry * result = tables[i]->Lookup(in_name);
+      if(tables[i]->Visible() && result != 0) {
+        return result;
+        }
+    }
+	return NULL;
+  }
+
+  // Insert a temporary variable entry into the symbol table.
+  tableEntry * AddTempEntry() {
+    tableEntry * new_entry = new tableEntry();
+    new_entry->SetVarID( GetNextID() );
+    return new_entry;
+  }
+
+  void IncreaseScope() { scope++; }
+  void DecreaseScope() { scope--; }
+
+};
+
+#endif
+// Insert an entry into the symbol table.
+/*tableEntry * symbolTable::AddEntry(std::string in_name) {
+  tableEntry * new_entry = new tableEntry(in_name);
+  new_entry->SetVarID( tables->GetNextID() );
+  tbl_map[in_name] = new_entry;
+  return new_entry;
+};*/
+
+
