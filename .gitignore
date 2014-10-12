@@ -5,13 +5,14 @@ out.tic
 *~
 *.map
 ss.js
-Project 1/
-Project 2/
-Project 3/
+Project1/
+Project2/
+Project3/
 
 # Text Editor Backups #
 ###########################
 ~*
+*.swp
 
 # Compiled source #
 ###################
@@ -24,7 +25,6 @@ Project 3/
 *.tab.cc
 *.tab.hh
 *.yy.cc
-*.swp
 
 # Packages #
 ############
