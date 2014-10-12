@@ -12,11 +12,11 @@ extern int line_num;
 extern int yylex();
 std::ofstream fs;
 
-symbolTable symbol_table;
+symbolTables symbol_table;
 
-std::vector<symbolTable> discarded_tables;
-std::vector<symbolTable> symbol_tables;
-int scope = 0;
+//std::vector<symbolTable> discarded_tables;
+//std::vector<symbolTable> symbol_tables;
+//int scope = 0;
 
 void yyerror(std::string err_string) {
   std::cout << "ERROR(line " << line_num << "): " << err_string << std::endl;
@@ -71,25 +71,24 @@ statement_list:	{
 block:
      open close { $$ = new ASTNode_Block (); }
 
-open:     OPEN_BRACE statement_list {
-     scope += 1;
-     symbolTable temp;
+open:   '{'  statement_list {
+    symbol_table.AddTable();
+     /*symbolTable temp;
      temp.SetVisible(true);
      std::vector<symbolTable>::iterator iterator = symbol_tables.begin();
      symbol_tables.insert(iterator+scope, temp);
-
+    */
      //$$ = new ASTNode_Block( );
      };
-close:  CLOSE_BRACE {
+close: '}'  {
+     symbol_table.PopTable();
+    /*
     // TODO: remove symbol table and put it in the discard pile
     symbolTable temp = symbol_tables.back(); //last element
     std::vector<symbolTable>::iterator it = discarded_tables.begin();
     discarded_tables.insert(it+scope, temp); //insert into discarded
     symbol_tables.pop_back(); //delete last element
-    scope +=1;
-    // PROBLEM:  can there be an empty element at 2, with elements at 1 and 3?
-    // this is problem because variable searchs each element
-    // ie: vector = <symbolTable, , symbolTable>
+    scope +=1;*/
 
      };
 
@@ -181,7 +180,7 @@ expression:     INT_LITERAL {
                   $$ = new ASTNode_Math2($1, $3, '%');
                 }
         |       '-' expression %prec UMINUS {
-                  $$ = new ASTNode_Negation($2); 
+                  $$ = new ASTNode_Negation($2);
                 }
         |       var_usage ASSIGN_ADD expression {
                   $$ = new ASTNode_MathAssign($1, $3, '+');

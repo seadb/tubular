@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <sstream>
+#include <vector>
 
 // A tableEntry contains all of the stored information about a single variable.
 
@@ -62,15 +63,16 @@ public:
   // Insert a temporary variable entry into the symbol table.
   tableEntry * AddTempEntry() {
     tableEntry * new_entry = new tableEntry();
-    new_entry->SetVarID( t->GetNextID() );    
+    new_entry->SetVarID( t->GetNextID() );
     return new_entry;
   }
 };
 
 class symbolTables {
 private:
-  vector<symbolTable> tables;
-  int current_scope;
+  std::vector<symbolTable> tables;
+  std::vector<symbolTable> discarded;
+  int scope;
   int next_var_id;                // Next variable ID to use.
   int next_label_id;              // Next label ID to use.
 
@@ -79,6 +81,21 @@ private:
 public:
   symbolTables() : next_var_id(1), next_label_id(0), current_scope(0) { ; }
   ~symbolTables() { ; }
+
+  void AddTable() {
+    symbolTable temp;
+    std::vector<symbolTable>::iterator it = tables.begin();
+    tables.insert(it+scope, temp);
+    scope +=1;
+    }
+
+  void PopTable() {
+    symbolTable temp = tables.back(); //grab last element
+    std::vector<symbolTable>::iterator it = discarded.begin();
+    discarded.insert(it+scope, temp);
+    tables.pop_back();
+    scope -=1;
+  }
 
   int NextLabelID() { return next_label_id++; }
   std::string NextLabelID(std::string prefix) {
@@ -99,8 +116,9 @@ public:
   }
 
   void IncreaseScope() { scope++; }
-
+  void DecreaseScope() { scope--; }
 
 };
 
 #endif
+
