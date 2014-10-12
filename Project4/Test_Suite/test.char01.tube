@@ -1,6 +1,0 @@
-char a = '\n';
-char b = '\t';
-char c = '\'';
-char d = '\\';
-char e = '#'; #but this is still a comment
-print e, a, b, c, d, e;

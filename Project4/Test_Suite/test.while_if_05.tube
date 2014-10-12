@@ -1,6 +1,0 @@
-int a = 4;
-if (a)
-{
-int b = 5;
-print b;
-} 

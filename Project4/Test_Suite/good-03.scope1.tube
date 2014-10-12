@@ -1,8 +1,0 @@
-# Test basic scoping without shadowing
-
-int a = 5;
-{
-  int b = 6;
-  print b;
-}
-print a;

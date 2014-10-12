@@ -1,5 +1,0 @@
-int name = 4;
-int i =1;
-if(i>0){
-  name =2;
-}
