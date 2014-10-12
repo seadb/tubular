@@ -12,7 +12,7 @@ extern int line_num;
 extern int yylex();
 std::ofstream fs;
 
-symbolTables symbol_table;
+symbolTables symbol_tables;
 
 //std::vector<symbolTable> discarded_tables;
 //std::vector<symbolTable> symbol_tables;
@@ -51,7 +51,7 @@ block open close
 
 program:        statement_list {
                   // This is always the last rule to run so $$ is the full AST
-                  $1->CompileTubeIC(symbol_table, fs);
+                  $1->CompileTubeIC(symbol_tables, fs);
                   //$1->DebugPrint();
                 }
 
@@ -72,7 +72,7 @@ block:
      open close { $$ = new ASTNode_Block (); }
 
 open:   '{'  statement_list {
-    symbol_table.AddTable();
+    symbol_tables.AddTable();
      /*symbolTable temp;
      temp.SetVisible(true);
      std::vector<symbolTable>::iterator iterator = symbol_tables.begin();
@@ -81,7 +81,7 @@ open:   '{'  statement_list {
      //$$ = new ASTNode_Block( );
      };
 close: '}'  {
-     symbol_table.PopTable();
+     symbol_tables.PopTable();
     /*
     // TODO: remove symbol table and put it in the discard pile
     symbolTable temp = symbol_tables.back(); //last element
@@ -109,7 +109,7 @@ var_declare:	TYPE ID {
 
                   $$ = new ASTNode_Variable( symbol_table.AddEntry($2) );*/
 
-	if (symbol_tables[scope].Lookup($2) != 0) {
+	if (symbol_tables.Lookup($2) != 0) {
       std::string err_string = "re-declaring variable '";
       err_string += $2;
       err_string += "'";
@@ -117,7 +117,7 @@ var_declare:	TYPE ID {
       exit(1);
       }
 
-      $$ = new ASTNode_Variable( symbol_table.AddEntry($2) );
+      $$ = new ASTNode_Variable( symbol_tables.current()->AddEntry($2) );
 
                 }
 
@@ -126,17 +126,10 @@ var_declare_assign:  var_declare '=' expression {
                 }
 
 var_usage:      ID {
-                  /*tableEntry * entry = symbol_table.Lookup($1);
-                  if (entry == 0) {
-                    std::string err_string = "unknown variable '";
-		    err_string += $1;
-                    err_string += "'";
-		    yyerror(err_string);
-                    exit(1);
-                  }
+                  tableEntry * entry = symbol_tables.Lookup($1);
 
-                  $$ = new ASTNode_Variable( entry );*/
-tableEntry * temp;
+                  $$ = new ASTNode_Variable( entry );
+			 /*tableEntry * temp;
           for(int i=scope-1; i>=0; i--) { //start with most recent scope
             symbolTable itr = symbol_tables.at(i);
             if(itr.Visible())
@@ -148,9 +141,9 @@ tableEntry * temp;
               $$ = new ASTNode_Variable( temp);
               break;
             }
-          }
+          }*/
 
-        if (temp == 0) {
+        if (entry == 0) {
           std::string err_string = "unknown variable '";
           err_string += $1;
           err_string += "'";
