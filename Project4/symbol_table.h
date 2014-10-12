@@ -2,8 +2,11 @@
 #define SYMBOL_TABLE_H
 
 #include <map>
+#include <vector>
 #include <string>
 #include <sstream>
+
+using namespace std;
 
 // A tableEntry contains all of the stored information about a single variable.
 
@@ -26,19 +29,19 @@ public:
   void SetVarID(int in_id) { var_id = in_id; }
 };
 
-// The symbolTable allows easy lookup of tableEntry objects.
+class symbolTables;
 
+// The symbolTable allows easy lookup of tableEntry objects.
 class symbolTable {
 private:
   bool visible;
   std::map<std::string, tableEntry *> tbl_map;
   symbolTables *tables;
 public:
-  symbolTable(symbolTables *t) : next_var_id(1), next_label_id(0), tables(t) { ; }
+  symbolTable(symbolTables *t) : tables(t) { ; }
   ~symbolTable() { ; }
 
   int GetSize() { return tbl_map.size(); }
-  int GetNumVars() { return next_var_id; }
 
   int SetVisible(bool value) { visible = value; }
   int Visible() { return visible; }
@@ -50,21 +53,6 @@ public:
     return tbl_map[in_name];
   }
 
-
-  // Insert an entry into the symbol table.
-  tableEntry * AddEntry(std::string in_name) {
-    tableEntry * new_entry = new tableEntry(in_name);
-    new_entry->SetVarID( t->GetNextID() );
-    tbl_map[in_name] = new_entry;
-    return new_entry;
-  }
-
-  // Insert a temporary variable entry into the symbol table.
-  tableEntry * AddTempEntry() {
-    tableEntry * new_entry = new tableEntry();
-    new_entry->SetVarID( t->GetNextID() );    
-    return new_entry;
-  }
 };
 
 class symbolTables {
@@ -87,6 +75,8 @@ public:
     return ss.str();
   }
 
+  int GetNumVars() { return next_var_id; }
+
   // Lookup will find an entry and return it.
   // If that entry is not in the table, it will return NULL
   tableEntry * Lookup(std::string in_name) {
@@ -98,9 +88,24 @@ public:
     }
   }
 
+  // Insert a temporary variable entry into the symbol table.
+  tableEntry * AddTempEntry() {
+    tableEntry * new_entry = new tableEntry();
+    new_entry->SetVarID( GetNextID() );    
+    return new_entry;
+  }
+
   void IncreaseScope() { scope++; }
 
 
 };
+
+// Insert an entry into the symbol table.
+tableEntry * symbolTable::AddEntry(std::string in_name) {
+  tableEntry * new_entry = new tableEntry(in_name);
+  new_entry->SetVarID( tables->GetNextID() );
+  tbl_map[in_name] = new_entry;
+  return new_entry;
+}
 
 #endif
