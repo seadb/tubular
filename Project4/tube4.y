@@ -14,6 +14,10 @@ std::ofstream fs;
 
 symbolTable symbol_table;
 
+std::vector<symbolTable> discarded_tables;
+std::vector<symbolTable> symbol_tables;
+int scope = 0;
+
 void yyerror(std::string err_string) {
   std::cout << "ERROR(line " << line_num << "): " << err_string << std::endl;
   exit(1);
@@ -31,7 +35,8 @@ void yyerror(std::string err_string) {
 %token<lexeme> BOOL_AND BOOL_OR
 %token<lexeme> ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 
-%type<ast_node> statement_list statement var_declare var_declare_assign var_usage expression command param_list
+%type<ast_node> statement_list statement var_declare var_declare_assign var_usage expression command param_list //
+block open close
 
 %right '=' ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %right '?' ':'
@@ -58,6 +63,36 @@ statement_list:	{
                   $1->AddChild($2); // Add each statement to the block
                   $$ = $1;          // Pass the block along
 		}
+  | statement_list block {
+      $1->AddChild($2);
+      $$ = $1;
+  }
+
+block:
+     open close { $$ = new ASTNode_Block (); }
+
+open:     OPEN_BRACE statement_list {
+     scope += 1;
+     symbolTable temp;
+     temp.SetVisible(true);
+     std::vector<symbolTable>::iterator iterator = symbol_tables.begin();
+     symbol_tables.insert(iterator+scope, temp);
+
+     //$$ = new ASTNode_Block( );
+     };
+close:  CLOSE_BRACE {
+    // TODO: remove symbol table and put it in the discard pile
+    symbolTable temp = symbol_tables.back(); //last element
+    std::vector<symbolTable>::iterator it = discarded_tables.begin();
+    discarded_tables.insert(it+scope, temp); //insert into discarded
+    symbol_tables.pop_back(); //delete last element
+    scope +=1;
+    // PROBLEM:  can there be an empty element at 2, with elements at 1 and 3?
+    // this is problem because variable searchs each element
+    // ie: vector = <symbolTable, , symbolTable>
+
+     };
+
 
 statement:      var_declare        { $$ = $1; }
         |       var_declare_assign { $$ = $1; }
@@ -65,7 +100,7 @@ statement:      var_declare        { $$ = $1; }
         |       command { $$ = $1; }
 
 var_declare:	TYPE ID {
-                  if (symbol_table.Lookup($2) != 0) {
+                  /*if (symbol_table.Lookup($2) != 0) {
 		    std::string err_string = "re-declaring variable '";
 		    err_string += $2;
                     err_string += "'";
@@ -73,7 +108,18 @@ var_declare:	TYPE ID {
 		    exit(1);
                   }
 
-                  $$ = new ASTNode_Variable( symbol_table.AddEntry($2) );
+                  $$ = new ASTNode_Variable( symbol_table.AddEntry($2) );*/
+
+	if (symbol_tables[scope].Lookup($2) != 0) {
+      std::string err_string = "re-declaring variable '";
+      err_string += $2;
+      err_string += "'";
+      yyerror(err_string);
+      exit(1);
+      }
+
+      $$ = new ASTNode_Variable( symbol_table.AddEntry($2) );
+
                 }
 
 var_declare_assign:  var_declare '=' expression {
@@ -81,7 +127,7 @@ var_declare_assign:  var_declare '=' expression {
                 }
 
 var_usage:      ID {
-                  tableEntry * entry = symbol_table.Lookup($1);
+                  /*tableEntry * entry = symbol_table.Lookup($1);
                   if (entry == 0) {
                     std::string err_string = "unknown variable '";
 		    err_string += $1;
@@ -90,7 +136,30 @@ var_usage:      ID {
                     exit(1);
                   }
 
-                  $$ = new ASTNode_Variable( entry );
+                  $$ = new ASTNode_Variable( entry );*/
+tableEntry * temp;
+          for(int i=scope-1; i>=0; i--) { //start with most recent scope
+            symbolTable itr = symbol_tables.at(i);
+            if(itr.Visible())
+            {
+              temp = symbol_tables[i].Lookup($1);
+            }
+            if ( temp != 0)
+            {
+              $$ = new ASTNode_Variable( temp);
+              break;
+            }
+          }
+
+        if (temp == 0) {
+          std::string err_string = "unknown variable '";
+          err_string += $1;
+          err_string += "'";
+          yyerror(err_string);
+          exit(2);
+        }
+
+
                 }
 
 expression:     INT_LITERAL {

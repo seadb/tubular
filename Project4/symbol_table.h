@@ -32,6 +32,7 @@ public:
 
 class symbolTable {
 private:
+  bool visible;
   std::map<std::string, tableEntry *> tbl_map;
   int next_var_id;                // Next variable ID to use.
   int next_label_id;              // Next label ID to use.
@@ -44,6 +45,9 @@ public:
 
   int GetSize() { return tbl_map.size(); }
   int GetNumVars() { return next_var_id; }
+
+  int SetVisible(bool value) { visible = value; }
+  int Visible() { return visible; }
 
   int NextLabelID() { return next_label_id++; }
   std::string NextLabelID(std::string prefix) {
