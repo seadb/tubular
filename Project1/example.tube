@@ -1,0 +1,26 @@
+<<<<<<< HEAD
+This is a test.
+#
+# The above comment tests if zero or more or one or more was used after comment
+42 jim_bob joseph
+=======
+int random = 45;
+random should not be used # as a variable name
+random *= random && false;;
+# Throw in some blank lines
+
+
+
+if random / 2 == 0 then
+    print Random is odd ;
+
+foreach r in random
+    random = random - 4
+
+if random < 2
+if random > 3
+if random <= 3
+if random >=sqrt(2)
+f || r && x
+{([ random /= 4 ])}
+>>>>>>> 18df0ac4bc62e8160874e4a238bce534385fea55
