@@ -5,7 +5,6 @@
 #include <string>
 #include <cstdlib>
 
-#include "symbol_table.h"
 #include "ast.h"
 
 extern int line_num;

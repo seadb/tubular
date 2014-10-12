@@ -125,6 +125,7 @@ public:
 
 };
 
+#endif
 // Insert an entry into the symbol table.
 tableEntry * symbolTable::AddEntry(std::string in_name) {
   tableEntry * new_entry = new tableEntry(in_name);
@@ -133,5 +134,4 @@ tableEntry * symbolTable::AddEntry(std::string in_name) {
   return new_entry;
 };
 
-#endif
 
