@@ -1,0 +1,1692 @@
+Terminals unused in grammar
+
+   '?'
+   ':'
+   LOGIC_OR
+   LOGIC_AND
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: statement_list
+
+    2 statement_list: /* empty */
+    3               | statement_list statement ';'
+    4               | statement_list block
+
+    5 block: open close
+
+    6 open: OPEN_BRACE statement_list
+
+    7 close: CLOSE_BRACE
+
+    8 statement: declare
+    9          | declare_assign
+   10          | expression
+   11          | command
+
+   12 declare: declaration
+
+   13 declaration: TYPE ID
+
+   14 declare_assign: declaration '=' expression
+
+   15 expression: literal
+   16           | negative
+   17           | variable
+   18           | operation
+   19           | compare
+   20           | assignment
+
+   21 literal: INT_LITERAL
+
+   22 negative: '-' expression
+
+   23 variable: ID
+
+   24 operation: expression '+' expression
+   25          | expression '-' expression
+   26          | expression '*' expression
+   27          | expression '/' expression
+   28          | expression '%' expression
+   29          | '(' expression ')'
+   30          | COMMAND_RANDOM '(' expression ')'
+
+   31 compare: expression COMP_EQU expression
+   32        | expression COMP_NEQU expression
+   33        | expression COMP_LESS expression
+   34        | expression COMP_LTE expression
+   35        | expression COMP_GTR expression
+   36        | expression COMP_GTE expression
+   37        | expression BOOL_AND expression
+   38        | expression BOOL_OR expression
+
+   39 assignment: variable '=' expression
+   40           | variable ASSIGN_ADD expression
+   41           | variable ASSIGN_SUB expression
+   42           | variable ASSIGN_MULT expression
+   43           | variable ASSIGN_DIV expression
+   44           | variable ASSIGN_MOD expression
+
+   45 command: command_print
+
+   46 command_print: COMMAND_PRINT parameter_list
+
+   47 parameter_list: expression
+   48               | parameter_list ',' expression
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'%' (37) 28
+'(' (40) 29 30
+')' (41) 29 30
+'*' (42) 26
+'+' (43) 24
+',' (44) 48
+'-' (45) 22 25
+'/' (47) 27
+':' (58)
+';' (59) 3
+'=' (61) 14 39
+'?' (63)
+error (256)
+ID (258) 13 23
+INT_LITERAL (259) 21
+TYPE (260) 13
+COMMAND_PRINT (261) 46
+COMMAND_RANDOM (262) 30
+OPEN_BRACE (263) 6
+CLOSE_BRACE (264) 7
+ASSIGN_MOD (265) 44
+ASSIGN_DIV (266) 43
+ASSIGN_MULT (267) 42
+ASSIGN_SUB (268) 41
+ASSIGN_ADD (269) 40
+BOOL_OR (270) 38
+BOOL_AND (271) 37
+LOGIC_OR (272)
+LOGIC_AND (273)
+COMP_LESS (274) 33
+COMP_GTR (275) 35
+COMP_GTE (276) 36
+COMP_LTE (277) 34
+COMP_EQU (278) 31
+COMP_NEQU (279) 32
+UMINUS (280)
+
+
+Nonterminals, with rules where they appear
+
+$accept (38)
+    on left: 0
+program (39)
+    on left: 1, on right: 0
+statement_list (40)
+    on left: 2 3 4, on right: 1 3 4 6
+block (41)
+    on left: 5, on right: 4
+open (42)
+    on left: 6, on right: 5
+close (43)
+    on left: 7, on right: 5
+statement (44)
+    on left: 8 9 10 11, on right: 3
+declare (45)
+    on left: 12, on right: 8
+declaration (46)
+    on left: 13, on right: 12 14
+declare_assign (47)
+    on left: 14, on right: 9
+expression (48)
+    on left: 15 16 17 18 19 20, on right: 10 14 22 24 25 26 27 28 29
+    30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 47 48
+literal (49)
+    on left: 21, on right: 15
+negative (50)
+    on left: 22, on right: 16
+variable (51)
+    on left: 23, on right: 17 39 40 41 42 43 44
+operation (52)
+    on left: 24 25 26 27 28 29 30, on right: 18
+compare (53)
+    on left: 31 32 33 34 35 36 37 38, on right: 19
+assignment (54)
+    on left: 39 40 41 42 43 44, on right: 20
+command (55)
+    on left: 45, on right: 11
+command_print (56)
+    on left: 46, on right: 45
+parameter_list (57)
+    on left: 47 48, on right: 46 48
+
+
+state 0
+
+    0 $accept: . program $end
+
+    $default  reduce using rule 2 (statement_list)
+
+    program         go to state 1
+    statement_list  go to state 2
+
+
+state 1
+
+    0 $accept: program . $end
+
+    $end  shift, and go to state 3
+
+
+state 2
+
+    1 program: statement_list .
+    3 statement_list: statement_list . statement ';'
+    4               | statement_list . block
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    TYPE            shift, and go to state 6
+    COMMAND_PRINT   shift, and go to state 7
+    COMMAND_RANDOM  shift, and go to state 8
+    OPEN_BRACE      shift, and go to state 9
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    $default  reduce using rule 1 (program)
+
+    block           go to state 12
+    open            go to state 13
+    statement       go to state 14
+    declare         go to state 15
+    declaration     go to state 16
+    declare_assign  go to state 17
+    expression      go to state 18
+    literal         go to state 19
+    negative        go to state 20
+    variable        go to state 21
+    operation       go to state 22
+    compare         go to state 23
+    assignment      go to state 24
+    command         go to state 25
+    command_print   go to state 26
+
+
+state 3
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+state 4
+
+   23 variable: ID .
+
+    $default  reduce using rule 23 (variable)
+
+
+state 5
+
+   21 literal: INT_LITERAL .
+
+    $default  reduce using rule 21 (literal)
+
+
+state 6
+
+   13 declaration: TYPE . ID
+
+    ID  shift, and go to state 27
+
+
+state 7
+
+   46 command_print: COMMAND_PRINT . parameter_list
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression      go to state 28
+    literal         go to state 19
+    negative        go to state 20
+    variable        go to state 21
+    operation       go to state 22
+    compare         go to state 23
+    assignment      go to state 24
+    parameter_list  go to state 29
+
+
+state 8
+
+   30 operation: COMMAND_RANDOM . '(' expression ')'
+
+    '('  shift, and go to state 30
+
+
+state 9
+
+    6 open: OPEN_BRACE . statement_list
+
+    $default  reduce using rule 2 (statement_list)
+
+    statement_list  go to state 31
+
+
+state 10
+
+   22 negative: '-' . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 32
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 11
+
+   29 operation: '(' . expression ')'
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 33
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 12
+
+    4 statement_list: statement_list block .
+
+    $default  reduce using rule 4 (statement_list)
+
+
+state 13
+
+    5 block: open . close
+
+    CLOSE_BRACE  shift, and go to state 34
+
+    close  go to state 35
+
+
+state 14
+
+    3 statement_list: statement_list statement . ';'
+
+    ';'  shift, and go to state 36
+
+
+state 15
+
+    8 statement: declare .
+
+    $default  reduce using rule 8 (statement)
+
+
+state 16
+
+   12 declare: declaration .
+   14 declare_assign: declaration . '=' expression
+
+    '='  shift, and go to state 37
+
+    $default  reduce using rule 12 (declare)
+
+
+state 17
+
+    9 statement: declare_assign .
+
+    $default  reduce using rule 9 (statement)
+
+
+state 18
+
+   10 statement: expression .
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    BOOL_OR    shift, and go to state 38
+    BOOL_AND   shift, and go to state 39
+    COMP_LESS  shift, and go to state 40
+    COMP_GTR   shift, and go to state 41
+    COMP_GTE   shift, and go to state 42
+    COMP_LTE   shift, and go to state 43
+    COMP_EQU   shift, and go to state 44
+    COMP_NEQU  shift, and go to state 45
+    '+'        shift, and go to state 46
+    '-'        shift, and go to state 47
+    '*'        shift, and go to state 48
+    '/'        shift, and go to state 49
+    '%'        shift, and go to state 50
+
+    $default  reduce using rule 10 (statement)
+
+
+state 19
+
+   15 expression: literal .
+
+    $default  reduce using rule 15 (expression)
+
+
+state 20
+
+   16 expression: negative .
+
+    $default  reduce using rule 16 (expression)
+
+
+state 21
+
+   17 expression: variable .
+   39 assignment: variable . '=' expression
+   40           | variable . ASSIGN_ADD expression
+   41           | variable . ASSIGN_SUB expression
+   42           | variable . ASSIGN_MULT expression
+   43           | variable . ASSIGN_DIV expression
+   44           | variable . ASSIGN_MOD expression
+
+    '='          shift, and go to state 51
+    ASSIGN_MOD   shift, and go to state 52
+    ASSIGN_DIV   shift, and go to state 53
+    ASSIGN_MULT  shift, and go to state 54
+    ASSIGN_SUB   shift, and go to state 55
+    ASSIGN_ADD   shift, and go to state 56
+
+    $default  reduce using rule 17 (expression)
+
+
+state 22
+
+   18 expression: operation .
+
+    $default  reduce using rule 18 (expression)
+
+
+state 23
+
+   19 expression: compare .
+
+    $default  reduce using rule 19 (expression)
+
+
+state 24
+
+   20 expression: assignment .
+
+    $default  reduce using rule 20 (expression)
+
+
+state 25
+
+   11 statement: command .
+
+    $default  reduce using rule 11 (statement)
+
+
+state 26
+
+   45 command: command_print .
+
+    $default  reduce using rule 45 (command)
+
+
+state 27
+
+   13 declaration: TYPE ID .
+
+    $default  reduce using rule 13 (declaration)
+
+
+state 28
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+   47 parameter_list: expression .
+
+    BOOL_OR    shift, and go to state 38
+    BOOL_AND   shift, and go to state 39
+    COMP_LESS  shift, and go to state 40
+    COMP_GTR   shift, and go to state 41
+    COMP_GTE   shift, and go to state 42
+    COMP_LTE   shift, and go to state 43
+    COMP_EQU   shift, and go to state 44
+    COMP_NEQU  shift, and go to state 45
+    '+'        shift, and go to state 46
+    '-'        shift, and go to state 47
+    '*'        shift, and go to state 48
+    '/'        shift, and go to state 49
+    '%'        shift, and go to state 50
+
+    $default  reduce using rule 47 (parameter_list)
+
+
+state 29
+
+   46 command_print: COMMAND_PRINT parameter_list .
+   48 parameter_list: parameter_list . ',' expression
+
+    ','  shift, and go to state 57
+
+    $default  reduce using rule 46 (command_print)
+
+
+state 30
+
+   30 operation: COMMAND_RANDOM '(' . expression ')'
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 58
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 31
+
+    3 statement_list: statement_list . statement ';'
+    4               | statement_list . block
+    6 open: OPEN_BRACE statement_list .
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    TYPE            shift, and go to state 6
+    COMMAND_PRINT   shift, and go to state 7
+    COMMAND_RANDOM  shift, and go to state 8
+    OPEN_BRACE      shift, and go to state 9
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    $default  reduce using rule 6 (open)
+
+    block           go to state 12
+    open            go to state 13
+    statement       go to state 14
+    declare         go to state 15
+    declaration     go to state 16
+    declare_assign  go to state 17
+    expression      go to state 18
+    literal         go to state 19
+    negative        go to state 20
+    variable        go to state 21
+    operation       go to state 22
+    compare         go to state 23
+    assignment      go to state 24
+    command         go to state 25
+    command_print   go to state 26
+
+
+state 32
+
+   22 negative: '-' expression .
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    $default  reduce using rule 22 (negative)
+
+
+state 33
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   29          | '(' expression . ')'
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    BOOL_OR    shift, and go to state 38
+    BOOL_AND   shift, and go to state 39
+    COMP_LESS  shift, and go to state 40
+    COMP_GTR   shift, and go to state 41
+    COMP_GTE   shift, and go to state 42
+    COMP_LTE   shift, and go to state 43
+    COMP_EQU   shift, and go to state 44
+    COMP_NEQU  shift, and go to state 45
+    '+'        shift, and go to state 46
+    '-'        shift, and go to state 47
+    '*'        shift, and go to state 48
+    '/'        shift, and go to state 49
+    '%'        shift, and go to state 50
+    ')'        shift, and go to state 59
+
+
+state 34
+
+    7 close: CLOSE_BRACE .
+
+    $default  reduce using rule 7 (close)
+
+
+state 35
+
+    5 block: open close .
+
+    $default  reduce using rule 5 (block)
+
+
+state 36
+
+    3 statement_list: statement_list statement ';' .
+
+    $default  reduce using rule 3 (statement_list)
+
+
+state 37
+
+   14 declare_assign: declaration '=' . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 60
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 38
+
+   38 compare: expression BOOL_OR . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 61
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 39
+
+   37 compare: expression BOOL_AND . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 62
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 40
+
+   33 compare: expression COMP_LESS . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 63
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 41
+
+   35 compare: expression COMP_GTR . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 64
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 42
+
+   36 compare: expression COMP_GTE . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 65
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 43
+
+   34 compare: expression COMP_LTE . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 66
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 44
+
+   31 compare: expression COMP_EQU . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 67
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 45
+
+   32 compare: expression COMP_NEQU . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 68
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 46
+
+   24 operation: expression '+' . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 69
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 47
+
+   25 operation: expression '-' . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 70
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 48
+
+   26 operation: expression '*' . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 71
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 49
+
+   27 operation: expression '/' . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 72
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 50
+
+   28 operation: expression '%' . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 73
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 51
+
+   39 assignment: variable '=' . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 74
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 52
+
+   44 assignment: variable ASSIGN_MOD . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 75
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 53
+
+   43 assignment: variable ASSIGN_DIV . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 76
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 54
+
+   42 assignment: variable ASSIGN_MULT . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 77
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 55
+
+   41 assignment: variable ASSIGN_SUB . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 78
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 56
+
+   40 assignment: variable ASSIGN_ADD . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 79
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 57
+
+   48 parameter_list: parameter_list ',' . expression
+
+    ID              shift, and go to state 4
+    INT_LITERAL     shift, and go to state 5
+    COMMAND_RANDOM  shift, and go to state 8
+    '-'             shift, and go to state 10
+    '('             shift, and go to state 11
+
+    expression  go to state 80
+    literal     go to state 19
+    negative    go to state 20
+    variable    go to state 21
+    operation   go to state 22
+    compare     go to state 23
+    assignment  go to state 24
+
+
+state 58
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   30          | COMMAND_RANDOM '(' expression . ')'
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    BOOL_OR    shift, and go to state 38
+    BOOL_AND   shift, and go to state 39
+    COMP_LESS  shift, and go to state 40
+    COMP_GTR   shift, and go to state 41
+    COMP_GTE   shift, and go to state 42
+    COMP_LTE   shift, and go to state 43
+    COMP_EQU   shift, and go to state 44
+    COMP_NEQU  shift, and go to state 45
+    '+'        shift, and go to state 46
+    '-'        shift, and go to state 47
+    '*'        shift, and go to state 48
+    '/'        shift, and go to state 49
+    '%'        shift, and go to state 50
+    ')'        shift, and go to state 81
+
+
+state 59
+
+   29 operation: '(' expression ')' .
+
+    $default  reduce using rule 29 (operation)
+
+
+state 60
+
+   14 declare_assign: declaration '=' expression .
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    BOOL_OR    shift, and go to state 38
+    BOOL_AND   shift, and go to state 39
+    COMP_LESS  shift, and go to state 40
+    COMP_GTR   shift, and go to state 41
+    COMP_GTE   shift, and go to state 42
+    COMP_LTE   shift, and go to state 43
+    COMP_EQU   shift, and go to state 44
+    COMP_NEQU  shift, and go to state 45
+    '+'        shift, and go to state 46
+    '-'        shift, and go to state 47
+    '*'        shift, and go to state 48
+    '/'        shift, and go to state 49
+    '%'        shift, and go to state 50
+
+    $default  reduce using rule 14 (declare_assign)
+
+
+state 61
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+   38        | expression BOOL_OR expression .
+
+    BOOL_AND   shift, and go to state 39
+    COMP_LESS  shift, and go to state 40
+    COMP_GTR   shift, and go to state 41
+    COMP_GTE   shift, and go to state 42
+    COMP_LTE   shift, and go to state 43
+    COMP_EQU   shift, and go to state 44
+    COMP_NEQU  shift, and go to state 45
+    '+'        shift, and go to state 46
+    '-'        shift, and go to state 47
+    '*'        shift, and go to state 48
+    '/'        shift, and go to state 49
+    '%'        shift, and go to state 50
+
+    $default  reduce using rule 38 (compare)
+
+
+state 62
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   37        | expression BOOL_AND expression .
+   38        | expression . BOOL_OR expression
+
+    COMP_LESS  shift, and go to state 40
+    COMP_GTR   shift, and go to state 41
+    COMP_GTE   shift, and go to state 42
+    COMP_LTE   shift, and go to state 43
+    COMP_EQU   shift, and go to state 44
+    COMP_NEQU  shift, and go to state 45
+    '+'        shift, and go to state 46
+    '-'        shift, and go to state 47
+    '*'        shift, and go to state 48
+    '/'        shift, and go to state 49
+    '%'        shift, and go to state 50
+
+    $default  reduce using rule 37 (compare)
+
+
+state 63
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   33        | expression COMP_LESS expression .
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    '+'  shift, and go to state 46
+    '-'  shift, and go to state 47
+    '*'  shift, and go to state 48
+    '/'  shift, and go to state 49
+    '%'  shift, and go to state 50
+
+    $default  reduce using rule 33 (compare)
+
+
+state 64
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   35        | expression COMP_GTR expression .
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    '+'  shift, and go to state 46
+    '-'  shift, and go to state 47
+    '*'  shift, and go to state 48
+    '/'  shift, and go to state 49
+    '%'  shift, and go to state 50
+
+    $default  reduce using rule 35 (compare)
+
+
+state 65
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   36        | expression COMP_GTE expression .
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    '+'  shift, and go to state 46
+    '-'  shift, and go to state 47
+    '*'  shift, and go to state 48
+    '/'  shift, and go to state 49
+    '%'  shift, and go to state 50
+
+    $default  reduce using rule 36 (compare)
+
+
+state 66
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   34        | expression COMP_LTE expression .
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    '+'  shift, and go to state 46
+    '-'  shift, and go to state 47
+    '*'  shift, and go to state 48
+    '/'  shift, and go to state 49
+    '%'  shift, and go to state 50
+
+    $default  reduce using rule 34 (compare)
+
+
+state 67
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   31        | expression COMP_EQU expression .
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    '+'  shift, and go to state 46
+    '-'  shift, and go to state 47
+    '*'  shift, and go to state 48
+    '/'  shift, and go to state 49
+    '%'  shift, and go to state 50
+
+    $default  reduce using rule 31 (compare)
+
+
+state 68
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   32        | expression COMP_NEQU expression .
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    '+'  shift, and go to state 46
+    '-'  shift, and go to state 47
+    '*'  shift, and go to state 48
+    '/'  shift, and go to state 49
+    '%'  shift, and go to state 50
+
+    $default  reduce using rule 32 (compare)
+
+
+state 69
+
+   24 operation: expression . '+' expression
+   24          | expression '+' expression .
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    '*'  shift, and go to state 48
+    '/'  shift, and go to state 49
+    '%'  shift, and go to state 50
+
+    $default  reduce using rule 24 (operation)
+
+
+state 70
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   25          | expression '-' expression .
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    '*'  shift, and go to state 48
+    '/'  shift, and go to state 49
+    '%'  shift, and go to state 50
+
+    $default  reduce using rule 25 (operation)
+
+
+state 71
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   26          | expression '*' expression .
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    $default  reduce using rule 26 (operation)
+
+
+state 72
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   27          | expression '/' expression .
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    $default  reduce using rule 27 (operation)
+
+
+state 73
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   28          | expression '%' expression .
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+
+    $default  reduce using rule 28 (operation)
+
+
+state 74
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+   39 assignment: variable '=' expression .
+
+    BOOL_OR    shift, and go to state 38
+    BOOL_AND   shift, and go to state 39
+    COMP_LESS  shift, and go to state 40
+    COMP_GTR   shift, and go to state 41
+    COMP_GTE   shift, and go to state 42
+    COMP_LTE   shift, and go to state 43
+    COMP_EQU   shift, and go to state 44
+    COMP_NEQU  shift, and go to state 45
+    '+'        shift, and go to state 46
+    '-'        shift, and go to state 47
+    '*'        shift, and go to state 48
+    '/'        shift, and go to state 49
+    '%'        shift, and go to state 50
+
+    $default  reduce using rule 39 (assignment)
+
+
+state 75
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+   44 assignment: variable ASSIGN_MOD expression .
+
+    BOOL_OR    shift, and go to state 38
+    BOOL_AND   shift, and go to state 39
+    COMP_LESS  shift, and go to state 40
+    COMP_GTR   shift, and go to state 41
+    COMP_GTE   shift, and go to state 42
+    COMP_LTE   shift, and go to state 43
+    COMP_EQU   shift, and go to state 44
+    COMP_NEQU  shift, and go to state 45
+    '+'        shift, and go to state 46
+    '-'        shift, and go to state 47
+    '*'        shift, and go to state 48
+    '/'        shift, and go to state 49
+    '%'        shift, and go to state 50
+
+    $default  reduce using rule 44 (assignment)
+
+
+state 76
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+   43 assignment: variable ASSIGN_DIV expression .
+
+    BOOL_OR    shift, and go to state 38
+    BOOL_AND   shift, and go to state 39
+    COMP_LESS  shift, and go to state 40
+    COMP_GTR   shift, and go to state 41
+    COMP_GTE   shift, and go to state 42
+    COMP_LTE   shift, and go to state 43
+    COMP_EQU   shift, and go to state 44
+    COMP_NEQU  shift, and go to state 45
+    '+'        shift, and go to state 46
+    '-'        shift, and go to state 47
+    '*'        shift, and go to state 48
+    '/'        shift, and go to state 49
+    '%'        shift, and go to state 50
+
+    $default  reduce using rule 43 (assignment)
+
+
+state 77
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+   42 assignment: variable ASSIGN_MULT expression .
+
+    BOOL_OR    shift, and go to state 38
+    BOOL_AND   shift, and go to state 39
+    COMP_LESS  shift, and go to state 40
+    COMP_GTR   shift, and go to state 41
+    COMP_GTE   shift, and go to state 42
+    COMP_LTE   shift, and go to state 43
+    COMP_EQU   shift, and go to state 44
+    COMP_NEQU  shift, and go to state 45
+    '+'        shift, and go to state 46
+    '-'        shift, and go to state 47
+    '*'        shift, and go to state 48
+    '/'        shift, and go to state 49
+    '%'        shift, and go to state 50
+
+    $default  reduce using rule 42 (assignment)
+
+
+state 78
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+   41 assignment: variable ASSIGN_SUB expression .
+
+    BOOL_OR    shift, and go to state 38
+    BOOL_AND   shift, and go to state 39
+    COMP_LESS  shift, and go to state 40
+    COMP_GTR   shift, and go to state 41
+    COMP_GTE   shift, and go to state 42
+    COMP_LTE   shift, and go to state 43
+    COMP_EQU   shift, and go to state 44
+    COMP_NEQU  shift, and go to state 45
+    '+'        shift, and go to state 46
+    '-'        shift, and go to state 47
+    '*'        shift, and go to state 48
+    '/'        shift, and go to state 49
+    '%'        shift, and go to state 50
+
+    $default  reduce using rule 41 (assignment)
+
+
+state 79
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+   40 assignment: variable ASSIGN_ADD expression .
+
+    BOOL_OR    shift, and go to state 38
+    BOOL_AND   shift, and go to state 39
+    COMP_LESS  shift, and go to state 40
+    COMP_GTR   shift, and go to state 41
+    COMP_GTE   shift, and go to state 42
+    COMP_LTE   shift, and go to state 43
+    COMP_EQU   shift, and go to state 44
+    COMP_NEQU  shift, and go to state 45
+    '+'        shift, and go to state 46
+    '-'        shift, and go to state 47
+    '*'        shift, and go to state 48
+    '/'        shift, and go to state 49
+    '%'        shift, and go to state 50
+
+    $default  reduce using rule 40 (assignment)
+
+
+state 80
+
+   24 operation: expression . '+' expression
+   25          | expression . '-' expression
+   26          | expression . '*' expression
+   27          | expression . '/' expression
+   28          | expression . '%' expression
+   31 compare: expression . COMP_EQU expression
+   32        | expression . COMP_NEQU expression
+   33        | expression . COMP_LESS expression
+   34        | expression . COMP_LTE expression
+   35        | expression . COMP_GTR expression
+   36        | expression . COMP_GTE expression
+   37        | expression . BOOL_AND expression
+   38        | expression . BOOL_OR expression
+   48 parameter_list: parameter_list ',' expression .
+
+    BOOL_OR    shift, and go to state 38
+    BOOL_AND   shift, and go to state 39
+    COMP_LESS  shift, and go to state 40
+    COMP_GTR   shift, and go to state 41
+    COMP_GTE   shift, and go to state 42
+    COMP_LTE   shift, and go to state 43
+    COMP_EQU   shift, and go to state 44
+    COMP_NEQU  shift, and go to state 45
+    '+'        shift, and go to state 46
+    '-'        shift, and go to state 47
+    '*'        shift, and go to state 48
+    '/'        shift, and go to state 49
+    '%'        shift, and go to state 50
+
+    $default  reduce using rule 48 (parameter_list)
+
+
+state 81
+
+   30 operation: COMMAND_RANDOM '(' expression ')' .
+
+    $default  reduce using rule 30 (operation)

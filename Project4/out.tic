@@ -1,0 +1,2 @@
+val_copy 4 s2
+val_copy s2 s1

@@ -1,0 +1,21 @@
+IMPLEMENTING SCOPE INTO THE SYMBOL TABLE(S)
+
+bison will detect a blocks
+
+one way:
+  encounters {
+    create new symbol table
+    encounters }
+      move that symbol table into a vector of discared symbol tables
+        How will we keep track of which symbol table belongs to what???
+        -- member variable for each "astnode block' that holds the symbol tables
+        -- problem: we need to be able to check other symbol tables for globall declared variables, or variables declared within a a block that contains the current block ie:
+        int var = 4;
+        if(true){
+          var = 0;
+          int a = 2;
+          if (true){
+            a = 3;
+          }
+        }
+
