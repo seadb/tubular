@@ -40,6 +40,8 @@ function run_error_test {
 	    else
 		echo $1 "passed";
 	    fi;
+    else 
+    	echo $1 "passed";
     fi
 
 }
