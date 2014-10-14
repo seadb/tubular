@@ -356,22 +356,26 @@ public:
 
   tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
     tableEntry * in_var1 = children[0]->CompileTubeIC(tables, out);
-    tableEntry * in_var2 = children[1]->CompileTubeIC(tables, out);
     tableEntry * out_var = tables.AddTempEntry();
 
+// Added tableEntry in_var2 and const int i2 into the code below so short circuiting works
+
     const int i1 = in_var1->GetVarID();
-    const int i2 = in_var2->GetVarID();
     const int o3 = out_var->GetVarID();
 
     // Determine the correct operation...
     if (log_op == "&&") {
       out << "test_nequ s" << i1 << " 0 s" << o3 << std::endl;
       out << "jump_if_0 s" << o3 << " and" << o3 << std::endl;
+      tableEntry * in_var2 = children[1]->CompileTubeIC(tables, out);
+      const int i2 = in_var2->GetVarID();
       out << "test_nequ s" << i2 << " 0 s" << o3 << std::endl;
       out << "and" << o3 << ":" << std::endl;
     } else if (log_op == "||") {
       out << "test_nequ s" << i1 << " 0 s" << o3 << std::endl;
       out << "jump_if_n0 s" << o3 << " or" << o3 << std::endl;
+      tableEntry * in_var2 = children[1]->CompileTubeIC(tables, out);
+      const int i2 = in_var2->GetVarID();
       out << "test_nequ s" << i2 << " 0 s" << o3 << std::endl;
       out << "or" << o3 << ":" << std::endl;
     }
@@ -466,6 +470,5 @@ public:
     return out_var;
   }
 };
-
 
 #endif

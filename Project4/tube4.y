@@ -25,7 +25,7 @@ void yyerror(std::string err_string) {
   ASTNode * ast_node;
 }
 
-%token<lexeme> ID INT_LITERAL TYPE_INT TYPE_CHAR IF
+%token<lexeme> ID INT_LITERAL CHAR_LITERAL TYPE_INT TYPE_CHAR IF
 %token<lexeme> COMMAND_PRINT COMMAND_RANDOM
 %token<lexeme> COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE
 %token<lexeme> BOOL_AND BOOL_OR
@@ -51,7 +51,7 @@ program:        statement_list {
                   // This is always the last rule to run so $$ is the full AST
                   symbol_tables.ShowAll();
                   $1->CompileTubeIC(symbol_tables, fs);
-                  $1->DebugPrint();
+// 		  $1->DebugPrint();
                 }
 
 statement_list:  {
@@ -76,7 +76,7 @@ statement:      declare  ';'      { $$ = $1; }
         |       block           { symbol_tables.AddTable(); std::cout<< "IN BLOCK1" <<std::endl; $$ = $1; }
 
 block: open close {
-     std::cout << "IN BLOCK" << std::endl;
+     //std::cout << "IN BLOCK" << std::endl;
      $$ = $1;
      }
 
@@ -87,7 +87,7 @@ open:     OPEN_BRACE  statement_list {
      }
 
 close:    CLOSE_BRACE {
-      std::cout << "IN CLOSE" << std::endl;
+     // std::cout << "IN CLOSE" << std::endl;
       symbol_tables.PopTable();
      };
 
@@ -146,7 +146,7 @@ variable:      ID {
           yyerror(err_string);
           exit(2);
         }
-        $$ = new ASTNode_Variable(entry);
+	$$ = new ASTNode_Variable( entry );
       }
 
 operation:

@@ -9,7 +9,7 @@ int line_num = 1;
 %}
 
 id              [a-zA-Z_][a-zA-Z0-9_]*
-ascii           [+\-*/;\(\)\{\}=,%?:\!]
+ascii           [\'+\-*/;\(\)\{\}=,%?:\!]
 
 %%
 
@@ -49,6 +49,11 @@ random  {
           yylval.lexeme = strdup(yytext);
           return INT_LITERAL;
         }
+
+\'[a-zA-Z]\' { 
+	  yylval.lexeme = strdup(yytext);
+	  return CHAR_LITERAL;
+	}
 
 "==" { return COMP_EQU; }
 "!=" { return COMP_NEQU; }
