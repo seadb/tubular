@@ -1,2 +1,0 @@
-# Test basic math inside of a print.
-print 6 * 9;

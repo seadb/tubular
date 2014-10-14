@@ -1,3 +1,0 @@
-# We must have a variable after any comma.
-int this, is=2, fine=3;
-int but, this, is, not,;

@@ -1,7 +1,0 @@
-# Ouput from Dr. Charles Ofria's sample compiler.
-  val_copy 10 s2 
-  val_copy s2 s1 
-  out_int s1 
-  val_copy 24 s3 
-  out_int s3 
-  out_char '\n'                         # End print statements with a newline.

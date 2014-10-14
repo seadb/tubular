@@ -1,3 +1,0 @@
-# No semi-colon at the end of a line.
-int val = 42;
-val += 49

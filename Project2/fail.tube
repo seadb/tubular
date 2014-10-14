@@ -1,4 +1,0 @@
-int x = random;
-int cur_var = 15;
-cur_var2 = cur_var + 1;
-int fail = 0

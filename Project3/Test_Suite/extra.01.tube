@@ -1,3 +1,0 @@
-int a = random(6);
-int b = (a < 4) ? a + 5 : 4 + 9; 
-print a, b;

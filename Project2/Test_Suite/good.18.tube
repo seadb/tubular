@@ -1,5 +1,0 @@
-# Test out comparison operators
-int a = 5;
-int b = (a *= 2);
-print (a == b), (a != b), (a < b), (a <= b), (a > b), (a >= b);
-

@@ -1,3 +1,0 @@
-# Result of comparison is always an int - cannot be assigned to a char
-
-char a = 'a' < 'b';

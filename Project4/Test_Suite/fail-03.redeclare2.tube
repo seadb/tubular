@@ -1,7 +1,0 @@
-# You cannot redeclare a variable in the same scope even with another scope in between.
-
-int a = 20;
-{
-  int b = 10;
-}
-int a = 0;

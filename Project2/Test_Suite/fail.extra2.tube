@@ -1,3 +1,0 @@
-# Can we recognize that an undeclared variable has used in a group declaration?
-int a=1, b=2, c=3;
-int d=4, e=not_here, f=6;

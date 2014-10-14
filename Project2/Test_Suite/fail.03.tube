@@ -1,2 +1,0 @@
-# Setting a defined variable = to nothing.
-int my_var =;

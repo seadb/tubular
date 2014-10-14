@@ -1,4 +1,0 @@
-{ int abc = 5; print abc; }
-int abc = 7;
-print abc;
-

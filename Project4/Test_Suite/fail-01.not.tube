@@ -1,3 +1,0 @@
-# NOT can only be used if there's a proper expression following.
-
-int a = !;

@@ -1,7 +1,0 @@
-# A basic test of "if"
-
-int a = 10;
-if (a < 20) a += 15;
-if (a < 20) a += 15;
-
-print a; # 25

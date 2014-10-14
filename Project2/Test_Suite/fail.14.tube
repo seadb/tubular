@@ -1,4 +1,0 @@
-# Re-using a variable name.
-int cur_var = 25;
-int cur_var2 = 26;
-int cur_var = cur_var2;

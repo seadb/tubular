@@ -1,2 +1,0 @@
-# Multiple statements on the same line (including a print!)
-int a = 1; int b = 3; print a+b;

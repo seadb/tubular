@@ -1,2 +1,0 @@
-# We should not also have commas before variable ID's in a declaration
-int , bad, bad, bad;

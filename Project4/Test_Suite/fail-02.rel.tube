@@ -1,5 +1,0 @@
-# Types must match when comparing variables.
-
-int abc = 92;
-char def = 'a';
-print abc == def;

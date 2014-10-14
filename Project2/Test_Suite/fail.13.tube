@@ -1,3 +1,0 @@
-# Using an un-declared variable.
-int cur_var = 25;
-cur_var2 = cur_var + 1;

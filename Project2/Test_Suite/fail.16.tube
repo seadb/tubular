@@ -1,2 +1,0 @@
-# Trying to do a compound assignment on a newly created variable
-int doubleme *= 2;

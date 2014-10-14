@@ -1,3 +1,0 @@
-# Test printing a variable followed by an integer.
-int b = 10;
-print b, 24;

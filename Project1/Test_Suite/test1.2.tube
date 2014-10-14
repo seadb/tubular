@@ -1,5 +1,0 @@
-int test_num = 3 * (7 + 12);  # This is my comment.
-test_num *= 3;
-# The next line intentionally left blank!;
-
-print test_num;

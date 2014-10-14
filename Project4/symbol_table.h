@@ -75,7 +75,10 @@ private:
   // Figure out the next memory position to use. Ideally, we should recycle these!
 
 public:
-  symbolTables() : next_var_id(1), next_label_id(0), scope(-1) { ; }
+  symbolTables() : next_var_id(1), next_label_id(0), scope(0) {
+    tables.push_back(new symbolTable(this)) ;
+    tables.back()->SetVisible(true);
+  }
   ~symbolTables() { ; }
   int GetNextID() { return next_var_id++; }
 
@@ -86,14 +89,18 @@ public:
 symbolTable * current() { return tables[scope];}
 
   void AddTable() {
-    tables.push_back(new symbolTable(this));
+    tables.push_back(new symbolTable(this));//doesnt use scope as the index
+    tables.back()->SetVisible(true);
+    //std::vector<symbolTable*>::iterator it = tables.begin();
+    //tables.insert(it+scope, new symbolTable(this));
     scope +=1;
     }
 
   void PopTable() {
-    discarded.push_back(tables[scope]);
-    tables.pop_back();
-    scope -=1;
+    tables.back()->SetVisible(false);
+    //discarded.push_back(tables[scope]);
+    //tables.pop_back();
+   // scope -=1;
   }
 
   int NextLabelID() { return next_label_id++; }
@@ -108,7 +115,7 @@ symbolTable * current() { return tables[scope];}
   // Lookup will find an entry and return it.
   // If that entry is not in the table, it will return NULL
   tableEntry * Lookup(std::string in_name) {
-    for(int i = scope - 1; i >= 0; i--) {
+    for(int i = scope ; i >= 0; i--) {
       tableEntry * result = tables[i]->Lookup(in_name);
       if(tables[i]->Visible() && result != 0) {
         return result;

@@ -1,5 +1,0 @@
-# Test out boolean operators
-int a = 5;
-int b = (a *= 2);
-print (a == b) && (a != b) && (a < b) && (a <= b) && (a > b) && (a >= b);
-print (a == b) || (a != b) || (a < b) || (a <= b) || (a > b) || (a >= b);

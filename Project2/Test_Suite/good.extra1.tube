@@ -1,2 +1,0 @@
-# Can we declare multiple variables on a line?
-int a, b, c;

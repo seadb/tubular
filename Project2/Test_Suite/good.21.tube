@@ -1,4 +1,0 @@
-# Make sure more complex comparisons can be saved to variables
-int a = 5;
-int b = (a *= 2);
-int c = (a == b) || ((a != b) && (a > b));

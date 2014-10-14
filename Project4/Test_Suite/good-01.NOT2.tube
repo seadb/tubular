@@ -1,4 +1,0 @@
-# Make sure NOT can handle values other than 0 or 1
-
-print !7;  # Should print 0
-

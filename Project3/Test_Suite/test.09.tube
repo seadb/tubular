@@ -1,6 +1,0 @@
-# Test compound operators in a chain.
-int a = 10;
-int b = 20;
-a *= b -= 5;
-print a;
-print b;
