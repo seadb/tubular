@@ -111,7 +111,7 @@ public:
     tables.back()->SetVisible(false);
     //discarded.push_back(tables[scope]);
     //tables.pop_back();
-    scope -=1;
+   // scope -=1;
   }
 
   int NextLabelID() { return next_label_id++; }

@@ -3,3 +3,7 @@ int a;
   a = 5;
 }
 
+int var = !0;
+int a = var;
+int test = !3;
+print a;

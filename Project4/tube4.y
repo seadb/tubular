@@ -25,14 +25,14 @@ void yyerror(std::string err_string) {
   ASTNode * ast_node;
 }
 
-%token<lexeme> ID INT_LITERAL TYPE
+%token<lexeme> ID INT_LITERAL TYPE_INT TYPE_CHAR IF
 %token<lexeme> COMMAND_PRINT COMMAND_RANDOM
 %token<lexeme> COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE
 %token<lexeme> BOOL_AND BOOL_OR
 %token<lexeme> ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %type<ast_node> statement_list statement block declare declare_assign//
 variable expression assignment operation compare literal negative//
-command parameters if open close//
+command parameters if open close not type//
 
 
 %right '=' ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
@@ -42,7 +42,7 @@ command parameters if open close//
 %nonassoc COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE
 %left '+' '-'
 %left '*' '/' '%'
-%nonassoc UMINUS
+%nonassoc UMINUS NOT
 %left OPEN_BRACE CLOSE_BRACE
 
 %%
@@ -85,10 +85,11 @@ statement:      declare  ';'      { $$ = $1; }
         |       if          ';'       { $$ = $1; }
         |       block           { $$ = $1; symbol_tables.AddTable(); }
 
-if:   'if(' expression ')' {
+if:     IF expression {
+		;
   }
 
-declare:  TYPE ID {
+declare:  type ID {
 
     if (symbol_tables.Lookup($2) != 0) {
       std::string err_string = "redeclaration of variable '";
@@ -102,12 +103,16 @@ declare:  TYPE ID {
 
     }
 
+type:		TYPE_INT { }
+	|	TYPE_CHAR { }
+
 declare_assign:  declare '=' expression {
                   $$ = new ASTNode_Assign($1, $3);
                 }
 
 expression:     literal { $$ = $1; }
           |     negative { $$ = $1; }
+	  |	not { $$ = $1; }
           |     variable { $$ = $1; }
           |     operation { $$ = $1; }
           |     compare { $$ = $1; }
@@ -120,7 +125,10 @@ literal:        INT_LITERAL {
 negative:       '-' expression %prec UMINUS {
                   $$ = new ASTNode_Negation($2);
                 }
-;
+
+not:		'!' expression %prec NOT {
+		  $$ = new ASTNode_Not($2);
+		}
 
 variable:      ID {
         tableEntry * entry = symbol_tables.Lookup($1);

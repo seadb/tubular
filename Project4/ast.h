@@ -271,6 +271,30 @@ public:
   }
 };
 
+class ASTNode_Not : public ASTNode {
+public:
+  ASTNode_Not(ASTNode * in) {
+    children.push_back(in);
+  }
+  ~ASTNode_Not() { ; }
+
+  tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+    tableEntry * in_var = children[0]->CompileTubeIC(tables, out);
+    tableEntry * out_var = tables.AddTempEntry();
+
+    const int i = in_var->GetVarID();
+    const int o = out_var->GetVarID();
+
+    out << "test_equ s" << i << " 0 s" << o << std::endl;
+
+    return out_var;
+  }
+
+  std::string GetName() {
+    return "ASTNode_Not";
+  }
+};
+
 class ASTNode_Comparison : public ASTNode {
 protected:
   std::string comp_op;
@@ -341,7 +365,10 @@ public:
 
     // Determine the correct operation...
     if (log_op == "&&") {
-      out << "mult s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+      out << "test_nequ s" << i1 << " 0 s" << o3 << std::endl;
+      out << "jump_if_0 s" << o3 << " and" << o3 << std::endl;
+      out << "test_nequ s" << i2 << " 0 s" << o3 << std::endl;
+      out << "and" << o3 << ":" << std::endl;
     } else if (log_op == "||") {
       out << "test_nequ s" << i1 << " 0 s" << o3 << std::endl;
       out << "jump_if_n0 s" << o3 << " or" << o3 << std::endl;
