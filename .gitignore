@@ -1,18 +1,10 @@
 # Specific Files
 ################
 tube4
-<<<<<<< HEAD
 out.tic
 *~
 *.map
 ss.js
-=======
-*~
-*.map
-ss.js
-out.tic
-AST_Example/*
->>>>>>> 4364925
 Project1/
 Project2/
 Project3/
@@ -20,10 +12,7 @@ Project3/
 # Text Editor Backups #
 ###########################
 ~*
-<<<<<<< HEAD
 *.swp
-=======
->>>>>>> 4364925
 
 # Compiled source #
 ###################
@@ -36,10 +25,6 @@ Project3/
 *.tab.cc
 *.tab.hh
 *.yy.cc
-<<<<<<< HEAD
-=======
-*.swp
->>>>>>> 4364925
 
 # Packages #
 ############
