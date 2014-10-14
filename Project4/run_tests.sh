@@ -4,6 +4,9 @@
 # It will then test tube1 against the reference_implementation for
 # each tube file in the test-suite
 project=tube4
+chmod a+x Test_Suite/reference_$project
+chmod a+x Test_Suite/TubeIC
+
 make clean
 make
 if [ ! -f $project ]; then 
@@ -24,6 +27,9 @@ function run_error_test {
     if [ $result -ne 0 ]; then
 	echo $1 "failed different error messages";
 	rm $project.tic;
+	if [ -e ref.tic ] ; then 
+		rm ref.tic;
+	fi
 	return 1;
     fi;
 
@@ -40,6 +46,8 @@ function run_error_test {
 	    else
 		echo $1 "passed";
 	    fi;
+    else 
+    	echo $1 "passed";
     fi
 
 }
