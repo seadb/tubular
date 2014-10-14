@@ -1,0 +1,6 @@
+int i = 0;
+for (;;) {
+  print i;
+  if (i  == 8) break;
+  i += 1;
+}
