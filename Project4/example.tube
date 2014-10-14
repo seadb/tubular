@@ -1,4 +1,4 @@
-int var = 0;
-{
-  var = 3;
-}
+int var = !0;
+int a = var;
+int test = !3;
+print a;

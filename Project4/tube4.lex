@@ -9,7 +9,7 @@ int line_num = 1;
 %}
 
 id              [a-zA-Z_][a-zA-Z0-9_]*
-ascii           [+\-*/;\(\)=,%?:]
+ascii           [+\-*/;\(\)\{\}=,%?:\!]
 
 %%
 
@@ -17,8 +17,13 @@ ascii           [+\-*/;\(\)=,%?:]
 
 "int"   { /* Types; right now, just "int" */
           yylval.lexeme = strdup(yytext); 
-	  return TYPE;
+	  return TYPE_INT;
         }
+
+"char"  { 
+	  yylval.lexeme = strdup(yytext);
+	  return TYPE_CHAR;
+	}
 
 "print" {
           yylval.lexeme = strdup(yytext); 
@@ -29,6 +34,11 @@ random  {
  	  yylval.lexeme = strdup(yytext);
 	  return COMMAND_RANDOM;
         }
+
+"if"	{ 
+	  yylval.lexeme = strdup(yytext);
+	  return IF;
+	}
 
 {id}    { /* Identifier */
           yylval.lexeme = strdup(yytext); 
