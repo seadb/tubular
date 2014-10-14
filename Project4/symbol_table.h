@@ -79,15 +79,26 @@ public:
     tables.push_back(new symbolTable(this)) ;
     tables.back()->SetVisible(true);
   }
+
   ~symbolTables() { ; }
   int GetNextID() { return next_var_id++; }
 
+  void IncreaseScope() { scope++; }
+  void DecreaseScope() { scope--; }
 
-  tableEntry * AddEntry(std::string in_name)
-	{ return current()->AddEntry(in_name, GetNextID());}
+  symbolTable * current() {
+    for(int i=scope; i >= 0; i--){
+      if(tables[scope]->Visible()){
+        return tables[scope];
+      }
+    }
+  }
 
-symbolTable * current() { return tables[scope];}
+  tableEntry * AddEntry(std::string in_name) {
+    return current()->AddEntry(in_name, GetNextID());
+  }
 
+  // Add a new symbol table for a new scope
   void AddTable() {
     tables.push_back(new symbolTable(this));//doesnt use scope as the index
     tables.back()->SetVisible(true);
@@ -95,12 +106,12 @@ symbolTable * current() { return tables[scope];}
     //tables.insert(it+scope, new symbolTable(this));
     scope +=1;
     }
-
+  // Hide the last table
   void PopTable() {
     tables.back()->SetVisible(false);
     //discarded.push_back(tables[scope]);
     //tables.pop_back();
-   // scope -=1;
+    scope -=1;
   }
 
   int NextLabelID() { return next_label_id++; }
@@ -115,13 +126,13 @@ symbolTable * current() { return tables[scope];}
   // Lookup will find an entry and return it.
   // If that entry is not in the table, it will return NULL
   tableEntry * Lookup(std::string in_name) {
-    for(int i = scope ; i >= 0; i--) {
+    for(int i = tables.size()-1 ; i >= 0; i--) {
       tableEntry * result = tables[i]->Lookup(in_name);
       if(tables[i]->Visible() && result != 0) {
         return result;
         }
     }
-	return NULL;
+    return NULL;
   }
 
   // Insert a temporary variable entry into the symbol table.
@@ -131,8 +142,13 @@ symbolTable * current() { return tables[scope];}
     return new_entry;
   }
 
-  void IncreaseScope() { scope++; }
-  void DecreaseScope() { scope--; }
+  void ShowAll(){
+    std::vector<symbolTable*>::iterator it = tables.begin();
+    for( it; it != tables.end(); it++){
+      (*it)->SetVisible(true);
+    }
+  }
+
 
 };
 

@@ -16,12 +16,12 @@ ascii           [+\-*/;\(\)=,%?:]
 #.* ; // Comment, ignore remainder of line
 
 "int"   { /* Types; right now, just "int" */
-          yylval.lexeme = strdup(yytext); 
+          yylval.lexeme = strdup(yytext);
 	  return TYPE;
         }
 
 "print" {
-          yylval.lexeme = strdup(yytext); 
+          yylval.lexeme = strdup(yytext);
 	  return COMMAND_PRINT;
         }
 
@@ -31,12 +31,12 @@ random  {
         }
 
 {id}    { /* Identifier */
-          yylval.lexeme = strdup(yytext); 
+          yylval.lexeme = strdup(yytext);
 	  return ID;
         }
 
 [0-9]+  { /* Int Literal */
-          yylval.lexeme = strdup(yytext); 
+          yylval.lexeme = strdup(yytext);
           return INT_LITERAL;
         }
 
@@ -53,6 +53,8 @@ random  {
 "*=" { return ASSIGN_MULT; }
 "/=" { return ASSIGN_DIV; }
 "%=" { return ASSIGN_MOD; }
+"{"  { return OPEN_BRACE; }
+"}"  { return CLOSE_BRACE; }
 
 {ascii} { /* Chars to return directly! */
           return yytext[0];
@@ -62,7 +64,7 @@ random  {
 
 [\n]    { /* Increment line number */
           line_num++;
-        } 
+        }
 
 .       { /* Deal with unknown token! */
           std::cout << "ERROR(line " << line_num << "): Unknown Token '"
@@ -80,7 +82,7 @@ void LexMain(int argc, char * argv[])
     std::cerr << "Format: " << argv[0] << " [filename] [filename]" << std::endl;
     exit(1);
   }
-  
+
   // The only thing left to do is assume the current argument is the filename.
   FILE *file = fopen(argv[1], "r");
   if (!file) {

@@ -14,10 +14,6 @@ std::ofstream fs;
 
 symbolTables symbol_tables;
 
-//std::vector<symbolTable> discarded_tables;
-//std::vector<symbolTable> symbol_tables;
-//int scope = 0;
-
 void yyerror(std::string err_string) {
   std::cout << "ERROR(line " << line_num << "): " << err_string << std::endl;
   exit(1);
@@ -53,6 +49,7 @@ command parameters if open close//
 
 program:        statement_list {
                   // This is always the last rule to run so $$ is the full AST
+                  symbol_tables.ShowAll();
                   $1->CompileTubeIC(symbol_tables, fs);
                   $1->DebugPrint();
                 }
@@ -62,35 +59,31 @@ statement_list:  {
     //symbol_tables.AddTable();
                   $$ = new ASTNode_Block();
                 }
-  | statement_list statement ';' {
+  | statement_list statement {
     $1->AddChild($2); // Add each statement to the block
     $$ = $1;          // Pass the block along
     }
-  | statement_list block {
-      $1->AddChild($2);
-      $$ = $1;
-    }
-
 
 
 block: open close { $$ = $1; }
 
 open:     OPEN_BRACE  statement_list {
-     symbol_tables.AddTable();
-     $$ = new ASTNode_Block ();
+    // symbol_tables.AddTable();
+     $$ = $2;
      }
 
 close:    CLOSE_BRACE {
-     symbol_tables.PopTable();
+      symbol_tables.PopTable();
      };
 
 
 
-statement:      declare        { $$ = $1; }
-        |       declare_assign { $$ = $1; }
-        |       expression         { $$ = $1; }
-        |       command            { $$ = $1; }
-        |       if                 { $$ = $1; }
+statement:      declare  ';'      { $$ = $1; }
+        |       declare_assign ';' { $$ = $1; }
+        |       expression ';'        { $$ = $1; }
+        |       command  ';'          { $$ = $1; }
+        |       if          ';'       { $$ = $1; }
+        |       block           { $$ = $1; symbol_tables.AddTable(); }
 
 if:   'if(' expression ')' {
   }
@@ -98,7 +91,7 @@ if:   'if(' expression ')' {
 declare:  TYPE ID {
 
     if (symbol_tables.Lookup($2) != 0) {
-      std::string err_string = "re-declaring variable '";
+      std::string err_string = "redeclaration of variable '";
       err_string += $2;
       err_string += "'";
       yyerror(err_string);
@@ -138,6 +131,7 @@ variable:      ID {
           yyerror(err_string);
           exit(2);
         }
+        $$ = new ASTNode_Variable(entry);
       }
 
 operation:

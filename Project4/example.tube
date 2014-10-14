@@ -1,4 +1,5 @@
-int var = 0;
+int a;
 {
-  var = 3;
+  a = 5;
 }
+
