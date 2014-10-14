@@ -55,7 +55,7 @@ public:
 
   // Debug function to help make sure the AST is being built correctly...
   void DebugPrint(int depth=0) {
-    for (int i = 0; i < depth; i++) std::cout << " ";  // Indent appropriately
+    for (int i = 0; i < depth; i++) std::cout << ".";  // Indent appropriately
     std::cout << GetName() << std::endl;               // Print this node's name
     for (int i = 0; i < (int) children.size(); i++) {  // Print all of the children
       children[i]->DebugPrint(depth+1);

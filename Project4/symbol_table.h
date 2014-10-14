@@ -75,9 +75,7 @@ private:
   // Figure out the next memory position to use. Ideally, we should recycle these!
 
 public:
-  symbolTables() : next_var_id(1), next_label_id(0), scope(0) {
-    tables.push_back(new symbolTable(this)) ;
-    tables.back()->SetVisible(true);
+  symbolTables() : next_var_id(1), next_label_id(0), scope(-1) {
   }
 
   ~symbolTables() { ; }
@@ -87,11 +85,12 @@ public:
   void DecreaseScope() { scope--; }
 
   symbolTable * current() {
-    for(int i=scope; i >= 0; i--){
-      if(tables[scope]->Visible()){
-        return tables[scope];
+    for(int i=tables.size()-1; i >= 0; i--){
+      if(tables[i]->Visible()){
+        return tables[i];
       }
     }
+    return NULL;
   }
 
   tableEntry * AddEntry(std::string in_name) {

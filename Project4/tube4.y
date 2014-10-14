@@ -51,12 +51,12 @@ program:        statement_list {
                   // This is always the last rule to run so $$ is the full AST
                   symbol_tables.ShowAll();
                   $1->CompileTubeIC(symbol_tables, fs);
-                  //$1->DebugPrint();
+                  $1->DebugPrint();
                 }
 
 statement_list:  {
                   // Start the statement list by creating a block.
-    //symbol_tables.AddTable();
+                  symbol_tables.AddTable();
                   $$ = new ASTNode_Block();
                 }
   | statement_list statement {
@@ -65,16 +65,6 @@ statement_list:  {
     }
 
 
-block: open close { $$ = $1; }
-
-open:     OPEN_BRACE  statement_list {
-    // symbol_tables.AddTable();
-     $$ = $2;
-     }
-
-close:    CLOSE_BRACE {
-      symbol_tables.PopTable();
-     };
 
 
 
@@ -83,15 +73,32 @@ statement:      declare  ';'      { $$ = $1; }
         |       expression ';'        { $$ = $1; }
         |       command  ';'          { $$ = $1; }
         |       if          ';'       { $$ = $1; }
-        |       block           { $$ = $1; symbol_tables.AddTable(); }
+        |       block           { symbol_tables.AddTable(); std::cout<< "IN BLOCK1" <<std::endl; $$ = $1; }
+
+block: open close {
+     std::cout << "IN BLOCK" << std::endl;
+     $$ = $1;
+     }
+
+open:     OPEN_BRACE  statement_list {
+    // symbol_tables.AddTable();
+    std::cout << "IN OPEN" << std::endl;
+     $$ = $2;
+     }
+
+close:    CLOSE_BRACE {
+      std::cout << "IN CLOSE" << std::endl;
+      symbol_tables.PopTable();
+     };
+
 
 if:     IF expression {
 		;
   }
 
 declare:  type ID {
-
-    if (symbol_tables.Lookup($2) != 0) {
+    std::cout << "IN DECLARE" << std::endl;
+    if (symbol_tables.current()->Lookup($2) != 0) {
       std::string err_string = "redeclaration of variable '";
       err_string += $2;
       err_string += "'";
