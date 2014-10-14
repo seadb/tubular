@@ -1,0 +1,4 @@
+# Simple type-error in assignment to variable
+
+int a = 5;
+char b = a;
