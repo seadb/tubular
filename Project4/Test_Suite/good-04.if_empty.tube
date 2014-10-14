@@ -1,0 +1,8 @@
+# No body on the if, just the else!
+
+int a = 0;
+
+if (a); else a=200;
+if (a); else a=7;
+
+print a; # 200

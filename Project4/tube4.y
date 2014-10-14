@@ -29,7 +29,7 @@ void yyerror(std::string err_string) {
   ASTNode * ast_node;
 }
 
-%token<lexeme> ID INT_LITERAL TYPE_INT TYPE_CHAR IF
+%token<lexeme> ID INT_LITERAL CHAR_LITERAL TYPE_INT TYPE_CHAR IF
 %token<lexeme> COMMAND_PRINT COMMAND_RANDOM
 %token<lexeme> COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE
 %token<lexeme> BOOL_AND BOOL_OR
@@ -54,7 +54,7 @@ command parameters if open close not type//
 program:        statement_list {
                   // This is always the last rule to run so $$ is the full AST
                   $1->CompileTubeIC(symbol_tables, fs);
-                  $1->DebugPrint();
+// 		  $1->DebugPrint();
                 }
 
 statement_list:  {
@@ -146,6 +146,7 @@ variable:      ID {
           yyerror(err_string);
           exit(2);
         }
+	$$ = new ASTNode_Variable( entry );
       }
 
 operation:
