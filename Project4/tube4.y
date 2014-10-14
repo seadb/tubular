@@ -51,7 +51,7 @@ program:        statement_list {
                   // This is always the last rule to run so $$ is the full AST
                   symbol_tables.ShowAll();
                   $1->CompileTubeIC(symbol_tables, fs);
-                  $1->DebugPrint();
+                  //$1->DebugPrint();
                 }
 
 statement_list:  {
