@@ -66,8 +66,7 @@ bool check_type_char(ASTNode* lhs_in, ASTNode * rhs_in) {
 %token<lexeme> ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %type<ast_node> statement_list statement block declare declare_assign//
 variable expression assignment operation compare literal negative//
-command parameters if open close not //
-
+command parameters if not //
 
 %right '=' ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %right '?' ':'
@@ -91,41 +90,61 @@ program:        statement_list {
 statement_list:  {
                   // Start the statement list by creating a block.
                   symbol_tables.AddTable();
+                 // symbol_tables.HideTable();
                   $$ = new ASTNode_Block();
+                  std::cout << "IN STATEMENT_LIST 1" << std::endl;
                 }
   | statement_list statement {
     $1->AddChild($2); // Add each statement to the block
     $$ = $1;          // Pass the block along
     }
 
-
-
-
-
-statement:      declare  ';'      { $$ = $1; }
+statement:
+                block {
+                  std::cout<< "IN BLOCK1" <<std::endl;
+                  //ASTNode * b = new ASTNode_Block();
+                  //b->AddChild($3);
+                  $$ = $1;
+                }
+        |       declare  ';'      { $$ = $1; }
         |       declare_assign ';' { $$ = $1; }
         |       expression ';'        { $$ = $1; }
         |       command  ';'          { $$ = $1; }
         |       if          ';'       { $$ = $1; }
-        |       block           { symbol_tables.AddTable(); $$ = $1; }
 
-block: open close {
-     //std::cout << "IN BLOCK" << std::endl;
-     $$ = $1;
-     }
+block: OPEN_BRACE {
+        std::cout << "IN OPEN" << std::endl;
+        symbol_tables.AddTable();
+    }
+    statement_list {
+                  std::cout<< "IN STATEMENT LIST" << std::endl;
+                  ASTNode * b = new ASTNode_Block();
+                  b->AddChild($3);
+                  $<ast_node>$ = b;
+   }
+   CLOSE_BRACE {
+        std::cout<< "IN CLOSE" << std::endl;
+        symbol_tables.HideTable();
+        $$ = $<ast_node>4;
+    }
 
-open:     OPEN_BRACE  statement_list {
-    // symbol_tables.AddTable();
-    // std::cout << "IN OPEN" << std::endl;
-     $$ = $2;
-     }
 
-close:    CLOSE_BRACE {
-     // std::cout << "IN CLOSE" << std::endl;
-      symbol_tables.PopTable();
+/*block:
+      open statement_list close {
+        $$ = $2;
+        }
+
+ open:   '{' {
+        //$$ = $1;
+        std::cout << "IN OPEN" << std::endl;
+        symbol_tables.AddTable();
+    }
+
+close:   '}'  {
+      std::cout << "IN CLOSE" << std::endl;
+      symbol_tables.HideTable();
      };
-
-
+*/
 if:     IF expression {
 		;
   }
