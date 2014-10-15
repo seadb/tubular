@@ -33,6 +33,9 @@ public:
 
 class symbolTables;
 
+
+
+
 // The symbolTable allows easy lookup of tableEntry objects.
 class symbolTable {
 private:
@@ -111,7 +114,7 @@ public:
     tables.back()->SetVisible(false);
     //discarded.push_back(tables[scope]);
     //tables.pop_back();
-    scope -=1;
+    //scope -=1;
   }
 
   int NextLabelID() { return next_label_id++; }
