@@ -5,6 +5,9 @@
 #include <ostream>
 #include <string>
 #include <vector>
+#include <string>
+#include <sstream>
+using namespace std;
 
 #include "symbol_table.h"
 
@@ -513,13 +516,44 @@ public:
     out << "test_nequ s" << i1 << " 0 s" << o4 << std::endl;
     out << "jump_if_0 s" << o4 << " while_end" << o4 << std::endl;
 
+    stringstream ss;
+    ss << "while_end" << o4;
+    tables.breaks.push_back(ss.str());
+
     tableEntry * in_var2 = children[1]->CompileTubeIC(tables, out);
+
+    if(tables.breaks.size() > 0)
+    tables.breaks.pop_back();
 
     out << "jump while_begin" << o4 << endl;
 
     out << "while_end" << o4 << ":" << std::endl;
 
     return out_var;
+  }
+
+  std::string GetName() {
+    return "ASTNode_Conditional";
+  }
+};
+
+class ASTNode_Break : public ASTNode {
+public:
+  ASTNode_Break() {
+  }
+  std::string GetType() { ; }
+  ~ASTNode_Break() { ; }
+
+  tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+    if(tables.breaks.size() > 0) {
+      out << "jump " << tables.breaks.back() << endl;
+      //breaks.pop_back();
+    }
+    else {
+      cerr << "INTERNAL COMPILER ERROR: bad usage of break" << endl;
+    }
+
+    return NULL;
   }
 
   std::string GetName() {

@@ -187,6 +187,7 @@ expression:     literal { $$ = $1; }
           |     operation { $$ = $1; }
           |     compare { $$ = $1; }
           |     assignment { $$ = $1; }
+          |     BREAK     { $$ = new ASTNode_Break(); }
 
 literal:        INT_LITERAL {
                   $$ = new ASTNode_Literal($1, "int");

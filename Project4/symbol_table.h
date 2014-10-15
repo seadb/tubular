@@ -85,6 +85,8 @@ public:
   ~symbolTables() { ; }
   int GetNextID() { return next_var_id++; }
 
+  vector<string> breaks;
+
   symbolTable * current() {
     for(int i=tables.size()-1; i >= 0; i--){
       if(tables[i]->Visible()){
