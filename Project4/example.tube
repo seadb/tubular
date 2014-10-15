@@ -1,7 +1,8 @@
-int a;
+int m;
 
 {
-  int b;
+  int m;
 }
 
-a=5;
+m=5;
+

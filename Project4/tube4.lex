@@ -9,7 +9,7 @@ int line_num = 1;
 %}
 
 id              [a-zA-Z_][a-zA-Z0-9_]*
-ascii           [\'+\-*/;\(\)\{\}=,%?:\!]
+ascii           [+\-*/;\(\)\{\}=,%?:\!]
 
 %%
 
@@ -23,6 +23,18 @@ ascii           [\'+\-*/;\(\)\{\}=,%?:\!]
 "char"  {
 	  yylval.lexeme = strdup(yytext);
 	  return TYPE_CHAR;
+	}
+
+"else"  { yylval.lexeme = strdup(yytext);
+	  return ELSE;
+	}
+
+"while" { yylval.lexeme = strdup(yytext);
+	  return WHILE;
+	}
+
+"break" { yylval.lexeme = strdup(yytext);
+	  return BREAK;
 	}
 
 "print" {
@@ -50,10 +62,26 @@ random  {
           return INT_LITERAL;
         }
 
-\'[a-zA-Z\t\n\']\' {
+'[\40-\176]' {
 	  yylval.lexeme = strdup(yytext);
 	  return CHAR_LITERAL;
 	}
+'\\n' {
+          yylval.lexeme = strdup(yytext);
+          return CHAR_LITERAL_NEWLINE;
+        }
+'\\t' {
+          yylval.lexeme = strdup(yytext);
+          return CHAR_LITERAL_TAB;
+        }
+'\\'' {
+          yylval.lexeme = strdup(yytext);
+          return CHAR_LITERAL_QUOTE;
+        }
+'\\\\' {
+          yylval.lexeme = strdup(yytext);
+          return CHAR_LITERAL_BACKSLASH;
+        }
 
 "==" { return COMP_EQU; }
 "!=" { return COMP_NEQU; }

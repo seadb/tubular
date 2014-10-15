@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
@@ -15,13 +16,13 @@ class tableEntry {
 protected:
   std::string name;       // Variable name used by sourcecode.
   int var_id;        // What is the intermediate code ID for this variable?
-  //std::string type;
+  std::string type;
   // NOTE: This is also where you want to track other var info like
   //       type, line it was declared on, array status, etc.
 
 public:
   tableEntry() : name(""), var_id(-1) { ; }
-  tableEntry(const std::string & in_name) : name(in_name), var_id(-1) { ; }
+  tableEntry(const std::string & in_name, const std::string & in_type) : name(in_name), var_id(-1), type(in_type) { ; }
   ~tableEntry() { ; }
 
   const std::string & GetName() const { return name; }
@@ -29,6 +30,7 @@ public:
 
   void SetName(std::string in_name) { name = in_name; }
   void SetVarID(int in_id) { var_id = in_id; }
+  const std::string & GetType() const { return type; }
 };
 
 class symbolTables;
@@ -59,8 +61,8 @@ public:
   }
 
   // Insert an entry into the symbol table.
-  tableEntry * AddEntry(std::string in_name, int next_var_id){
-    tableEntry * new_entry = new tableEntry(in_name);
+  tableEntry * AddEntry(std::string in_name, int next_var_id, std::string in_type) {
+    tableEntry * new_entry = new tableEntry(in_name, in_type);
     new_entry->SetVarID( next_var_id );
     tbl_map[in_name] = new_entry;
     return new_entry;
@@ -80,13 +82,11 @@ private:
 
 public:
   symbolTables() : next_var_id(1), next_label_id(0), scope(-1) {
+      AddTable();
   }
 
   ~symbolTables() { ; }
   int GetNextID() { return next_var_id++; }
-
-  void IncreaseScope() { scope++; }
-  void DecreaseScope() { scope--; }
 
   symbolTable * current() {
     for(int i=tables.size()-1; i >= 0; i--){
@@ -97,24 +97,26 @@ public:
     return NULL;
   }
 
-  tableEntry * AddEntry(std::string in_name) {
-    return current()->AddEntry(in_name, GetNextID());
+  tableEntry * AddEntry(std::string in_name, std::string in_type) {
+    return current()->AddEntry(in_name, GetNextID(), in_type);
   }
 
   // Add a new symbol table for a new scope
   void AddTable() {
     tables.push_back(new symbolTable(this));//doesnt use scope as the index
     tables.back()->SetVisible(true);
+    //cout << "push back" << scope << endl;
     //std::vector<symbolTable*>::iterator it = tables.begin();
     //tables.insert(it+scope, new symbolTable(this));
     scope +=1;
     }
   // Hide the last table
   void HideTable() {
-    tables.back()->SetVisible(false);
+    //tables.back()->SetVisible(false);
     //discarded.push_back(tables[scope]);
-    //tables.pop_back();
-    //scope -=1;
+    //std::cout << "pop" << scope << endl;
+    tables.pop_back();
+    scope -=1;
   }
 
   int NextLabelID() { return next_label_id++; }

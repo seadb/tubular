@@ -32,6 +32,7 @@ public:
   }
 
   // Accessors
+  virtual std::string GetType() = 0;
   int GetLineNum() const { return line_num; }
   ASTNode * GetChild(int id) { return children[id]; }
   unsigned int GetNumChildren() const { return children.size(); }
@@ -68,6 +69,7 @@ public:
 class ASTNode_Temp : public ASTNode {
 public:
   ASTNode_Temp() { ; }
+  std::string GetType() { ; }
   tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
     std::cerr << "Internal Compiler Error: Trying to run CompileTubeIC on a temporary node!!" << std::endl;
     return NULL;
@@ -80,6 +82,7 @@ public:
 class ASTNode_Block : public ASTNode {
 public:
   ASTNode_Block() { ; }
+  std::string GetType() { ; }
   tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
     // Compile the code for each sub-tree in this block
     for (int i = 0; i < (int) children.size(); i++) {
@@ -107,18 +110,27 @@ public:
     out_string += ")";
     return out_string;
   }
+
+  std::string GetType() {
+    return var_entry->GetType();
+  }
 };
 
 class ASTNode_Literal : public ASTNode {
 private:
   std::string lexeme;
+  std::string type;
 public:
-  ASTNode_Literal(std::string in_lex) : lexeme(in_lex) { ; }
+  ASTNode_Literal(std::string in_lex, std::string in_type) : lexeme(in_lex), type(in_type) { ; }
 
   tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
     tableEntry * out_var = tables.AddTempEntry();
     out << "val_copy " << lexeme << " s" << out_var->GetVarID() << std::endl;
     return out_var;
+  }
+
+  std::string GetType() {
+	return type; 
   }
 
   std::string GetName() {
@@ -127,6 +139,7 @@ public:
     out_string += ")";
     return out_string;
   }
+
 };
 
 // Math...
@@ -138,16 +151,16 @@ public:
     children.push_back(rhs);
   }
 
+  std::string GetType() { ; }
   ~ASTNode_Assign() { ; }
 
   tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
     tableEntry * lhs_var = children[0]->CompileTubeIC(tables, out);
     tableEntry * rhs_var = children[1]->CompileTubeIC(tables, out);
 
-    out << "val_copy s" <<  rhs_var->GetVarID() << " s" << lhs_var->GetVarID() << std::endl;
-
-    return lhs_var;
-  }
+    	out << "val_copy s" <<  rhs_var->GetVarID() << " s" << lhs_var->GetVarID() << std::endl;
+    	return lhs_var;
+    }
 
   std::string GetName() { return "ASTNode_Assign (operator=)"; }
 };
@@ -161,6 +174,7 @@ public:
     children.push_back(rhs);
     math_op = op;
   }
+  std::string GetType() { ; }
 
   ~ASTNode_MathAssign() { ; }
 
@@ -207,6 +221,7 @@ public:
     children.push_back(in1);
     children.push_back(in2);
   }
+  std::string GetType() { ; }
   ~ASTNode_Math2() { ; }
 
   tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
@@ -251,6 +266,7 @@ public:
   ASTNode_Negation(ASTNode * in) {
     children.push_back(in);
   }
+  std::string GetType() { ; }
   ~ASTNode_Negation() { ; }
 
   tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
@@ -276,6 +292,7 @@ public:
   ASTNode_Not(ASTNode * in) {
     children.push_back(in);
   }
+  std::string GetType() { ; }
   ~ASTNode_Not() { ; }
 
   tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
@@ -303,6 +320,7 @@ public:
     children.push_back(in1);
     children.push_back(in2);
   }
+  std::string GetType() { ; }
   ~ASTNode_Comparison() { ; }
 
   tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
@@ -352,6 +370,7 @@ public:
     children.push_back(in1);
     children.push_back(in2);
   }
+  std::string GetType() { ; }
   ~ASTNode_Logical() { ; }
 
   tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
@@ -402,6 +421,7 @@ public:
     children.push_back(in2);
     children.push_back(in3);
   }
+  std::string GetType() { ; }
   ~ASTNode_Conditional() { ; }
 
   tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
@@ -440,12 +460,17 @@ class ASTNode_Print : public ASTNode {
 public:
   ASTNode_Print() { ; }
   virtual ~ASTNode_Print() { ; }
+  std::string GetType() { ; }
 
   virtual tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out)
   {
     for (int i = 0; i < (int) children.size(); i++) {
       tableEntry * in_var = children[i]->CompileTubeIC(tables, out);
-      out << "out_int s" << in_var->GetVarID() << std::endl;
+      if (in_var->GetType() == "int") {
+      	out << "out_int s" << in_var->GetVarID() << std::endl;
+      } else if (in_var->GetType() == "char") {
+	out << "out_char s" << in_var->GetVarID() << std::endl;
+      }
     }
     out << "out_char '\\n'" << std::endl;
 
@@ -458,6 +483,7 @@ public:
   ASTNode_Random(ASTNode * in) {
     children.push_back(in);
   }
+  std::string GetType() { ; }
 
   ~ASTNode_Random() { ; }
 
