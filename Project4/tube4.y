@@ -66,7 +66,7 @@ bool check_type_char(ASTNode* lhs_in, ASTNode * rhs_in) {
 %token<lexeme> ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %type<ast_node> statement_list statement block declare declare_assign//
 variable expression assignment operation compare literal negative//
-command parameters if not //
+command parameters if if_block not //
 
 %right '=' ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %right '?' ':'
@@ -83,7 +83,9 @@ command parameters if not //
 program:        statement_list {
                   // This is always the last rule to run so $$ is the full AST
                   symbol_tables.ShowAll();
+                  //cout << "before";
                   $1->CompileTubeIC(symbol_tables, fs);
+                  //cout << "after";
 	          //$1->DebugPrint();
                 }
 
@@ -111,6 +113,7 @@ statement:
         |       expression ';'        { $$ = $1; }
         |       command  ';'          { $$ = $1; }
         |       if          ';'       { $$ = $1; }
+        |       if_block              { $$ = $1; }
 
 block: OPEN_BRACE {
         //std::cout << "IN OPEN" << std::endl;
@@ -128,26 +131,8 @@ block: OPEN_BRACE {
         $$ = $<ast_node>4;
     }
 
-
-/*block:
-      open statement_list close {
-        $$ = $2;
-        }
-
- open:   '{' {
-        //$$ = $1;
-        std::cout << "IN OPEN" << std::endl;
-        symbol_tables.AddTable();
-    }
-
-close:   '}'  {
-      std::cout << "IN CLOSE" << std::endl;
-      symbol_tables.HideTable();
-     };
-*/
-if:     IF expression {
-		;
-  }
+if:         IF '(' expression ')' expression { $$ = new ASTNode_If($3, $5); }
+if_block:   IF '(' expression ')' block { $$ = new ASTNode_If($3, $5); }
 
 declare:  TYPE_INT ID {
     //std::cout << "IN DECLARE" << std::endl;
@@ -192,7 +177,7 @@ declare_assign:  declare '=' expression {
 
 expression:     literal { $$ = $1; }
           |     negative { $$ = $1; }
-	  |	not { $$ = $1; }
+    	  |	    not { $$ = $1; }
           |     variable { $$ = $1; }
           |     operation { $$ = $1; }
           |     compare { $$ = $1; }
