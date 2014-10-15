@@ -50,7 +50,7 @@ random  {
           return INT_LITERAL;
         }
 
-\'[a-zA-Z]\' { 
+\'[a-zA-Z\t\n\']\' {
 	  yylval.lexeme = strdup(yytext);
 	  return CHAR_LITERAL;
 	}

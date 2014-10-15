@@ -15,6 +15,7 @@ class tableEntry {
 protected:
   std::string name;       // Variable name used by sourcecode.
   int var_id;        // What is the intermediate code ID for this variable?
+  //std::string type;
   // NOTE: This is also where you want to track other var info like
   //       type, line it was declared on, array status, etc.
 
@@ -106,11 +107,11 @@ public:
     scope +=1;
     }
   // Hide the last table
-  void PopTable() {
+  void HideTable() {
     tables.back()->SetVisible(false);
     //discarded.push_back(tables[scope]);
     //tables.pop_back();
-   // scope -=1;
+    scope -=1;
   }
 
   int NextLabelID() { return next_label_id++; }
