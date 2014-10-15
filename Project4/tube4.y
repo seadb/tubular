@@ -66,7 +66,7 @@ bool check_type_char(ASTNode* lhs_in, ASTNode * rhs_in) {
 %token<lexeme> ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %type<ast_node> statement_list statement block declare declare_assign//
 variable expression assignment operation compare literal negative//
-command parameters if if_block not //
+command parameters if if_block while while_block not //
 
 %right '=' ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %right '?' ':'
@@ -114,6 +114,8 @@ statement:
         |       command  ';'          { $$ = $1; }
         |       if          ';'       { $$ = $1; }
         |       if_block              { $$ = $1; }
+        |       while ';'             { $$ = $1; }
+        |       while_block           { $$ = $1; }
 
 block: OPEN_BRACE {
         //std::cout << "IN OPEN" << std::endl;
@@ -133,6 +135,9 @@ block: OPEN_BRACE {
 
 if:         IF '(' expression ')' expression { $$ = new ASTNode_If($3, $5); }
 if_block:   IF '(' expression ')' block { $$ = new ASTNode_If($3, $5); }
+
+while: WHILE '(' expression ')' expression { $$ = new ASTNode_While($3, $5); }
+while_block: WHILE '(' expression ')' block { $$ = new ASTNode_While($3, $5); }
 
 declare:  TYPE_INT ID {
     //std::cout << "IN DECLARE" << std::endl;

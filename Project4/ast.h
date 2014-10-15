@@ -492,6 +492,41 @@ public:
   }
 };
 
+class ASTNode_While : public ASTNode {
+public:
+  ASTNode_While(ASTNode * in1, ASTNode * in2) {
+    children.push_back(in1);
+    children.push_back(in2);
+  }
+  std::string GetType() { ; }
+  ~ASTNode_While() { ; }
+
+  tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+    tableEntry * out_var = tables.AddTempEntry();
+    const int o4 = out_var->GetVarID();
+
+    out << "while_begin" << o4 << ":" << endl;
+
+    tableEntry * in_var1 = children[0]->CompileTubeIC(tables, out);
+    const int i1 = in_var1->GetVarID();
+
+    out << "test_nequ s" << i1 << " 0 s" << o4 << std::endl;
+    out << "jump_if_0 s" << o4 << " while_end" << o4 << std::endl;
+
+    tableEntry * in_var2 = children[1]->CompileTubeIC(tables, out);
+
+    out << "jump while_begin" << o4 << endl;
+
+    out << "while_end" << o4 << ":" << std::endl;
+
+    return out_var;
+  }
+
+  std::string GetName() {
+    return "ASTNode_Conditional";
+  }
+};
+
 class ASTNode_Print : public ASTNode {
 public:
   ASTNode_Print() { ; }
