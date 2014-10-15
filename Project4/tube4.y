@@ -84,15 +84,15 @@ program:        statement_list {
                   // This is always the last rule to run so $$ is the full AST
                   symbol_tables.ShowAll();
                   $1->CompileTubeIC(symbol_tables, fs);
-	          $1->DebugPrint();
+	          //$1->DebugPrint();
                 }
 
 statement_list:  {
                   // Start the statement list by creating a block.
-                  symbol_tables.AddTable();
+                  //symbol_tables.AddTable();
                  // symbol_tables.HideTable();
                   $$ = new ASTNode_Block();
-                  std::cout << "IN STATEMENT_LIST 1" << std::endl;
+                  //std::cout << "IN STATEMENT_LIST 1" << std::endl;
                 }
   | statement_list statement {
     $1->AddChild($2); // Add each statement to the block
@@ -101,7 +101,7 @@ statement_list:  {
 
 statement:
                 block {
-                  std::cout<< "IN BLOCK1" <<std::endl;
+                  //std::cout<< "IN BLOCK1" <<std::endl;
                   //ASTNode * b = new ASTNode_Block();
                   //b->AddChild($3);
                   $$ = $1;
@@ -113,17 +113,17 @@ statement:
         |       if          ';'       { $$ = $1; }
 
 block: OPEN_BRACE {
-        std::cout << "IN OPEN" << std::endl;
+        //std::cout << "IN OPEN" << std::endl;
         symbol_tables.AddTable();
     }
     statement_list {
-                  std::cout<< "IN STATEMENT LIST" << std::endl;
+                  //std::cout<< "IN STATEMENT LIST" << std::endl;
                   ASTNode * b = new ASTNode_Block();
                   b->AddChild($3);
                   $<ast_node>$ = b;
    }
    CLOSE_BRACE {
-        std::cout<< "IN CLOSE" << std::endl;
+        //std::cout<< "IN CLOSE" << std::endl;
         symbol_tables.HideTable();
         $$ = $<ast_node>4;
     }

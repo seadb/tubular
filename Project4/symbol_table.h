@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
@@ -78,13 +79,11 @@ private:
 
 public:
   symbolTables() : next_var_id(1), next_label_id(0), scope(-1) {
+      AddTable();
   }
 
   ~symbolTables() { ; }
   int GetNextID() { return next_var_id++; }
-
-  void IncreaseScope() { scope++; }
-  void DecreaseScope() { scope--; }
 
   symbolTable * current() {
     for(int i=tables.size()-1; i >= 0; i--){
@@ -103,15 +102,17 @@ public:
   void AddTable() {
     tables.push_back(new symbolTable(this));//doesnt use scope as the index
     tables.back()->SetVisible(true);
+    //cout << "push back" << scope << endl;
     //std::vector<symbolTable*>::iterator it = tables.begin();
     //tables.insert(it+scope, new symbolTable(this));
     scope +=1;
     }
   // Hide the last table
   void HideTable() {
-    tables.back()->SetVisible(false);
+    //tables.back()->SetVisible(false);
     //discarded.push_back(tables[scope]);
-    //tables.pop_back();
+    //std::cout << "pop" << scope << endl;
+    tables.pop_back();
     scope -=1;
   }
 
