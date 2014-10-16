@@ -93,8 +93,9 @@ statement_list:  {
                   // Start the statement list by creating a block.
                   //symbol_tables.AddTable();
                  // symbol_tables.HideTable();
+                  symbol_tables.AddTable();
                   $$ = new ASTNode_Block();
-                  //std::cout << "IN STATEMENT_LIST 1" << std::endl;
+ //               std::cout << "IN STATEMENT_LIST 1" << std::endl;
                 }
   | statement_list statement {
     $1->AddChild($2); // Add each statement to the block
@@ -103,7 +104,7 @@ statement_list:  {
 
 statement:
                 block {
-                  //std::cout<< "IN BLOCK1" <<std::endl;
+ //                std::cout<< "IN BLOCK1" <<std::endl;
                   //ASTNode * b = new ASTNode_Block();
                   //b->AddChild($3);
                   $$ = $1;
@@ -118,18 +119,19 @@ statement:
         |       while_block           { $$ = $1; }
 
 block: OPEN_BRACE {
-        //std::cout << "IN OPEN" << std::endl;
-        symbol_tables.AddTable();
+    //    std::cout << "IN OPEN" << std::endl;
+        //symbol_tables.AddTable();
     }
     statement_list {
-                  //std::cout<< "IN STATEMENT LIST" << std::endl;
+     //             std::cout<< "IN MIDDLE STATEMENT LIST" << std::endl;
                   ASTNode * b = new ASTNode_Block();
                   b->AddChild($3);
                   $<ast_node>$ = b;
+                 symbol_tables.HideTable();
    }
    CLOSE_BRACE {
-        //std::cout<< "IN CLOSE" << std::endl;
-        symbol_tables.HideTable();
+       // std::cout<< "IN CLOSE" << std::endl;
+        //symbol_tables.HideTable();
         $$ = $<ast_node>4;
     }
 
@@ -140,7 +142,7 @@ while: WHILE '(' expression ')' expression { $$ = new ASTNode_While($3, $5); }
 while_block: WHILE '(' expression ')' block { $$ = new ASTNode_While($3, $5); }
 
 declare:  TYPE_INT ID {
-    //std::cout << "IN DECLARE" << std::endl;
+ //   std::cout << "IN DECLARE" << std::endl;
     if (symbol_tables.current()->Lookup($2) != 0) {
       std::string err_string = "redeclaration of variable '";
       err_string += $2;
@@ -153,7 +155,7 @@ declare:  TYPE_INT ID {
 
     }
 	| TYPE_CHAR ID {
-    //std::cout << "IN DECLARE" << std::endl;
+  //  std::cout << "IN DECLARE" << std::endl;
     if (symbol_tables.current()->Lookup($2) != 0) {
       std::string err_string = "redeclaration of variable '";
       err_string += $2;
@@ -207,7 +209,7 @@ literal:        INT_LITERAL {
 		| CHAR_LITERAL_BACKSLASH {
                   $$ = new ASTNode_Literal($1, "char");
                 }
-		
+
 
 negative:       '-' expression %prec UMINUS {
 		  if ($2->GetType() == "char") {
@@ -229,13 +231,14 @@ not:		'!' expression %prec NOT {
 			err_string += "' in mathematical expressions";
 			yyerror(err_string);
 			exit(1);
-		  } else { 
+		  } else {
 		  	$$ = new ASTNode_Not($2);
 		  }
 	}
 
 variable:      ID {
-        tableEntry * entry = symbol_tables.Lookup($1);
+   // std::cout << "IN VARIABLE" << std::endl;
+    tableEntry * entry = symbol_tables.Lookup($1);
         if (entry == 0) {
           std::string err_string = "unknown variable '";
           err_string += $1;
@@ -314,7 +317,7 @@ compare:
     	|  expression COMP_NEQU expression {
                   check_types($1, $3);
               	  $$ = new ASTNode_Comparison($1, $3, "!=");
-    	}	
+    	}
     	|  expression COMP_GTE expression {
                   check_types($1, $3);
                	  $$ = new ASTNode_Comparison($1, $3, ">=");

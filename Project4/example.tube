@@ -1,5 +1,8 @@
-int a = 5; 
-char b = 'c';
-print b += 5;
-# Comment
-print a, b;
+int m;
+
+{
+  int m;
+}
+
+m=5;
+

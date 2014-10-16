@@ -35,6 +35,9 @@ public:
 
 class symbolTables;
 
+
+
+
 // The symbolTable allows easy lookup of tableEntry objects.
 class symbolTable {
 private:
