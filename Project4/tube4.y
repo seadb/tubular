@@ -130,7 +130,7 @@ statement:
         |       declare_assign ';' { $$ = $1; }
         |       expression ';'        { $$ = $1; }
         |       command  ';'          { $$ = $1; }
-        |       if          ';'       { $$ = $1; }
+        |       if                 { $$ = $1; }
         |       if_block              { $$ = $1; }
         |       while ';'             { $$ = $1; }
         |       while_block           { $$ = $1; }
@@ -151,9 +151,19 @@ block: OPEN_BRACE {
         $$ = $<ast_node>4;
     }
 
-if:         IF '(' expression ')' expression  { $$ = new ASTNode_If($3, $5); }
-if_block:   IF '(' expression ')' block { $$ = new ASTNode_If($3, $5); }
-        |   IF '(' expression ')' block ELSE block { $$ = new ASTNode_Else($3, $5, $7); }
+if:         IF '(' expression ')' expression ';'
+              { $$ = new ASTNode_If($3, $5); }
+  |         IF '(' expression ')' expression ';' ELSE expression ';'
+              { $$ = new ASTNode_Else($3, $5, $8); }
+  |         IF '(' expression ')' expression ';' ELSE block
+              { $$ = new ASTNode_Else($3, $5, $8); }
+if_block:   IF '(' expression ')' block
+              { $$ = new ASTNode_If($3, $5); }
+        |   IF '(' expression ')' block ELSE block
+              { $$ = new ASTNode_Else($3, $5, $7); }
+        |   IF '(' expression ')' block ELSE expression ';'
+              { $$ = new ASTNode_Else($3, $5, $7); }
+
 
 while: WHILE '(' expression ')' expression  { $$ = new ASTNode_While($3, $5); }
 while_block: WHILE '(' expression ')' block { $$ = new ASTNode_While($3, $5); }
