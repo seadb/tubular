@@ -131,11 +131,10 @@ public:
   // Lookup will find an entry and return it.
   // If that entry is not in the table, it will return NULL
   tableEntry * Lookup(std::string in_name) {
-    for(int i = tables.size()-1 ; i >= 0; i--) {
-      tableEntry * result = tables[i]->Lookup(in_name);
-      if(tables[i]->Visible() && result != 0) {
-        return result;
-        }
+    symbolTable * table = current();
+    tableEntry * result = table->Lookup(in_name);
+    if(result != 0) {
+      return result;
     }
     return NULL;
   }

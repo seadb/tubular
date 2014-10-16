@@ -101,12 +101,7 @@ statement_list:  {
     }
 
 statement:
-                block {
- //                std::cout<< "IN BLOCK1" <<std::endl;
-                  //ASTNode * b = new ASTNode_Block();
-                  //b->AddChild($3);
-                  $$ = $1;
-                }
+                block { $$ = $1; }
         |       declare  ';'      { $$ = $1; }
         |       declare_assign ';' { $$ = $1; }
         |       expression ';'        { $$ = $1; }
@@ -124,12 +119,7 @@ block: OPEN_BRACE {
                   $<ast_node>$ = b;
                  symbol_tables.HideTable();
    }
-   CLOSE_BRACE {
-       // std::cout<< "IN CLOSE" << std::endl;
-        //symbol_tables.HideTable();
-        $$ = $<ast_node>4;
-    }
-
+   CLOSE_BRACE { $$ = $<ast_node>4; }
 
 /*block:
       open statement_list close {
@@ -166,7 +156,7 @@ declare:  TYPE_INT ID {
     }
 	| TYPE_CHAR ID {
   //  std::cout << "IN DECLARE" << std::endl;
-    if (symbol_tables.current()->Lookup($2) != 0) {
+    if (symbol_tables.Lookup($2) != 0) {
       std::string err_string = "redeclaration of variable '";
       err_string += $2;
       err_string += "'";
@@ -181,7 +171,8 @@ declare:  TYPE_INT ID {
 declare_assign:  declare '=' expression {
 		if ($1->GetType() == $3->GetType()) {
                   $$ = new ASTNode_Assign($1, $3);
-                } else {
+                }
+                else {
 			std::string err_string = "types do not match for assignment (lhs = '";
 			err_string += $1->GetType();
 			err_string += "', rhs = '";
