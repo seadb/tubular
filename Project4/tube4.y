@@ -23,18 +23,36 @@ bool check_types(ASTNode* lhs_in, ASTNode * rhs_in) {
 	ASTNode * lhs = lhs_in;
 	ASTNode * rhs = rhs_in;
 	if (lhs->GetType() == rhs->GetType()) {
-		return true;
-                } else {
-                        std::string err_string = "types do not match for assignment (lhs = '";
-                        err_string += lhs->GetType();
-                        err_string += "', rhs = '";
-                        err_string += rhs->GetType();
-                        err_string += "')";
-                        yyerror(err_string);
-                        exit(1);
-                }
+	   return true;
+          }
+        else {
+           std::string err_string = "types do not match for assignment (lhs='";
+           err_string += lhs->GetType();
+           err_string += "', rhs='";
+           err_string += rhs->GetType();
+           err_string += "')";
+           yyerror(err_string);
+           exit(1);
+           }
 }
 
+// checks the types for relationship operators
+bool check_types_RO(ASTNode* lhs_in, ASTNode * rhs_in) {
+	ASTNode * lhs = lhs_in;
+	ASTNode * rhs = rhs_in;
+	if (lhs->GetType() == rhs->GetType()) {
+		return true;
+                }
+        else {
+            std::string err_string = "types do not match for relationship operator (lhs='";
+            err_string += lhs->GetType();
+            err_string += "', rhs='";
+            err_string += rhs->GetType();
+            err_string += "')";
+            yyerror(err_string);
+            exit(1);
+           }
+}
 bool check_type_char(ASTNode* lhs_in, ASTNode * rhs_in) {
         ASTNode * lhs = lhs_in;
         ASTNode * rhs = rhs_in;
@@ -133,10 +151,11 @@ block: OPEN_BRACE {
         $$ = $<ast_node>4;
     }
 
-if:         IF '(' expression ')' expression { $$ = new ASTNode_If($3, $5); }
+if:         IF '(' expression ')' expression  { $$ = new ASTNode_If($3, $5); }
 if_block:   IF '(' expression ')' block { $$ = new ASTNode_If($3, $5); }
+        |   IF '(' expression ')' block ELSE block { $$ = new ASTNode_Else($3, $5, $7); }
 
-while: WHILE '(' expression ')' expression { $$ = new ASTNode_While($3, $5); }
+while: WHILE '(' expression ')' expression  { $$ = new ASTNode_While($3, $5); }
 while_block: WHILE '(' expression ')' block { $$ = new ASTNode_While($3, $5); }
 
 declare:  TYPE_INT ID {
@@ -170,9 +189,9 @@ declare_assign:  declare '=' expression {
 		if ($1->GetType() == $3->GetType()) {
                   $$ = new ASTNode_Assign($1, $3);
                 } else {
-			std::string err_string = "types do not match for assignment (lhs = '";
+			std::string err_string = "types do not match for assignment (lhs='";
 			err_string += $1->GetType();
-			err_string += "', rhs = '";
+			err_string += "', rhs='";
 			err_string += $3->GetType();
 			err_string += "')";
 			yyerror(err_string);
@@ -207,7 +226,7 @@ literal:        INT_LITERAL {
 		| CHAR_LITERAL_BACKSLASH {
                   $$ = new ASTNode_Literal($1, "char");
                 }
-		
+
 
 negative:       '-' expression %prec UMINUS {
 		  if ($2->GetType() == "char") {
@@ -229,7 +248,7 @@ not:		'!' expression %prec NOT {
 			err_string += "' in mathematical expressions";
 			yyerror(err_string);
 			exit(1);
-		  } else { 
+		  } else {
 		  	$$ = new ASTNode_Not($2);
 		  }
 	}
@@ -308,27 +327,27 @@ assignment:
           }
 compare:
         expression COMP_EQU expression {
-		  check_types($1, $3);
+		  check_types_RO($1, $3);
       	          $$ = new ASTNode_Comparison($1, $3, "==");
    	}
     	|  expression COMP_NEQU expression {
-                  check_types($1, $3);
+                  check_types_RO($1, $3);
               	  $$ = new ASTNode_Comparison($1, $3, "!=");
-    	}	
+    	}
     	|  expression COMP_GTE expression {
-                  check_types($1, $3);
+                  check_types_RO($1, $3);
                	  $$ = new ASTNode_Comparison($1, $3, ">=");
     	}
     	|  expression COMP_LESS expression {
-                  check_types($1, $3);
+                  check_types_RO($1, $3);
                   $$ = new ASTNode_Comparison($1, $3, "<");
        	}
 	|  expression COMP_LTE expression {
-                  check_types($1, $3);
+                  check_types_RO($1, $3);
                   $$ = new ASTNode_Comparison($1, $3, "<=");
        	}
     	|  expression COMP_GTR expression {
-                  check_types($1, $3);
+                  check_types_RO($1, $3);
                   $$ = new ASTNode_Comparison($1, $3, ">");
        	}
     	|  expression BOOL_AND expression {
