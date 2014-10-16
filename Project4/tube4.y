@@ -19,57 +19,6 @@ void yyerror(std::string err_string) {
   exit(1);
 }
 
-bool check_types(ASTNode* lhs_in, ASTNode * rhs_in) {
-	ASTNode * lhs = lhs_in;
-	ASTNode * rhs = rhs_in;
-	if (lhs->GetType() == rhs->GetType()) {
-	   return true;
-          }
-        else {
-           std::string err_string = "types do not match for assignment (lhs='";
-           err_string += lhs->GetType();
-           err_string += "', rhs='";
-           err_string += rhs->GetType();
-           err_string += "')";
-           yyerror(err_string);
-           exit(1);
-           }
-}
-
-// checks the types for relationship operators
-bool check_types_RO(ASTNode* lhs_in, ASTNode * rhs_in) {
-	ASTNode * lhs = lhs_in;
-	ASTNode * rhs = rhs_in;
-	if (lhs->GetType() == rhs->GetType()) {
-		return true;
-                }
-        else {
-            std::string err_string = "types do not match for relationship operator (lhs='";
-            err_string += lhs->GetType();
-            err_string += "', rhs='";
-            err_string += rhs->GetType();
-            err_string += "')";
-            yyerror(err_string);
-            exit(1);
-           }
-}
-bool check_type_char(ASTNode* lhs_in, ASTNode * rhs_in) {
-        ASTNode * lhs = lhs_in;
-        ASTNode * rhs = rhs_in;
-	std::string lhs_type = lhs->GetType(), rhs_type = rhs->GetType();
-        if ((lhs_type == "char") || (rhs_type == "char")) {
-                 std::string err_string = "cannot use type '";
-		if (lhs_type == "char") {
-                     err_string += lhs->GetType();
-		} else {
-		     err_string += rhs->GetType();
-		}
-                 err_string += "' in mathematical expressions";
-                 yyerror(err_string);
-                 exit(1);
-        } else return true;
-}
-
 %}
 
 %union {
@@ -154,21 +103,21 @@ block: OPEN_BRACE {
     }
 
 if:         IF '(' expression ')' expression ';'
-              { $$ = new ASTNode_If($3, $5); }
+              { $$ = new ASTNode_If($3, $5, line_num); }
   |         IF '(' expression ')' expression ';' ELSE expression ';'
-              { $$ = new ASTNode_Else($3, $5, $8); }
+              { $$ = new ASTNode_Else($3, $5, $8, line_num); }
   |         IF '(' expression ')' expression ';' ELSE block
-              { $$ = new ASTNode_Else($3, $5, $8); }
+              { $$ = new ASTNode_Else($3, $5, $8, line_num); }
 if_block:   IF '(' expression ')' block
-              { $$ = new ASTNode_If($3, $5); }
+              { $$ = new ASTNode_If($3, $5, line_num); }
         |   IF '(' expression ')' block ELSE block
-              { $$ = new ASTNode_Else($3, $5, $7); }
+              { $$ = new ASTNode_Else($3, $5, $7, line_num); }
         |   IF '(' expression ')' block ELSE expression ';'
-              { $$ = new ASTNode_Else($3, $5, $7); }
+              { $$ = new ASTNode_Else($3, $5, $7, line_num); }
 
 
-while: WHILE '(' expression ')' expression  { $$ = new ASTNode_While($3, $5); }
-while_block: WHILE '(' expression ')' block { $$ = new ASTNode_While($3, $5); }
+while: WHILE '(' expression ')' expression  { $$ = new ASTNode_While($3, $5, line_num); }
+while_block: WHILE '(' expression ')' block { $$ = new ASTNode_While($3, $5, line_num); }
 
 declare:  TYPE_INT ID {
  //   std::cout << "IN DECLARE" << std::endl;
@@ -198,17 +147,7 @@ declare:  TYPE_INT ID {
 
 
 declare_assign:  declare '=' expression {
-		if ($1->GetType() == $3->GetType()) {
-                  $$ = new ASTNode_Assign($1, $3);
-                } else {
-			std::string err_string = "types do not match for assignment (lhs='";
-			err_string += $1->GetType();
-			err_string += "', rhs='";
-			err_string += $3->GetType();
-			err_string += "')";
-			yyerror(err_string);
-			exit(1);
-		}
+                  $$ = new ASTNode_Assign($1, $3, line_num);
 }
 
 expression:     literal { $$ = $1; }
@@ -218,7 +157,7 @@ expression:     literal { $$ = $1; }
           |     operation { $$ = $1; }
           |     compare { $$ = $1; }
           |     assignment { $$ = $1; }
-          |     BREAK     { $$ = new ASTNode_Break(); }
+          |     BREAK     { $$ = new ASTNode_Break(line_num); }
 
 literal:        INT_LITERAL {
                   $$ = new ASTNode_Literal($1, "int");
@@ -241,28 +180,12 @@ literal:        INT_LITERAL {
 
 
 negative:       '-' expression %prec UMINUS {
-		  if ($2->GetType() == "char") {
-                        std::string err_string = "cannot use type '";
-                        err_string += $2->GetType();
-                        err_string += "' in mathematical expressions";
-                        yyerror(err_string);
-                        exit(1);
-                  } else {
-                        $$ = new ASTNode_Negation($2);
-                  }
+                        $$ = new ASTNode_Negation($2, line_num);
         }
 
 
 not:		'!' expression %prec NOT {
-		  if ($2->GetType() == "char") {
-			std::string err_string = "cannot use type '";
-			err_string += $2->GetType();
-			err_string += "' in mathematical expressions";
-			yyerror(err_string);
-			exit(1);
-		  } else {
-		  	$$ = new ASTNode_Not($2);
-		  }
+		  	$$ = new ASTNode_Not($2, line_num);
 	}
 
 variable:      ID {
@@ -280,100 +203,72 @@ variable:      ID {
 
 operation:
          expression '+' expression {
-		  check_type_char($1, $3);
-                  $$ = new ASTNode_Math2($1, $3, '+');
+                  $$ = new ASTNode_Math2($1, $3, '+', line_num);
          }
     |    expression '-' expression {
-                  check_type_char($1, $3);
-                  $$ = new ASTNode_Math2($1, $3, '-');
+                  $$ = new ASTNode_Math2($1, $3, '-', line_num);
          }
     |    expression '*' expression {
-                  check_type_char($1, $3);
-                  $$ = new ASTNode_Math2($1, $3, '*');
+                  $$ = new ASTNode_Math2($1, $3, '*', line_num);
          }
     |    expression '/' expression {
-                  check_type_char($1, $3);
-                  $$ = new ASTNode_Math2($1, $3, '/');
+                  $$ = new ASTNode_Math2($1, $3, '/', line_num);
          }
     |    expression '%' expression {
-                  check_type_char($1, $3);
-                  $$ = new ASTNode_Math2($1, $3, '%');
+                  $$ = new ASTNode_Math2($1, $3, '%', line_num);
          }
     |    '(' expression ')' {
                   $$ = $2;
          }
     |    COMMAND_RANDOM '(' expression ')' {
-		if ($3->GetType() == "char") {
-			 std::string err_string = "cannot use type '";
-                 	err_string += $3->GetType();
-                 	err_string += "' as an argument to random";
-                 	yyerror(err_string);
-                 	exit(1);
-		} else {
-                  $$ = new ASTNode_Random($3);
-                }
+                  $$ = new ASTNode_Random($3, line_num);
 	}
 assignment:
           variable '=' expression {
-                  check_types($1, $3);
-            $$ = new ASTNode_Assign($1, $3);
+            $$ = new ASTNode_Assign($1, $3, line_num);
           }
     |     variable ASSIGN_ADD expression {
-                  check_type_char($1, $3);
-            $$ = new ASTNode_MathAssign($1, $3, '+');
+            $$ = new ASTNode_MathAssign($1, $3, '+', line_num);
           }
     |     variable ASSIGN_SUB expression {
-                  check_type_char($1, $3);
-            $$ = new ASTNode_MathAssign($1, $3, '-');
+            $$ = new ASTNode_MathAssign($1, $3, '-', line_num);
           }
     |     variable ASSIGN_MULT expression {
-                  check_type_char($1, $3);
-            $$ = new ASTNode_MathAssign($1, $3, '*');
+            $$ = new ASTNode_MathAssign($1, $3, '*', line_num);
           }
     |     variable ASSIGN_DIV expression {
-                  check_type_char($1, $3);
-            $$ = new ASTNode_MathAssign($1, $3, '/');
+            $$ = new ASTNode_MathAssign($1, $3, '/', line_num);
           }
     |     variable ASSIGN_MOD expression {
-                  check_type_char($1, $3);
-            $$ = new ASTNode_MathAssign($1, $3, '%');
+            $$ = new ASTNode_MathAssign($1, $3, '%', line_num);
           }
 compare:
         expression COMP_EQU expression {
-		  check_types_RO($1, $3);
-      	          $$ = new ASTNode_Comparison($1, $3, "==");
+      	          $$ = new ASTNode_Comparison($1, $3, "==", line_num);
    	}
     	|  expression COMP_NEQU expression {
-                  check_types_RO($1, $3);
-              	  $$ = new ASTNode_Comparison($1, $3, "!=");
+              	  $$ = new ASTNode_Comparison($1, $3, "!=", line_num);
     	}
     	|  expression COMP_GTE expression {
-                  check_types_RO($1, $3);
-               	  $$ = new ASTNode_Comparison($1, $3, ">=");
+               	  $$ = new ASTNode_Comparison($1, $3, ">=", line_num);
     	}
     	|  expression COMP_LESS expression {
-                  check_types_RO($1, $3);
-                  $$ = new ASTNode_Comparison($1, $3, "<");
+                  $$ = new ASTNode_Comparison($1, $3, "<", line_num);
        	}
 	|  expression COMP_LTE expression {
-                  check_types_RO($1, $3);
-                  $$ = new ASTNode_Comparison($1, $3, "<=");
+                  $$ = new ASTNode_Comparison($1, $3, "<=", line_num);
        	}
     	|  expression COMP_GTR expression {
-                  check_types_RO($1, $3);
-                  $$ = new ASTNode_Comparison($1, $3, ">");
+                  $$ = new ASTNode_Comparison($1, $3, ">", line_num);
        	}
     	|  expression BOOL_AND expression {
-                  check_type_char($1, $3);
-                  $$ = new ASTNode_Logical($1, $3, "&&");
+                  $$ = new ASTNode_Logical($1, $3, "&&", line_num);
        	}
     	|  expression BOOL_OR expression {
-                  check_type_char($1, $3);
-                  $$ = new ASTNode_Logical($1, $3, "||");
+                  $$ = new ASTNode_Logical($1, $3, "||", line_num);
        	}
     	|  expression '?' expression ':' expression {
-                  check_types($1, $3);
-                  $$ = new ASTNode_Conditional($1, $3, $5);
+                  $$ = new ASTNode_Conditional($1, $3, $5, line_num);
        	}
 
 command:    COMMAND_PRINT parameters {
