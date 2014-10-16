@@ -17,7 +17,7 @@ if [ ! -f example.tube ]; then
 	echo "example.tube doesn't exist";
 	exit 1;
 fi;
-
+summary="Summary:\n";
 function run_error_test {
     ./$project $1 $project.tic > $project.cout;
     Test_Suite/reference_$project $1 ref.tic > ref.cout;
@@ -26,6 +26,7 @@ function run_error_test {
     rm $project.cout ref.cout;
     if [ $result -ne 0 ]; then
 	echo $1 "failed different error messages";
+	summary=$summary"\n"$1" failed with different error messages"
 	rm $project.tic;
 	if [ -e ref.tic ] ; then 
 		rm ref.tic;
@@ -42,11 +43,14 @@ function run_error_test {
 	    rm $project.out ref.out;
 	    if [ $result -ne 0 ]; then
 		echo $1 "failed different executed result on TubeIC";
+		summary=$summary"\n"$1" failed different executed result on TubeIC"
 		return 1;
 	    else
 		echo $1 "passed";
+		summary=$summary"\n"$1" passed"
 	    fi;
     else 
+		summary=$summary"\n"$1" passed"
     	echo $1 "passed";
     fi
 
@@ -65,4 +69,4 @@ for F in Test_Suite/extra.*.tube; do
 done
 
 
-
+echo -e $summary
