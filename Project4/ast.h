@@ -7,7 +7,6 @@
 #include <vector>
 #include <string>
 #include <sstream>
-//using namespace std;
 
 #include "symbol_table.h"
 // The classes in this file hold info about the nodes that form the Abstract Syntax Tree (AST)
@@ -161,7 +160,6 @@ public:
     tableEntry * rhs_var = children[1]->CompileTubeIC(tables, out);
     lhs_type = lhs_var->GetType();
     rhs_type = rhs_var->GetType();
-    //std::cout << "Assign lhs type: " << lhs_type << " rhs type: " << rhs_type << std::endl;
     if (lhs_type != rhs_type) {
 	std::string e;
 	e += "types do not match for assignment (lhs='";
@@ -197,7 +195,6 @@ public:
     tableEntry * rhs_var = children[1]->CompileTubeIC(tables, out);
     lhs_type = lhs_var->GetType();
     rhs_type = rhs_var->GetType();
-//    std::cout << "MathAssign lhs type: " << lhs_type << " rhs type: " << rhs_type << std::endl;
     if (lhs_type == "char") {
 	std::string e;
 	e += "cannot use type '";
@@ -261,7 +258,6 @@ public:
     tableEntry * out_var = tables.AddTempEntry();
     lhs_type = in_var1->GetType();
     rhs_type = in_var2->GetType();
-    //std::cout << "Math2 lhs type: " << lhs_type << " rhs type: " << rhs_type << std::endl;
     if (lhs_type == "char") {
         std::string e;
         e += "cannot use type '";
@@ -319,7 +315,6 @@ public:
     tableEntry * in_var = children[0]->CompileTubeIC(tables, out);
     tableEntry * out_var = tables.AddTempEntry();
     lhs_type = in_var->GetType();
-    //std::cout << "Negation type: " << lhs_type << std::endl;
     if (lhs_type == "char") {
         std::string e;
         e += "cannot use type '";
@@ -353,7 +348,6 @@ public:
     tableEntry * in_var = children[0]->CompileTubeIC(tables, out);
     tableEntry * out_var = tables.AddTempEntry();
     lhs_type = in_var->GetType();
-   // std::cout << "Not type: " << lhs_type << std::endl;
     if (lhs_type == "char") {
         std::string e;
         e += "cannot use type '";
@@ -392,7 +386,6 @@ public:
 
     lhs_type = in_var1->GetType();
     rhs_type = in_var2->GetType();
-   // std::cout << "Comparison lhs type: " << lhs_type << " rhs type: " << rhs_type << std::endl;
     if (lhs_type != rhs_type) {
 	std::string e;
 	e += "types do not match for relationship operator (lhs = '";
@@ -452,7 +445,6 @@ public:
     tableEntry * in_var1 = children[0]->CompileTubeIC(tables, out);
     tableEntry * out_var = tables.AddTempEntry();
     lhs_type = in_var1->GetType();
-    //std::cout << "Logical type: " << lhs_type << std::endl;
     if (lhs_type == "char") {
         std::string e;
         e += "cannot use type '";
@@ -711,8 +703,13 @@ public:
     tableEntry * in_var = children[0]->CompileTubeIC(tables, out);
     tableEntry * out_var = tables.AddTempEntry();
     lhs_type = in_var->GetType();
-    std::cout << "Random type: " << lhs_type << std::endl;
-
+    if (lhs_type != "int") {
+	std::string e;
+	e += "cannot use type '";
+	e += lhs_type;
+	e += "' as an argument to random";
+	yyerr(e);
+    }
     out << "random s" <<  in_var->GetVarID() << " s" << out_var->GetVarID() << std::endl;
 
     out_var->SetType(in_var->GetType());

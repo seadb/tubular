@@ -50,19 +50,14 @@ command parameters if if_block while while_block not //
 program:        statement_list {
                   // This is always the last rule to run so $$ is the full AST
                   symbol_tables.ShowAll();
-                  //cout << "before";
                   $1->CompileTubeIC(symbol_tables, fs);
-                  //cout << "after";
 	          //$1->DebugPrint();
                 }
 
 statement_list:  {
                   // Start the statement list by creating a block.
-                  //symbol_tables.AddTable();
-                 // symbol_tables.HideTable();
                   symbol_tables.AddTable();
                   $$ = new ASTNode_Block();
- //               std::cout << "IN STATEMENT_LIST 1" << std::endl;
                 }
   | statement_list statement {
     $1->AddChild($2); // Add each statement to the block
@@ -71,9 +66,6 @@ statement_list:  {
 
 statement:
                 block {
- //                std::cout<< "IN BLOCK1" <<std::endl;
-                  //ASTNode * b = new ASTNode_Block();
-                  //b->AddChild($3);
                   $$ = $1;
                 }
         |       declare  ';'      { $$ = $1; }
@@ -86,18 +78,15 @@ statement:
         |       while_block           { $$ = $1; }
 
 block: OPEN_BRACE {
-    //    std::cout << "IN OPEN" << std::endl;
         //symbol_tables.AddTable();
     }
     statement_list {
-     //             std::cout<< "IN MIDDLE STATEMENT LIST" << std::endl;
                   ASTNode * b = new ASTNode_Block();
                   b->AddChild($3);
                   $<ast_node>$ = b;
                  symbol_tables.HideTable();
    }
    CLOSE_BRACE {
-       // std::cout<< "IN CLOSE" << std::endl;
         //symbol_tables.HideTable();
         $$ = $<ast_node>4;
     }
@@ -120,7 +109,6 @@ while: WHILE '(' expression ')' expression  { $$ = new ASTNode_While($3, $5, lin
 while_block: WHILE '(' expression ')' block { $$ = new ASTNode_While($3, $5, line_num); }
 
 declare:  TYPE_INT ID {
- //   std::cout << "IN DECLARE" << std::endl;
     if (symbol_tables.current()->Lookup($2) != 0) {
       std::string err_string = "redeclaration of variable '";
       err_string += $2;
@@ -133,7 +121,6 @@ declare:  TYPE_INT ID {
 
     }
 	| TYPE_CHAR ID {
-  //  std::cout << "IN DECLARE" << std::endl;
     if (symbol_tables.current()->Lookup($2) != 0) {
       std::string err_string = "redeclaration of variable '";
       err_string += $2;
@@ -189,7 +176,6 @@ not:		'!' expression %prec NOT {
 	}
 
 variable:      ID {
-   // std::cout << "IN VARIABLE" << std::endl;
     tableEntry * entry = symbol_tables.Lookup($1);
         if (entry == 0) {
           std::string err_string = "unknown variable '";
