@@ -133,7 +133,7 @@ public:
   }
 
   std::string GetType() {
-	return type; 
+	return type;
   }
 
   std::string GetName() {
@@ -599,6 +599,48 @@ public:
     out << "random s" <<  in_var->GetVarID() << " s" << out_var->GetVarID() << std::endl;
 
     return out_var;
+  }
+};
+
+class ASTNode_Else : public ASTNode {
+public:
+  ASTNode_Else(ASTNode * in1, ASTNode * in2, ASTNode * in3) {
+    children.push_back(in1);
+    children.push_back(in2);
+    children.push_back(in3);
+  }
+  std::string GetType() { ; }
+  ~ASTNode_Else() { ; }
+
+  tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+    tableEntry * in_var1 = children[0]->CompileTubeIC(tables, out);
+    tableEntry * out_var = tables.AddTempEntry();
+
+    const int i1 = in_var1->GetVarID();
+    const int o4 = out_var->GetVarID();
+
+    out << "test_nequ s" << i1 << " 0 s" << o4 << std::endl;
+    out << "jump_if_n0 s" << o4 << " if_true" << o4 << std::endl;
+
+    // False
+    out << "jump else_label" << o4 << std::endl;
+
+    // True
+    out << "if_true" << o4 << ":" << std::endl;
+    tableEntry * in_var2 = children[1]->CompileTubeIC(tables, out);
+    out << "jump end_label" << o4 << std::endl;
+
+    //Else
+    out << "else_label" << o4 << ":" << std::endl;
+    tableEntry * in_var3 = children[2]->CompileTubeIC(tables, out);
+
+    out << "end_label" << o4 << ":" << std::endl;
+
+    return out_var;
+  }
+
+  std::string GetName() {
+    return "ASTNode_Conditional";
   }
 };
 
