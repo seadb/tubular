@@ -21,22 +21,20 @@ protected:
   //       type, line it was declared on, array status, etc.
 
 public:
-  tableEntry() : name(""), var_id(-1) { ; }
+  tableEntry() : name(""), var_id(-1), type("") { ; }
   tableEntry(const std::string & in_name, const std::string & in_type) : name(in_name), var_id(-1), type(in_type) { ; }
   ~tableEntry() { ; }
 
   const std::string & GetName() const { return name; }
   int GetVarID() const { return var_id; }
 
+  void SetType(std::string in_type) { type = in_type; }
   void SetName(std::string in_name) { name = in_name; }
   void SetVarID(int in_id) { var_id = in_id; }
   const std::string & GetType() const { return type; }
 };
 
 class symbolTables;
-
-
-
 
 // The symbolTable allows easy lookup of tableEntry objects.
 class symbolTable {
@@ -88,6 +86,8 @@ public:
   ~symbolTables() { ; }
   int GetNextID() { return next_var_id++; }
 
+  vector<string> breaks;
+
   symbolTable * current() {
     for(int i=tables.size()-1; i >= 0; i--){
       if(tables[i]->Visible()){
@@ -131,10 +131,11 @@ public:
   // Lookup will find an entry and return it.
   // If that entry is not in the table, it will return NULL
   tableEntry * Lookup(std::string in_name) {
-    symbolTable * table = current();
-    tableEntry * result = table->Lookup(in_name);
-    if(result != 0) {
-      return result;
+    for(int i = tables.size()-1 ; i >= 0; i--) {
+      tableEntry * result = tables[i]->Lookup(in_name);
+      if(tables[i]->Visible() && result != 0) {
+        return result;
+        }
     }
     return NULL;
   }
