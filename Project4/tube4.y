@@ -139,6 +139,10 @@ for_:       FOR '(' expression ';' expression ';' expression ')' statement
     |       FOR '(' declare_assign ';' expression ';' expression ')' statement
                { $$ = new ASTNode_For($3, $5, $7, $9, line_num); }
 
+    |       FOR '(' ';' ';' ')' statement
+              { ASTNode * temp = new ASTNode_Blank(); 
+                $$ = new ASTNode_For(temp, temp, temp, $6, line_num);
+              }
 expression:     literal    { $$ = $1; }
           |     negative   { $$ = $1; }
           |     not_       { $$ = $1; }

@@ -825,6 +825,7 @@ public:
 
   tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
     tableEntry * out_var = tables.AddTempEntry();
+    out_var->SetType("int");
     return out_var;
   }
 

@@ -6,7 +6,7 @@ default: all
 all: tube4
 
 tube4.tab.cc: tube4.y ast.h
-	bison -o tube4.tab.cc -b tube4 -d tube4.y
+	bison -o tube4.tab.cc -b tube4 -d tube4.y -t -v
 
 tube4.yy.cc: tube4.lex
 	flex -o tube4.yy.cc tube4.lex
