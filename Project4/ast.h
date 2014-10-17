@@ -762,4 +762,20 @@ public:
   }
 };
 
+class ASTNode_Blank : public ASTNode {
+public:
+  ASTNode_Blank() { ; }
+
+  tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+    tableEntry * out_var = tables.AddTempEntry();
+    return out_var;
+  }
+
+  std::string GetName() {
+    std::string out_string = "ASTNode_Blank";
+    return out_string;
+  }
+
+};
+
 #endif
