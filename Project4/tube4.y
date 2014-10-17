@@ -29,9 +29,12 @@ void yyerror(std::string err_string) {
 %token<lexeme> BOOL_AND BOOL_OR
 %token<lexeme> ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %type<ast_node> statement_list statement block declare declare_assign//
-variable expression assignment operation compare literal negative//
-command parameters if_single if_block while_single while_block not_ //
+variable expression assignment operation compare literal negative flow_control//
+command parameters if_ while_ not_ //
+  /* if_ while_ not_ have a '_' so they won't clash w/ c types 'if while not'*/
 
+
+%left OPEN_BRACE CLOSE_BRACE
 %right '=' ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %right '?' ':'
 %left BOOL_OR
@@ -40,7 +43,6 @@ command parameters if_single if_block while_single while_block not_ //
 %left '+' '-'
 %left '*' '/' '%'
 %nonassoc UMINUS NOT
-%left OPEN_BRACE CLOSE_BRACE
 
 %%
 
@@ -65,12 +67,10 @@ statement:
                 block               { $$ = $1; }
         |       declare  ';'        { $$ = $1; }
         |       declare_assign ';'  { $$ = $1; }
+        |       flow_control        { $$ = $1; }
         |       expression ';'      { $$ = $1; }
         |       command  ';'        { $$ = $1; }
-        |       if_single           { $$ = $1; }
-        |       if_block            { $$ = $1; }
-        |       while_single        { $$ = $1; }
-        |       while_block         { $$ = $1; }
+
 
 block: OPEN_BRACE     { ; }
        statement_list {
@@ -81,25 +81,6 @@ block: OPEN_BRACE     { ; }
        }
        CLOSE_BRACE    { $$ = $<ast_node>4; }
 
-if_single:  IF '(' expression ')' expression ';'
-              { $$ = new ASTNode_If($3, $5, line_num); }
-  |         IF '(' expression ')' expression ';' ELSE expression ';'
-              { $$ = new ASTNode_Else($3, $5, $8, line_num); }
-  |         IF '(' expression ')' expression ';' ELSE block
-              { $$ = new ASTNode_Else($3, $5, $8, line_num); }
-if_block:   IF '(' expression ')' block
-              { $$ = new ASTNode_If($3, $5, line_num); }
-        |   IF '(' expression ')' block ELSE block
-              { $$ = new ASTNode_Else($3, $5, $7, line_num); }
-        |   IF '(' expression ')' block ELSE expression ';'
-              { $$ = new ASTNode_Else($3, $5, $7, line_num); }
-
-
-while_single:WHILE '(' expression ')' expression ';'
-               { $$ = new ASTNode_While($3, $5, line_num); }
-
-while_block: WHILE '(' expression ')' block 
-               { $$ = new ASTNode_While($3, $5, line_num); }
 
 declare:  TYPE_INT ID {
             if (symbol_tables.current()->Lookup($2) != 0) {
@@ -125,6 +106,31 @@ declare:  TYPE_INT ID {
 declare_assign:  declare '=' expression {
                    $$ = new ASTNode_Assign($1, $3, line_num);
                  }
+
+flow_control:   if_                 { $$ = $1; }
+        |       while_              { $$ = $1; }
+
+if_:        IF '(' expression ')' statement 
+              { $$ = new ASTNode_If($3, $5, line_num); }
+
+   |        IF '(' expression ')' ';' { 
+              ASTNode * blank = new ASTNode_Blank();
+              $$ = new ASTNode_If($3, blank, line_num); 
+            }
+ 
+   |        IF '(' expression ')' statement ELSE statement 
+              { $$ = new ASTNode_Else($3, $5, $7, line_num); }
+       
+   |        IF '(' expression ')' ';' ELSE statement{
+                ASTNode * blank = new ASTNode_Blank();
+                $$ = new ASTNode_Else($3, blank, $7, line_num); }
+
+   |        IF '(' expression ')' statement ELSE ';'{
+                ASTNode * blank = new ASTNode_Blank();
+                $$ = new ASTNode_Else($3, $5, blank, line_num); }
+   
+while_:      WHILE '(' expression ')' statement
+               { $$ = new ASTNode_While($3, $5, line_num); }
 
 expression:     literal    { $$ = $1; }
           |     negative   { $$ = $1; }
@@ -197,6 +203,7 @@ operation:
     |    COMMAND_RANDOM '(' expression ')' {
                   $$ = new ASTNode_Random($3, line_num);
   }
+
 assignment:
           variable '=' expression {
             $$ = new ASTNode_Assign($1, $3, line_num);
