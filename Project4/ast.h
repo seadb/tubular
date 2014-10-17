@@ -643,6 +643,63 @@ public:
   }
 };
 
+class ASTNode_For : public ASTNode {
+public:
+  ASTNode_For(ASTNode * in1, ASTNode * in2, ASTNode *in3,
+                ASTNode *in4, int in_line) {
+    children.push_back(in1);
+    children.push_back(in2);
+    children.push_back(in3);
+    children.push_back(in4);
+    line_num = in_line;
+  }
+  ~ASTNode_For() { ; }
+
+  tableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+    tableEntry * out_var = tables.AddTempEntry();
+    const int o4 = out_var->GetVarID();
+
+    tableEntry * in_var1 = children[0]->CompileTubeIC(tables, out);
+
+    out << "for_begin" << o4 << ":" << endl;
+
+    tableEntry * in_var2 = children[1]->CompileTubeIC(tables, out);
+    lhs_type = in_var2->GetType();
+
+    if (lhs_type != "int") {
+	  std::string e;
+	  e += "condition for for statements must evaluate to type int";
+	  yyerr(e);
+    }
+    const int i2 = in_var2->GetVarID();
+
+    out << "test_nequ s" << i2 << " 0 s" << o4 << std::endl;
+    out << "jump_if_0 s" << o4 << " for_end" << o4 << std::endl;
+
+    stringstream ss;
+    ss << "for_end" << o4;
+    tables.breaks.push_back(ss.str());
+
+    tableEntry * in_var4 = children[3]->CompileTubeIC(tables, out);
+
+    if(tables.breaks.size() > 0)
+      tables.breaks.pop_back();
+
+    tableEntry * in_var3 = children[2]->CompileTubeIC(tables, out);
+
+    out << "jump for_begin" << o4 << endl;
+
+    out << "for_end" << o4 << ":" << std::endl;
+
+    out_var->SetType(in_var1->GetType());
+    return out_var;
+  }
+
+  std::string GetName() {
+    return "ASTNode_For";
+  }
+};
+
 class ASTNode_Break : public ASTNode {
 public:
   ASTNode_Break(int in_line) {

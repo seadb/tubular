@@ -42,6 +42,11 @@ ascii           [+\-*/;\(\)\{\}=,%?:\!]
 	  return COMMAND_PRINT;
         }
 
+"for" { yylval.lexeme = strdup(yytext);
+	  return FOR;
+    }
+
+
 random  {
  	  yylval.lexeme = strdup(yytext);
 	  return COMMAND_RANDOM;
