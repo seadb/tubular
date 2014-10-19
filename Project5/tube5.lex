@@ -10,7 +10,8 @@ int line_num = 1;
 
 id              [a-zA-Z_][a-zA-Z0-9_]*
 ascii           [+\-*/;\(\)\{\}=,%?:\!]
-string          \"[\11-\12\42-\43\101-\132\134\141-\172]\"
+string          \"[A-Za-z\t\n\\\"#]+\"
+char            \'[A-Za-z\t\n\\\'#]\'  
 %%
 
 #.* ; // Comment, ignore remainder of line
@@ -81,10 +82,11 @@ random  {
           return STRING_LITERAL;
           }
 
-'[\40-\176]' {
+ /*'[\40-\176]'*/
+{char} {
 	  yylval.lexeme = strdup(yytext);
 	  return CHAR_LITERAL;
-	}
+        }
 '\\n' {
           yylval.lexeme = strdup(yytext);
           return CHAR_LITERAL_NEWLINE;

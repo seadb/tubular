@@ -61,17 +61,16 @@ class CArrayEntry: public CTableEntry {
    const char * GetCharArray() const { return mCharArray; }
 };
 
-class symbolTables;
 
-// The symbolTable allows easy lookup of CTableEntry objects.
-class symbolTable {
+// The CSymbolTable allows easy lookup of CTableEntry objects.
+class CSymbolTable {
   private:
     bool visible;
     std::map<std::string, CTableEntry *> mTableMap;
-    //symbolTables *tables;
+    //CSymbolTables *tables;
   public:
-    symbolTable(/*symbolTables *t*/)/* : tables(t)*/ { ; }
-    ~symbolTable() { ; }
+    CSymbolTable(/*CSymbolTables *t*/)/* : tables(t)*/ { ; }
+    ~CSymbolTable() { ; }
 
     int GetSize() { return mTableMap.size(); }
 
@@ -101,10 +100,10 @@ class symbolTable {
 
   };
 
-class symbolTables {
+class CSymbolTables {
 private:
-  std::vector<symbolTable*> mTables;
- // std::vector<symbolTable*> mDiscarded;
+  std::vector<CSymbolTable*> mTables;
+ // std::vector<CSymbolTable*> mDiscarded;
   int mScope;
   int mNextVarID;                // Next variable ID to use.
   int mNextLabelID;              // Next label ID to use.
@@ -113,11 +112,11 @@ private:
   // Figure out the next memory position to use. Ideally, we should recycle these!
 
 public:
-  symbolTables() : mNextVarID(1), mNextLabelID(0), mScope(-1) {
+  CSymbolTables() : mNextVarID(1), mNextLabelID(0), mScope(-1) {
       AddTable();
   }
 
-  ~symbolTables() { ; }
+  ~CSymbolTables() { ; }
   
   std::vector<std::string> breaks;
   
@@ -127,7 +126,7 @@ public:
   void PopBackBreaks(){ mBreaks.pop_back(); }
   void PushBackBreaks(std::string element){ mBreaks.push_back(element); }
 
-  symbolTable * current() {
+  CSymbolTable * current() {
     for(int i=mTables.size()-1; i >= 0; i--){
       if(mTables[i]->Visible()){
         return mTables[i];
@@ -146,7 +145,7 @@ public:
 
   // Add a new symbol table for a new scope
   void AddTable() {
-    mTables.push_back(new symbolTable(/*this*/));//doesnt use scope as the index
+    mTables.push_back(new CSymbolTable(/*this*/));//doesnt use scope as the index
     mTables.back()->SetVisible(true);
     mScope +=1;
     }
@@ -186,7 +185,7 @@ public:
   }
 
   void ShowAll(){
-    std::vector<symbolTable*>::iterator it = mTables.begin();
+    std::vector<CSymbolTable*>::iterator it = mTables.begin();
     for( it; it != mTables.end(); it++){
       (*it)->SetVisible(true);
     }
@@ -196,7 +195,7 @@ public:
 
 #endif
 // Insert an entry into the symbol table.
-/*CTableEntry * symbolTable::AddEntry(std::string in_name) {
+/*CTableEntry * CSymbolTable::AddEntry(std::string in_name) {
   CTableEntry * new_entry = new CTableEntry(in_name);
   new_entry->SetVarID( tables->GetNextID() );
   mTableMap[in_name] = new_entry;

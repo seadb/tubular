@@ -9,7 +9,7 @@
 extern int line_num;
 extern int yylex();
 std::ofstream fs;
-symbolTables symbol_tables;
+CSymbolTables symbol_tables;
 
 void yyerror(std::string err_string) {
   std::cout << "ERROR(line " << line_num << "): " << err_string << std::endl;
@@ -20,7 +20,7 @@ void yyerror(std::string err_string) {
 
 %union {
   char * lexeme;
-  ASTNode * ast_node;
+  CNode * ast_node;
 }
 
 %token<lexeme> ID INT_LITERAL CHAR_LITERAL STRING_LITERAL
@@ -60,7 +60,7 @@ program:        statement_list {
 statement_list:  {
                   // Start the statement list by creating a block.
                   symbol_tables.AddTable();
-                  $$ = new ASTNode_Block();
+                  $$ = new CNodeBlock();
                  }
 | statement_list statement {
                           $1->AddChild($2); // Add each statement to the block
@@ -78,7 +78,7 @@ statement:
 
 block: OPEN_BRACE     { ; }
        statement_list {
-                        ASTNode * b = new ASTNode_Block();
+                        CNode * b = new CNodeBlock();
                         b->AddChild($3);
                         $<ast_node>$ = b;
                         symbol_tables.HideTable();
@@ -94,7 +94,7 @@ declare:  TYPE_INT ID {
               yyerror(err_string);
               exit(1);
               }
-            $$ = new ASTNode_Variable( symbol_tables.AddEntry($2, $1)  );
+            $$ = new CNodeVariable( symbol_tables.AddEntry($2, $1)  );
             }
        |  TYPE_CHAR ID {
             if (symbol_tables.current()->Lookup($2) != 0) {
@@ -104,7 +104,7 @@ declare:  TYPE_INT ID {
               yyerror(err_string);
               exit(1);
               }
-            $$ = new ASTNode_Variable( symbol_tables.AddEntry($2, $1)  );
+            $$ = new CNodeVariable( symbol_tables.AddEntry($2, $1)  );
             }
 
        | TYPE_ARRAY '(' TYPE_CHAR ')' ID {
@@ -117,10 +117,11 @@ declare:  TYPE_INT ID {
 
        | TYPE_STRING ID 
        {
-         $$ = new ASTNode_Variable( symbol_tables.AddArray($2, $1, 0));
+         $$ = new CNodeVariable( symbol_tables.AddArray($2, $1, 0));
        }
+
 declare_assign:  declare '=' expression {
-                   $$ = new ASTNode_Assign($1, $3, line_num);
+                   $$ = new CNodeAssign($1, $3, line_num);
                  }
 
 flow_control:   if_                 { $$ = $1; }
@@ -128,36 +129,36 @@ flow_control:   if_                 { $$ = $1; }
         |       for_                { $$ = $1; }
 
 if_:        IF '(' expression ')' statement 
-              { $$ = new ASTNode_If($3, $5, line_num); }
+              { $$ = new CNodeIf($3, $5, line_num); }
 
    |        IF '(' expression ')' ';' { 
-              ASTNode * blank = new ASTNode_Blank();
-              $$ = new ASTNode_If($3, blank, line_num); 
+              CNode * blank = new CNodeBlank();
+              $$ = new CNodeIf($3, blank, line_num); 
             }
  
    |        IF '(' expression ')' statement ELSE statement 
-              { $$ = new ASTNode_Else($3, $5, $7, line_num); }
+              { $$ = new CNodeElse($3, $5, $7, line_num); }
        
    |        IF '(' expression ')' ';' ELSE statement{
-                ASTNode * blank = new ASTNode_Blank();
-                $$ = new ASTNode_Else($3, blank, $7, line_num); }
+                CNode * blank = new CNodeBlank();
+                $$ = new CNodeElse($3, blank, $7, line_num); }
 
    |        IF '(' expression ')' statement ELSE ';'{
-                ASTNode * blank = new ASTNode_Blank();
-                $$ = new ASTNode_Else($3, $5, blank, line_num); }
+                CNode * blank = new CNodeBlank();
+                $$ = new CNodeElse($3, $5, blank, line_num); }
    
 while_:     WHILE '(' expression ')' statement
-               { $$ = new ASTNode_While($3, $5, line_num); }
+               { $$ = new CNodeWhile($3, $5, line_num); }
 
 for_:       FOR '(' expression ';' expression ';' expression ')' statement
-               { $$ = new ASTNode_For($3, $5, $7, $9, line_num); }
+               { $$ = new CNodeFor($3, $5, $7, $9, line_num); }
 
     |       FOR '(' declare_assign ';' expression ';' expression ')' statement
-               { $$ = new ASTNode_For($3, $5, $7, $9, line_num); }
+               { $$ = new CNodeFor($3, $5, $7, $9, line_num); }
 
     |       FOR '(' ';' ';' ')' statement
-              { ASTNode * temp = new ASTNode_Blank(); 
-                $$ = new ASTNode_For(temp, temp, temp, $6, line_num);
+              { CNode * temp = new CNodeBlank(); 
+                $$ = new CNodeFor(temp, temp, temp, $6, line_num);
               }
 expression:     literal    { $$ = $1; }
           |     negative   { $$ = $1; }
@@ -166,34 +167,39 @@ expression:     literal    { $$ = $1; }
           |     operation  { $$ = $1; }
           |     compare    { $$ = $1; }
           |     assignment { $$ = $1; }
-          |     BREAK      { $$ = new ASTNode_Break(line_num); }
+          |     BREAK      { $$ = new CNodeBreak(line_num); }
 
 literal:        INT_LITERAL {
-                  $$ = new ASTNode_Literal($1, "int");
+                  $$ = new CNodeLiteral($1, "int");
                 }
        |        CHAR_LITERAL {
-                  $$ = new ASTNode_Literal($1, "char");
+                  $$ = new CNodeLiteral($1, "char");
                 }
+
+       |        STRING_LITERAL {
+                  $$ = new CNodeLiteral($1, "char_array");
+                }
+  /*
        |        CHAR_LITERAL_NEWLINE {
-                  $$ = new ASTNode_Literal($1, "char");
+                  $$ = new CNodeLiteral($1, "char");
                 }
        |        CHAR_LITERAL_TAB {
-                  $$ = new ASTNode_Literal($1, "char");
+                  $$ = new CNodeLiteral($1, "char");
                 }
        |        CHAR_LITERAL_QUOTE {
-                  $$ = new ASTNode_Literal($1, "char");
+                  $$ = new CNodeLiteral($1, "char");
                 }
        |        CHAR_LITERAL_BACKSLASH {
-                  $$ = new ASTNode_Literal($1, "char");
+                  $$ = new CNodeLiteral($1, "char");
                 }
-
+  */
 
 negative: '-' expression %prec UMINUS {
-            $$ = new ASTNode_Negation($2, line_num);
+            $$ = new CNodeNegation($2, line_num);
             }
 
 not_:      '!' expression %prec NOT {
-            $$ = new ASTNode_Not($2, line_num);
+            $$ = new CNodeNot($2, line_num);
             }
 
 variable:     ID {
@@ -205,82 +211,82 @@ variable:     ID {
                   yyerror(err_string);
                   exit(2);
                   }
-                $$ = new ASTNode_Variable( entry );
+                $$ = new CNodeVariable( entry );
                 }
 
 operation:
          expression '+' expression {
-                  $$ = new ASTNode_Math2($1, $3, '+', line_num);
+                  $$ = new CNodeMath2($1, $3, '+', line_num);
          }
     |    expression '-' expression {
-                  $$ = new ASTNode_Math2($1, $3, '-', line_num);
+                  $$ = new CNodeMath2($1, $3, '-', line_num);
          }
     |    expression '*' expression {
-                  $$ = new ASTNode_Math2($1, $3, '*', line_num);
+                  $$ = new CNodeMath2($1, $3, '*', line_num);
          }
     |    expression '/' expression {
-                  $$ = new ASTNode_Math2($1, $3, '/', line_num);
+                  $$ = new CNodeMath2($1, $3, '/', line_num);
          }
     |    expression '%' expression {
-                  $$ = new ASTNode_Math2($1, $3, '%', line_num);
+                  $$ = new CNodeMath2($1, $3, '%', line_num);
          }
     |    '(' expression ')' {
                   $$ = $2;
          }
     |    COMMAND_RANDOM '(' expression ')' {
-                  $$ = new ASTNode_Random($3, line_num);
+                  $$ = new CNodeRandom($3, line_num);
   }
 
 assignment:
           variable '=' expression {
-            $$ = new ASTNode_Assign($1, $3, line_num);
+            $$ = new CNodeAssign($1, $3, line_num);
           }
     |     variable ASSIGN_ADD expression {
-            $$ = new ASTNode_MathAssign($1, $3, '+', line_num);
+            $$ = new CNodeMathAssign($1, $3, '+', line_num);
           }
     |     variable ASSIGN_SUB expression {
-            $$ = new ASTNode_MathAssign($1, $3, '-', line_num);
+            $$ = new CNodeMathAssign($1, $3, '-', line_num);
           }
     |     variable ASSIGN_MULT expression {
-            $$ = new ASTNode_MathAssign($1, $3, '*', line_num);
+            $$ = new CNodeMathAssign($1, $3, '*', line_num);
           }
     |     variable ASSIGN_DIV expression {
-            $$ = new ASTNode_MathAssign($1, $3, '/', line_num);
+            $$ = new CNodeMathAssign($1, $3, '/', line_num);
           }
     |     variable ASSIGN_MOD expression {
-            $$ = new ASTNode_MathAssign($1, $3, '%', line_num);
+            $$ = new CNodeMathAssign($1, $3, '%', line_num);
           }
 compare:
            expression COMP_EQU expression {
-                  $$ = new ASTNode_Comparison($1, $3, "==", line_num);
+                  $$ = new CNodeComparison($1, $3, "==", line_num);
            }
         |  expression COMP_NEQU expression {
-                  $$ = new ASTNode_Comparison($1, $3, "!=", line_num);
+                  $$ = new CNodeComparison($1, $3, "!=", line_num);
            }
         |  expression COMP_GTE expression {
-                    $$ = new ASTNode_Comparison($1, $3, ">=", line_num);
+                    $$ = new CNodeComparison($1, $3, ">=", line_num);
            }
         |  expression COMP_LESS expression {
-                    $$ = new ASTNode_Comparison($1, $3, "<", line_num);
+                    $$ = new CNodeComparison($1, $3, "<", line_num);
            }
         |  expression COMP_LTE expression {
-                    $$ = new ASTNode_Comparison($1, $3, "<=", line_num);
+                    $$ = new CNodeComparison($1, $3, "<=", line_num);
            }
         |  expression COMP_GTR expression {
-                    $$ = new ASTNode_Comparison($1, $3, ">", line_num);
+                    $$ = new CNodeComparison($1, $3, ">", line_num);
            }
         |  expression BOOL_AND expression {
-                    $$ = new ASTNode_Logical($1, $3, "&&", line_num);
+                    $$ = new CNodeLogical($1, $3, "&&", line_num);
            }
         |  expression BOOL_OR expression {
-                    $$ = new ASTNode_Logical($1, $3, "||", line_num);
+                    $$ = new CNodeLogical($1, $3, "||", line_num);
            }
         |  expression '?' expression ':' expression {
-                    $$ = new ASTNode_Conditional($1, $3, $5, line_num);
+                    $$ = new CNodeConditional($1, $3, $5, line_num);
            }
 
 command:   COMMAND_PRINT parameters {
-             $$ = new ASTNode_Print();
+             $$ = new CNodePrint();
              for (int i = 0; i < $2->GetNumChildren(); i++) {
                $$->AddChild($2->RemoveChild(i));
              }
@@ -288,7 +294,7 @@ command:   COMMAND_PRINT parameters {
            }
 
 parameters:  expression {
-              $$ = new ASTNode_Temp();
+              $$ = new CNodeTemp();
               $$->AddChild($1);
              }
           |  parameters ',' expression {

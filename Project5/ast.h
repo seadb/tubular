@@ -11,28 +11,28 @@
 #include "symbol_table.h"
 // The classes in this file hold info about the nodes that form the Abstract Syntax Tree (AST)
 //
-// ASTNode : The base class for all of the others, with useful virtual functions.
+// CNode : The base class for all of the others, with useful virtual functions.
 //
-// ASTNode_Block : Blocks of statements, including the overall program.
-// ASTNode_Variable : Leaf node containing a variable.
-// ASTNode_Literal : Leaf node contiaing a literal value.
-// ASTNode_Assign : Assignements
-// ASTNode_Math2 : Two-input math operations (here, just '+' and '-')
+// CNodeBlock : Blocks of statements, including the overall program.
+// CNodeVariable : Leaf node containing a variable.
+// CNodeLiteral : Leaf node contiaing a literal value.
+// CNodeAssign : Assignements
+// CNodeMath2 : Two-input math operations (here, just '+' and '-')
 
-class ASTNode {
+class CNode {
 protected:
   int mLineNum;                     // What line of the source program generated this node?
-  std::vector<ASTNode *> mChildren;  // What sub-trees does this node have?
+  std::vector<CNode *> mChildren;  // What sub-trees does this node have?
   std::string mLeftType;
   std::string mRightType;
 
 public:
-  ASTNode(int in_mLineNum=-1) : mLineNum(in_mLineNum) { ; }
+  CNode(int lineNum=-1) : mLineNum(lineNum) { ; }
   void yyerr(std::string errorString) {
   	std::cout << "ERROR(line " << mLineNum << "): " << errorString << std::endl;
   	exit(1);
   }
-  virtual ~ASTNode() {
+  virtual ~CNode() {
     for (int i = 0; i < (int) mChildren.size(); i++) {
       if (mChildren[i] != NULL) delete mChildren[i];
     }
@@ -40,26 +40,26 @@ public:
 
   // Accessors
   int GetLineNum() const { return mLineNum; }
-  ASTNode * GetChild(int id) { return mChildren[id]; }
+  CNode * GetChild(int id) { return mChildren[id]; }
   unsigned int GetNumChildren() const { return mChildren.size(); }
 
   void SetLineNum(int lineNum) { mLineNum = lineNum; }
 
-  ASTNode * RemoveChild(int id) {
-    ASTNode * outChild = mChildren[id];
+  CNode * RemoveChild(int id) {
+    CNode * outChild = mChildren[id];
     mChildren[id] = NULL;
     return outChild;
   }
 
   // Add a new child to this node, at the end of the vector.
-  void AddChild(ASTNode * child) { mChildren.push_back(child); }
+  void AddChild(CNode * child) { mChildren.push_back(child); }
 
   // Convert a single node to TubeIC and return information about the
   // variable where the results are saved.  Call mChildren recursively.
-  virtual CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) = 0;
+  virtual CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) = 0;
 
   // Return the name of the node being called.  This function is useful for debbing the AST.
-  virtual std::string GetName() { return "ASTNode (base class)"; }
+  virtual std::string GetName() { return "CNode (base class)"; }
 
   // Debug function to help make sure the AST is being built correctly...
   void DebugPrint(int depth=0) {
@@ -73,22 +73,22 @@ public:
 
 
 // A temporary node used to transfer mChildren...
-class ASTNode_Temp : public ASTNode {
+class CNodeTemp : public CNode {
 public:
-  ASTNode_Temp() { ; }
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CNodeTemp() { ; }
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     std::cerr << "Internal Compiler Error: Trying to run CompileTubeIC on a temporary node!!" << std::endl;
     return NULL;
   }
 
-  std::string GetName() { return "ASTNode_Temp (temporary container class)"; }
+  std::string GetName() { return "CNodeTemp (temporary container class)"; }
 };
 
 // Block...
-class ASTNode_Block : public ASTNode {
+class CNodeBlock : public CNode {
 public:
-  ASTNode_Block() { ; }
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CNodeBlock() { ; }
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     // Compile the code for each sub-tree in this block
     for (int i = 0; i < (int) mChildren.size(); i++) {
       mChildren[i]->CompileTubeIC(tables, out);
@@ -96,48 +96,47 @@ public:
     return NULL;
   }
 
-  std::string GetName() { return "ASTNode_Block (container class)"; }
+  std::string GetName() { return "CNodeBlock (container class)"; }
 };
 
 // Leaves...
-class ASTNode_Variable : public ASTNode {
+class CNodeVariable : public CNode {
 private:
-  CTableEntry * var_entry;
+  CTableEntry * mVarEntry;
 public:
-  ASTNode_Variable(CTableEntry * in_entry) : var_entry(in_entry) {;}
+  CNodeVariable(CTableEntry * entry) : mVarEntry(entry) {;}
 
-  CTableEntry * GetVarEntry() { return var_entry; }
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) { 
-    return var_entry; 
+  CTableEntry * GetVarEntry() { return mVarEntry; }
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) { 
+    return mVarEntry; 
   }
 
   std::string GetName() {
-    std::string out_string = "ASTNode_Variable (";
-    out_string += var_entry->GetName();
+    std::string out_string = "CNodeVariable (";
+    out_string += mVarEntry->GetName();
     out_string += ")";
     return out_string;
   }
 
 };
 
-class ASTNode_Literal : public ASTNode {
+class CNodeLiteral : public CNode {
 private:
-  std::string lexeme;
-  std::string type;
+  std::string mLexeme;
+  std::string mType;
 public:
-  ASTNode_Literal(std::string in_lex, std::string in_type) : lexeme(in_lex), type(in_type) { ; }
+  CNodeLiteral(std::string in_lex, std::string in_type) : mLexeme(in_lex), mType(in_type) { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * out_var = tables.AddTempEntry();
-    out << "val_copy " << lexeme << " s" << out_var->GetVarID() << std::endl;
-    out_var->SetType(type);
+    out << "val_copy " << mLexeme << " s" << out_var->GetVarID() << std::endl;
+    out_var->SetType(mType);
     return out_var;
   }
 
-
   std::string GetName() {
-    std::string out_string = "ASTNode_Literal (";
-    out_string += lexeme;
+    std::string out_string = "CNodeLiteral (";
+    out_string += mLexeme;
     out_string += ")";
     return out_string;
   }
@@ -146,17 +145,17 @@ public:
 
 // Math...
 
-class ASTNode_Assign : public ASTNode {
+class CNodeAssign : public CNode {
 public:
-  ASTNode_Assign(ASTNode * lhs, ASTNode * rhs, int  mLineNum) {
-    mLineNum = mLineNum;
+  CNodeAssign(CNode * lhs, CNode * rhs, int  lineNum) {
+    mLineNum = lineNum;
     mChildren.push_back(lhs);
     mChildren.push_back(rhs);
   }
 
-  ~ASTNode_Assign() { ; }
+  ~CNodeAssign() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * lhs_var = mChildren[0]->CompileTubeIC(tables, out);
     CTableEntry * rhs_var = mChildren[1]->CompileTubeIC(tables, out);
     mLeftType = lhs_var->GetType();
@@ -175,32 +174,30 @@ public:
     return lhs_var;
     }
 
-  std::string GetName() { return "ASTNode_Assign (operator=)"; }
+  std::string GetName() { return "CNodeAssign (operator=)"; }
 };
 
-class ASTNode_MathAssign : public ASTNode {
+class CNodeMathAssign : public CNode {
 protected:
-  int math_op;
+  int mMathOp;
 public:
-  ASTNode_MathAssign(ASTNode * lhs, ASTNode * rhs, int op, int mLineNum) {
+  CNodeMathAssign(CNode * lhs, CNode * rhs, int op, int lineNum) {
     mChildren.push_back(lhs);
     mChildren.push_back(rhs);
-    math_op = op;
-    mLineNum = mLineNum;
+    mMathOp = op;
+    mLineNum = lineNum;
   }
 
-  ~ASTNode_MathAssign() { ; }
+  ~CNodeMathAssign() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * lhs_var = mChildren[0]->CompileTubeIC(tables, out);
     CTableEntry * rhs_var = mChildren[1]->CompileTubeIC(tables, out);
     mLeftType = lhs_var->GetType();
     mRightType = rhs_var->GetType();
-    if (mLeftType == "char") {
+    if (mLeftType == "char" || mRightType == "char") {
 	std::string e;
-	e += "cannot use type '";
-	e += mLeftType;
-	e += "' in mathematical expressions";
+	e += "cannot use type 'char' in mathematical expressions";
 	yyerr(e);
     } else if (mRightType == "char") {
         std::string e;
@@ -213,7 +210,30 @@ public:
     const int r = rhs_var->GetVarID();
 
     // Determine the correct operation...
-    if (math_op == '+') {
+    switch(mMathOp){
+      case '+':
+        out << "add s" << l << " s" << r << " s" << l << std::endl;
+        break;
+      case '-':
+        out << "sub s" << l << " s" << r << " s" << l << std::endl;
+        break;
+      case '*':
+        out << "mult s" << l << " s" << r << " s" << l << std::endl;
+        break;
+      case '/':
+        out << "div s" << l << " s" << r << " s" << l << std::endl;
+        break;
+      case '%':
+        out << "mod s" << l << " s" << r << " s" << l << std::endl;
+        break;
+      default:
+        std::cerr << "INTERNAL COMPILER ERROR: Unknown MathAssign operator '"
+                << mMathOp << "'" << std::endl;
+        break;
+    }
+
+    /*
+    if (mMathOp == '+') {
       out << "add s" << l << " s" << r << " s" << l << std::endl;
     } else if (math_op == '-') {
       out << "sub s" << l << " s" << r << " s" << l << std::endl;
@@ -227,7 +247,7 @@ public:
     else {
       std::cerr << "INTERNAL COMPILER ERROR: Unknown MathAssign operator '"
                 << math_op << "'" << std::endl;
-    }
+    }*/
 
     lhs_var->SetType("int");
 
@@ -235,25 +255,25 @@ public:
   }
 
   std::string GetName() {
-    std::string out_string = "ASTNode_MathAssign (operator";
-    out_string += (char) math_op;
+    std::string out_string = "CNodeMathAssign (operator";
+    out_string += (char) mMathOp;
     out_string += ")";
     return out_string;
   }
 };
 
-class ASTNode_Math2 : public ASTNode {
+class CNodeMath2 : public CNode {
 protected:
-  int math_op;
+  int mMathOp;
 public:
-  ASTNode_Math2(ASTNode * in1, ASTNode * in2, int op, int mLineNum) : math_op(op) {
+  CNodeMath2(CNode * in1, CNode * in2, int op, int lineNum) : mMathOp(op) {
     mChildren.push_back(in1);
     mChildren.push_back(in2);
-    mLineNum = mLineNum;
+    mLineNum = lineNum;
   }
-  ~ASTNode_Math2() { ; }
+  ~CNodeMath2() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * in_var1 = mChildren[0]->CompileTubeIC(tables, out);
     CTableEntry * in_var2 = mChildren[1]->CompileTubeIC(tables, out);
     CTableEntry * out_var = tables.AddTempEntry();
@@ -275,7 +295,33 @@ public:
     const int i1 = in_var1->GetVarID();
     const int i2 = in_var2->GetVarID();
     const int o3 = out_var->GetVarID();
+    
 
+    switch(mMathOp){
+      case '+':
+        out << "add s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+        break;
+      case '-':
+        out << "sub s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+        break;
+      case '*':
+        out << "mult s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+        break;
+      case '/':
+        out << "div s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+        break;
+      case '%':
+        out << "mod s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
+        break;
+      default:
+        std::cerr << "INTERNAL COMPILER ERROR: Unknown Math2 operator '"
+                << mMathOp << "'" << std::endl;
+        break;
+    }
+
+    out_var->SetType("int");
+    return out_var;
+        /*
     // Determine the correct operation...
     if (math_op == '+') {
       out << "add s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
@@ -292,27 +338,26 @@ public:
       std::cerr << "INTERNAL COMPILER ERROR: Unknown Math2 operator '"
                 << math_op << "'" << std::endl;
     }
-    out_var->SetType("int");
-    return out_var;
+    */
   }
 
   std::string GetName() {
-    std::string out_string = "ASTNode_Math2 (operator";
-    out_string += (char) math_op;
+    std::string out_string = "CNodeMath2 (operator";
+    out_string += (char) mMathOp;
     out_string += ")";
     return out_string;
   }
 };
 
-class ASTNode_Negation : public ASTNode {
+class CNodeNegation : public CNode {
 public:
-  ASTNode_Negation(ASTNode * in, int mLineNum) {
+  CNodeNegation(CNode * in, int lineNum) {
     mChildren.push_back(in);
-    mLineNum = mLineNum;
+    mLineNum = lineNum;
   }
-  ~ASTNode_Negation() { ; }
+  ~CNodeNegation() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * in_var = mChildren[0]->CompileTubeIC(tables, out);
     CTableEntry * out_var = tables.AddTempEntry();
     mLeftType = in_var->GetType();
@@ -333,19 +378,19 @@ public:
   }
 
   std::string GetName() {
-    return "ASTNode_Negation";
+    return "CNodeNegation";
   }
 };
 
-class ASTNode_Not : public ASTNode {
+class CNodeNot : public CNode {
 public:
-  ASTNode_Not(ASTNode * in, int mLineNum) {
+  CNodeNot(CNode * in, int lineNum) {
     mChildren.push_back(in);
-    mLineNum = mLineNum;
+    mLineNum = lineNum;
   }
-  ~ASTNode_Not() { ; }
+  ~CNodeNot() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * in_var = mChildren[0]->CompileTubeIC(tables, out);
     CTableEntry * out_var = tables.AddTempEntry();
     mLeftType = in_var->GetType();
@@ -365,22 +410,22 @@ public:
   }
 
   std::string GetName() {
-    return "ASTNode_Not";
+    return "CNodeNot";
   }
 };
 
-class ASTNode_Comparison : public ASTNode {
+class CNodeComparison : public CNode {
 protected:
-  std::string comp_op;
+  std::string mCompOp;
 public:
-  ASTNode_Comparison(ASTNode * in1, ASTNode * in2, std::string op, int mLineNum) : comp_op(op) {
+  CNodeComparison(CNode * in1, CNode * in2, std::string op, int lineNum) : mCompOp(op) {
     mChildren.push_back(in1);
     mChildren.push_back(in2);
-    mLineNum = mLineNum;
+    mLineNum = lineNum;
   }
-  ~ASTNode_Comparison() { ; }
+  ~CNodeComparison() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * in_var1 = mChildren[0]->CompileTubeIC(tables, out);
     CTableEntry * in_var2 = mChildren[1]->CompileTubeIC(tables, out);
     CTableEntry * out_var = tables.AddTempEntry();
@@ -401,48 +446,47 @@ public:
     const int i2 = in_var2->GetVarID();
     const int o3 = out_var->GetVarID();
 
-    // Determine the correct operation...
-    if (comp_op == "<") {
+    if (mCompOp == "<") {
       out << "test_less s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
-    } else if (comp_op == ">") {
+    } else if (mCompOp == ">") {
       out << "test_gtr s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
-    } else if (comp_op == "<=") {
+    } else if (mCompOp == "<=") {
       out << "test_lte s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
-    } else if (comp_op == ">=") {
+    } else if (mCompOp == ">=") {
       out << "test_gte s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
-    } else if (comp_op == "==") {
+    } else if (mCompOp == "==") {
       out << "test_equ s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
-    } else if (comp_op == "!=") {
+    } else if (mCompOp == "!=") {
       out << "test_nequ s" << i1 << " s" <<  i2 << " s" << o3 << std::endl;
     }
     else {
       std::cerr << "INTERNAL COMPILER ERROR: Unknown Comparison operator '"
-                << comp_op << "'" << std::endl;
+                << mCompOp << "'" << std::endl;
     }
 
-    return out_var;
+        return out_var;
   }
 
   std::string GetName() {
-    std::string out_string = "ASTNode_Comparison (operator";
-    out_string += comp_op;
+    std::string out_string = "CNodeComparison (operator";
+    out_string += mCompOp;
     out_string += ")";
     return out_string;
   }
 };
 
-class ASTNode_Logical : public ASTNode {
+class CNodeLogical : public CNode {
 protected:
-  std::string log_op;
+  std::string mLogOp;
 public:
-  ASTNode_Logical(ASTNode * in1, ASTNode * in2, std::string op, int mLineNum) : log_op(op) {
+  CNodeLogical(CNode * in1, CNode * in2, std::string op, int lineNum) : mLogOp(op) {
     mChildren.push_back(in1);
     mChildren.push_back(in2);
-    mLineNum = mLineNum;
+    mLineNum = lineNum;
   }
-  ~ASTNode_Logical() { ; }
+  ~CNodeLogical() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * in_var1 = mChildren[0]->CompileTubeIC(tables, out);
     CTableEntry * out_var = tables.AddTempEntry();
     mLeftType = in_var1->GetType();
@@ -457,7 +501,7 @@ public:
     const int o3 = out_var->GetVarID();
 
     // Determine the correct operation...
-    if (log_op == "&&") {
+    if (mLogOp == "&&") {
       out << "test_nequ s" << i1 << " 0 s" << o3 << std::endl;
       out << "jump_if_0 s" << o3 << " and" << o3 << std::endl;
       CTableEntry * in_var2 = mChildren[1]->CompileTubeIC(tables, out);
@@ -473,7 +517,9 @@ public:
       const int i2 = in_var2->GetVarID();
       out << "test_nequ s" << i2 << " 0 s" << o3 << std::endl;
       out << "and" << o3 << ":" << std::endl;
-    } else if (log_op == "||") {
+    } 
+    
+    else if (mLogOp == "||") {
       out << "test_nequ s" << i1 << " 0 s" << o3 << std::endl;
       out << "jump_if_n0 s" << o3 << " or" << o3 << std::endl;
       CTableEntry * in_var2 = mChildren[1]->CompileTubeIC(tables, out);
@@ -489,9 +535,10 @@ public:
       out << "test_nequ s" << i2 << " 0 s" << o3 << std::endl;
       out << "or" << o3 << ":" << std::endl;
     }
+
     else {
       std::cerr << "INTERNAL COMPILER ERROR: Unknown Logical operator '"
-                << log_op << "'" << std::endl;
+                << mLogOp << "'" << std::endl;
     }
     out_var->SetType(in_var1->GetType());
 
@@ -499,24 +546,24 @@ public:
   }
 
   std::string GetName() {
-    std::string out_string = "ASTNode_Logical (operator";
-    out_string += log_op;
+    std::string out_string = "CNodeLogical (operator";
+    out_string += mLogOp;
     out_string += ")";
     return out_string;
   }
 };
 
-class ASTNode_Conditional : public ASTNode {
+class CNodeConditional : public CNode {
 public:
-  ASTNode_Conditional(ASTNode * in1, ASTNode * in2, ASTNode * in3, int mLineNum) {
+  CNodeConditional(CNode * in1, CNode * in2, CNode * in3, int lineNum) {
     mChildren.push_back(in1);
     mChildren.push_back(in2);
     mChildren.push_back(in3);
-    mLineNum = mLineNum;
+    mLineNum = lineNum;
   }
-  ~ASTNode_Conditional() { ; }
+  ~CNodeConditional() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * in_var1 = mChildren[0]->CompileTubeIC(tables, out);
     CTableEntry * out_var = tables.AddTempEntry();
 
@@ -546,20 +593,20 @@ public:
   }
 
   std::string GetName() {
-    return "ASTNode_Conditional";
+    return "CNodeConditional";
   }
 };
 
-class ASTNode_If : public ASTNode {
+class CNodeIf : public CNode {
 public:
-  ASTNode_If(ASTNode * in1, ASTNode * in2, int mLineNum) {
+  CNodeIf(CNode * in1, CNode * in2, int lineNum) {
     mChildren.push_back(in1);
     mChildren.push_back(in2);
-    mLineNum = mLineNum;
+    mLineNum = lineNum;
   }
-  ~ASTNode_If() { ; }
+  ~CNodeIf() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * in_var1 = mChildren[0]->CompileTubeIC(tables, out);
     mLeftType = in_var1->GetType();
     if (mLeftType != "int") {
@@ -590,20 +637,20 @@ public:
   }
 
   std::string GetName() {
-    return "ASTNode_Conditional";
+    return "CNodeConditional";
   }
 };
 
-class ASTNode_While : public ASTNode {
+class CNodeWhile : public CNode {
 public:
-  ASTNode_While(ASTNode * in1, ASTNode * in2, int mLineNum) {
+  CNodeWhile(CNode * in1, CNode * in2, int lineNum) {
     mChildren.push_back(in1);
     mChildren.push_back(in2);
-    mLineNum = mLineNum;
+    mLineNum = lineNum;
   }
-  ~ASTNode_While() { ; }
+  ~CNodeWhile() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * out_var = tables.AddTempEntry();
     const int o4 = out_var->GetVarID();
 
@@ -639,23 +686,23 @@ public:
   }
 
   std::string GetName() {
-    return "ASTNode_Conditional";
+    return "CNodeConditional";
   }
 };
 
-class ASTNode_For : public ASTNode {
+class CNodeFor : public CNode {
 public:
-  ASTNode_For(ASTNode * in1, ASTNode * in2, ASTNode *in3,
-                ASTNode *in4, int mLineNum) {
+  CNodeFor(CNode * in1, CNode * in2, CNode *in3,
+                CNode *in4, int lineNum) {
     mChildren.push_back(in1);
     mChildren.push_back(in2);
     mChildren.push_back(in3);
     mChildren.push_back(in4);
-    mLineNum = mLineNum;
+    mLineNum = lineNum;
   }
-  ~ASTNode_For() { ; }
+  ~CNodeFor() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * out_var = tables.AddTempEntry();
     const int o4 = out_var->GetVarID();
 
@@ -696,18 +743,18 @@ public:
   }
 
   std::string GetName() {
-    return "ASTNode_For";
+    return "CNodeFor";
   }
 };
 
-class ASTNode_Break : public ASTNode {
+class CNodeBreak : public CNode {
 public:
-  ASTNode_Break(int mLineNum) {
-    mLineNum = mLineNum;
+  CNodeBreak(int lineNum) {
+    mLineNum = lineNum;
   }
-  ~ASTNode_Break() { ; }
+  ~CNodeBreak() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     if(tables.breaks.size() > 0) {
       out << "jump " << tables.breaks.back() << std::endl;
       //breaks.pop_back();
@@ -722,16 +769,16 @@ public:
   }
 
   std::string GetName() {
-    return "ASTNode_Conditional";
+    return "CNodeConditional";
   }
 };
 
-class ASTNode_Print : public ASTNode {
+class CNodePrint : public CNode {
 public:
-  ASTNode_Print() { ; }
-  virtual ~ASTNode_Print() { ; }
+  CNodePrint() { ; }
+  virtual ~CNodePrint() { ; }
 
-  virtual CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out)
+  virtual CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out)
   {
     for (int i = 0; i < (int) mChildren.size(); i++) {
       CTableEntry * in_var = mChildren[i]->CompileTubeIC(tables, out);
@@ -747,16 +794,16 @@ public:
   }
 };
 
-class ASTNode_Random : public ASTNode {
+class CNodeRandom : public CNode {
 public:
-  ASTNode_Random(ASTNode * in, int mLineNum) {
+  CNodeRandom(CNode * in, int lineNum) {
     mChildren.push_back(in);
-    mLineNum = mLineNum;
+    mLineNum = lineNum;
   }
 
-  ~ASTNode_Random() { ; }
+  ~CNodeRandom() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * in_var = mChildren[0]->CompileTubeIC(tables, out);
     CTableEntry * out_var = tables.AddTempEntry();
     mLeftType = in_var->GetType();
@@ -775,17 +822,17 @@ public:
   }
 };
 
-class ASTNode_Else : public ASTNode {
+class CNodeElse : public CNode {
 public:
-  ASTNode_Else(ASTNode * in1, ASTNode * in2, ASTNode * in3, int mLineNum) {
+  CNodeElse(CNode * in1, CNode * in2, CNode * in3, int lineNum) {
     mChildren.push_back(in1);
     mChildren.push_back(in2);
     mChildren.push_back(in3);
-    mLineNum = mLineNum;
+    mLineNum = lineNum;
   }
-  ~ASTNode_Else() { ; }
+  ~CNodeElse() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * in_var1 = mChildren[0]->CompileTubeIC(tables, out);
     CTableEntry * out_var = tables.AddTempEntry();
 
@@ -815,22 +862,22 @@ public:
   }
 
   std::string GetName() {
-    return "ASTNode_Conditional";
+    return "CNodeConditional";
   }
 };
 
-class ASTNode_Blank : public ASTNode {
+class CNodeBlank : public CNode {
 public:
-  ASTNode_Blank() { ; }
+  CNodeBlank() { ; }
 
-  CTableEntry * CompileTubeIC(symbolTables & tables, std::ostream & out) {
+  CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
     CTableEntry * out_var = tables.AddTempEntry();
     out_var->SetType("int");
     return out_var;
   }
 
   std::string GetName() {
-    std::string out_string = "ASTNode_Blank";
+    std::string out_string = "CNodeBlank";
     return out_string;
   }
 
