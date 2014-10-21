@@ -36,10 +36,10 @@ void yyerror2(std::string err_string, int orig_line) {
   ASTNode * ast_node;
 }
 
-%token CASSIGN_ADD CASSIGN_SUB CASSIGN_MULT CASSIGN_DIV CASSIGN_MOD COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE BOOL_AND BOOL_OR COMMAND_PRINT COMMAND_IF COMMAND_ELSE COMMAND_WHILE COMMAND_BREAK
+%token ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE BOOL_AND BOOL_OR COMMAND_PRINT COMMAND_IF COMMAND_ELSE COMMAND_WHILE COMMAND_BREAK COMMAND_FOR
 %token <lexeme> INT_LIT CHAR_LIT ID TYPE
 
-%right '=' CASSIGN_ADD CASSIGN_SUB CASSIGN_MULT CASSIGN_DIV CASSIGN_MOD
+%right '=' ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %left BOOL_OR
 %left BOOL_AND
 %nonassoc COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE
@@ -52,7 +52,7 @@ void yyerror2(std::string err_string, int orig_line) {
 %nonassoc COMMAND_ELSE
 
 
-%type <ast_node> var_declare expression declare_assign statement statement_list var_usage lhs_ok command argument_list code_block if_start while_start flow_command
+%type <ast_node> declare expression declare_assign statement statement_list var_usage lhs_ok command argument_list code_block if_start while_start flow_control
 %%
 
 program:      statement_list {
@@ -72,16 +72,16 @@ statement_list:	 {
 		 }
 	;
 
-statement:   var_declare ';'    {  $$ = $1;  }
+statement:   declare ';'    {  $$ = $1;  }
 	|    declare_assign ';' {  $$ = $1;  }
 	|    expression ';'     {  $$ = $1;  }
 	|    command ';'        {  $$ = $1;  }
-        |    flow_command       {  $$ = $1;  }
+        |    flow_control       {  $$ = $1;  }
         |    code_block         {  $$ = $1;  }
         |    ';'                {  $$ = NULL;  }
 	;
 
-var_declare:	TYPE ID {
+declare:	TYPE ID {
 	          if (symbol_table.InCurScope($2) != 0) {
 		    std::string err_string = "redeclaration of variable '";
 		    err_string += $2;
@@ -106,7 +106,7 @@ var_declare:	TYPE ID {
 	        }
 	;
 
-declare_assign:  var_declare '=' expression {
+declare_assign:  declare '=' expression {
 	           $$ = new ASTNode_Assign($1, $3);
                    $$->SetLineNum(line_num);
 	         }
@@ -185,23 +185,23 @@ expression:  expression '+' expression {
                $$ = new ASTNode_Assign($1, $3);
                $$->SetLineNum(line_num);
              }
-	|    lhs_ok CASSIGN_ADD expression {
+	|    lhs_ok ASSIGN_ADD expression {
                $$ = new ASTNode_Assign($1, new ASTNode_Math2($1, $3, '+') );
                $$->SetLineNum(line_num);
              }
-	|    lhs_ok CASSIGN_SUB expression {
+	|    lhs_ok ASSIGN_SUB expression {
                $$ = new ASTNode_Assign($1, new ASTNode_Math2($1, $3, '-') );
                $$->SetLineNum(line_num);
              }
-	|    lhs_ok CASSIGN_MULT expression {
+	|    lhs_ok ASSIGN_MULT expression {
                $$ = new ASTNode_Assign($1, new ASTNode_Math2($1, $3, '*') );
                $$->SetLineNum(line_num);
              }
-	|    lhs_ok CASSIGN_DIV expression {
+	|    lhs_ok ASSIGN_DIV expression {
                $$ = new ASTNode_Assign($1, new ASTNode_Math2($1, $3, '/') );
                $$->SetLineNum(line_num);
              }
-	|    lhs_ok CASSIGN_MOD expression {
+	|    lhs_ok ASSIGN_MOD expression {
                $$ = new ASTNode_Assign($1, new ASTNode_Math2($1, $3, '%') );
                $$->SetLineNum(line_num);
              }
@@ -262,7 +262,7 @@ while_start:  COMMAND_WHILE '(' expression ')' {
               }
            ;
 
-flow_command:  if_start statement COMMAND_ELSE statement {
+flow_control:  if_start statement COMMAND_ELSE statement {
                  $$->SetChild(1, $2);
                  $$->SetChild(2, $4);
                  $$ = $1;

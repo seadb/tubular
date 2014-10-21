@@ -2,7 +2,7 @@
 #include "symbol_table.h"
 #include "type_info.h"
 #include "ast.h"
-#include "tube4-parser.tab.hh"
+#include "tube5-parser.tab.hh"
 
 #include <iostream>
 #include <stdio.h>
@@ -15,10 +15,11 @@ std::string out_filename = "";
 
 %option nounput
 
-type		int|char
+type		int|char|array|string
 id	        [_a-zA-Z][a-zA-Z0-9_]*
 int_lit         [0-9]+
 char_lit        '(.|(\\[\\'nt]))'
+string_lit     \"[A-Za-z\t\n\\\"#+\"
 comment		#.*
 whitespace	[ \t\r]
 passthrough	[+\-*/%=(),!{}[\].;]
@@ -30,19 +31,20 @@ passthrough	[+\-*/%=(),!{}[\].;]
 "else"  { return COMMAND_ELSE; }
 "while" { return COMMAND_WHILE; }
 "break" { return COMMAND_BREAK; }
+"for"   { return COMMAND_FOR; }
 
 {type}        { yylval.lexeme = strdup(yytext);  return TYPE; }
 {id}          { yylval.lexeme = strdup(yytext);  return ID; }
 {int_lit}     { yylval.lexeme = strdup(yytext);  return INT_LIT; }
 {char_lit}    { yylval.lexeme = strdup(yytext);  return CHAR_LIT; }
-
+{string_lit}  { yylval.lexeme = strdup(yytext);  return STRING_LIT; }
 {passthrough}  { yylval.lexeme = strdup(yytext);  return (int) yytext[0]; }
 
-"+=" { return CASSIGN_ADD; }
-"-=" { return CASSIGN_SUB; }
-"*=" { return CASSIGN_MULT; }
-"/=" { return CASSIGN_DIV; }
-"%=" { return CASSIGN_MOD; }
+"+=" { return ASSIGN_ADD; }
+"-=" { return ASSIGN_SUB; }
+"*=" { return ASSIGN_MULT; }
+"/=" { return ASSIGN_DIV; }
+"%=" { return ASSIGN_MOD; }
 
 "==" { return COMP_EQU; }
 "!=" { return COMP_NEQU; }

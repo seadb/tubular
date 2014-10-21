@@ -213,7 +213,7 @@ IC_Entry& IC_Array::Add(std::string inst_name, std::string arg1, std::string arg
 
 void IC_Array::PrintIC(std::ostream & ofs)
 {
-  ofs << "# Ouput from Dr. Charles Ofria's sample compiler." << std::endl;
+  ofs << "# Output from Dr. Charles Ofria's sample compiler." << std::endl;
   for (int i = 0; i < (int) ic_array.size(); i++) {
     ic_array[i]->PrintIC(ofs);
   }
