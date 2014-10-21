@@ -32,29 +32,29 @@
 
 class ASTNode {
 protected:
-  int type;                         // What type should this node pass up?
-  int line_num;                     // What line of the source program generated this node?
-  std::vector<ASTNode *> children;  // What sub-trees does this node have?
+  int mType;                         // What type should this node pass up?
+  int mLineNum;                     // What line of the source program generated this node?
+  std::vector<ASTNode *> mChildren;  // What sub-trees does this node have?
 
-  void SetType(int new_type) { type = new_type; } // Use inside constructor only!
+  void SetType(int new_type) { mType = new_type; } // Use inside constructor only!
 public:
-  ASTNode(int in_type) : type(in_type), line_num(-1) { ; }
+  ASTNode(int in_type) : mType(in_type), mLineNum(-1) { ; }
   virtual ~ASTNode() {
-    for (int i = 0; i < (int) children.size(); i++) delete children[i];
+    for (int i = 0; i < (int) mChildren.size(); i++) delete mChildren[i];
   }
 
-  int GetType() { return type; }
-  int GetLineNum() { return line_num; }
-  ASTNode * GetChild(int id) { return children[id]; }
-  int GetNumChildren() { return children.size(); }
+  int GetType()              { return mType; }
+  int GetLineNum()           { return mLineNum; }
+  ASTNode * GetChild(int id) { return mChildren[id]; }
+  int GetNumChildren()       { return mChildren.size(); }
 
-  void SetLineNum(int _in) { line_num = _in; }
-  void SetChild(int id, ASTNode * in_node) { children[id] = in_node; }
-  void AddChild(ASTNode * in_child) { children.push_back(in_child); }
+  void SetLineNum(int _in) { mLineNum = _in; }
+  void SetChild(int id, ASTNode * in_node) { mChildren[id] = in_node; }
+  void AddChild(ASTNode * in_child) { mChildren.push_back(in_child); }
   void TransferChildren(ASTNode * in_node);
 
   // Convert a single node to TubeIC and return information about the
-  // variable where the results are saved.  Call children recursively.
+  // variable where the results are saved.  Call mChildren recursively.
   virtual CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica) = 0;
 };
 
@@ -77,18 +77,18 @@ public:
 // Leaves...
 class ASTNodeVariable : public ASTNode {
 private:
-  CTableEntry * var_entry;
+  CTableEntry * mVarEntry;
 public:
   ASTNodeVariable(CTableEntry * in_entry)
-    : ASTNode(in_entry->GetType()), var_entry(in_entry) {;}
+    : ASTNode(in_entry->GetType()), mVarEntry(in_entry) {;}
 
-  CTableEntry * GetVarEntry() { return var_entry; }
+  CTableEntry * GetVarEntry() { return mVarEntry; }
   CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
 };
 
 class ASTNodeLiteral : public ASTNode {
 private:
-  std::string lexeme;     // When we print, how should this node look?
+  std::string mLexeme;     // When we print, how should this node look?
 public:
   ASTNodeLiteral(int in_type, std::string in_lex);
   CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
@@ -106,7 +106,7 @@ public:
 
 class ASTNodeMath1 : public ASTNode {
 protected:
-  int math_op;
+  int mMathOp;
 public:
   ASTNodeMath1(ASTNode * in_child, int op);
   virtual ~ASTNodeMath1() { ; }
@@ -116,7 +116,7 @@ public:
 
 class ASTNodeMath2 : public ASTNode {
 protected:
-  int math_op;
+  int mMathOp;
 public:
   ASTNodeMath2(ASTNode * in1, ASTNode * in2, int op);
   virtual ~ASTNodeMath2() { ; }
@@ -126,7 +126,7 @@ public:
 
 class ASTNodeBool2 : public ASTNode {
 protected:
-  int bool_op;
+  int mBoolOp;
 public:
   ASTNodeBool2(ASTNode * in1, ASTNode * in2, int op);
   virtual ~ASTNodeBool2() { ; }
