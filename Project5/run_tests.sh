@@ -21,22 +21,41 @@ summary="Summary:\n";
 function run_error_test {
     ./$project $1 $project.tic > $project.cout;
     Test_Suite/reference_$project $1 ref.tic > ref.cout;
-    diff -w ref.cout $project.cout;
-    result=$?;
-    rm $project.cout ref.cout;
-    if [ $result -ne 0 ]; then
-	echo $1 "failed different error messages";
-	summary=$summary"\n"$1" failed with different error messages"
-	rm $project.tic;
-	if [ -e ref.tic ] ; then 
-		rm ref.tic;
+    grep -Fq "ERROR" ref.cout
+    ref_error=$?
+    grep -Fq "ERROR" $project.cout
+    proj_error=$?    
+    echo $ref_error
+    echo $proj_error
+    echo [ $proj_error ] && [ $ref_error ]
+    if  [ $proj_error -eq "0" ] ; then
+    	if [ $ref_error -ne "0" ] ; then
+		echo $1 " gave an when there should not be an error";
+		summary=$summary"\n"$1" gave an when there should not be an error";
+		rm $project.tic;
+		if [ -e ref.tic ] ; then 
+		    rm ref.tic;
+		fi
+		return 1;
+
 	fi
-	return 1;
-    fi;
+    else
+    	if [ $ref_error -eq "0" ] ; then
+		echo $1 " did not give an error when it should have";
+		summary=$summary"\n"$1" did not give an error when it should have";
+		rm $project.tic;
+		if [ -e ref.tic ] ; then 
+		    rm ref.tic;
+		fi
+		return 1;
+
+	fi
+    	
+    fi
 
     if [ -e ref.tic ] ; then
-	    Test_Suite/TubeIC $project.tic > $project.out
-	    Test_Suite/TubeIC ref.tic > ref.out
+	    Test_Suite/TubeIC -t 1000000 $project.tic > $project.out
+	    Test_Suite/TubeIC -t 1000000 ref.tic > ref.out
 	    rm  ref.tic $project.tic;
 	    diff -w ref.out $project.out;
 	    result=$?;
