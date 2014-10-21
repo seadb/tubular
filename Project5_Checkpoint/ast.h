@@ -7,18 +7,18 @@
 //
 //  ASTNode : The base class for all of the others, with useful virtual functions.
 //
-//  ASTNode_TempNode : AST Node that will be replaced (used for argument lists).
-//  ASTNode_Block : Blocks of statements, including the overall program.
-//  ASTNode_Variable : Leaf node containing a variable.
-//  ASTNode_Literal : Leaf node contiaing a literal value.
-//  ASTNode_Assign : Assignements
-//  ASTNode_Math1 : One-input math operations (unary '-' and '!')
-//  ASTNode_Math2 : Two-input math operations ('+', '-', '*', '/', '%', and comparisons)
-//  ASTNode_Bool2 : Two-input bool operations ('&&' and '||')
-//  ASTNode_If : If-conditional node.
-//  ASTNode_While : While-loop node.
-//  ASTNode_Break : Break node
-//  ASTNode_Print : Print command
+//  ASTNodeTempNode : AST Node that will be replaced (used for argument lists).
+//  ASTNodeBlock : Blocks of statements, including the overall program.
+//  ASTNodeVariable : Leaf node containing a variable.
+//  ASTNodeLiteral : Leaf node contiaing a literal value.
+//  ASTNodeAssign : Assignements
+//  ASTNodeMath1 : One-input math operations (unary '-' and '!')
+//  ASTNodeMath2 : Two-input math operations ('+', '-', '*', '/', '%', and comparisons)
+//  ASTNodeBool2 : Two-input bool operations ('&&' and '||')
+//  ASTNodeIf : If-conditional node.
+//  ASTNodeWhile : While-loop node.
+//  ASTNodeBreak : Break node
+//  ASTNodePrint : Print command
 //
 
 #include <iostream>
@@ -55,115 +55,115 @@ public:
 
   // Convert a single node to TubeIC and return information about the
   // variable where the results are saved.  Call children recursively.
-  virtual tableEntry * CompileTubeIC(symbolTable & table, IC_Array & ica) = 0;
+  virtual CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica) = 0;
 };
 
 
 // A placeholder node in the AST.
-class ASTNode_TempNode : public ASTNode {
+class ASTNodeTempNode : public ASTNode {
 public:
-  ASTNode_TempNode(int in_type) : ASTNode(in_type) { ; }
-  ~ASTNode_TempNode() { ; }
-  tableEntry * CompileTubeIC(symbolTable & table, IC_Array & ica) { return NULL; }
+  ASTNodeTempNode(int in_type) : ASTNode(in_type) { ; }
+  ~ASTNodeTempNode() { ; }
+  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica) { return NULL; }
 };
 
 // Block...
-class ASTNode_Block : public ASTNode {
+class ASTNodeBlock : public ASTNode {
 public:
-  ASTNode_Block() : ASTNode(Type::VOID) { ; }
-  tableEntry * CompileTubeIC(symbolTable & table, IC_Array & ica);
+  ASTNodeBlock() : ASTNode(Type::VOID) { ; }
+  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
 };
 
 // Leaves...
-class ASTNode_Variable : public ASTNode {
+class ASTNodeVariable : public ASTNode {
 private:
-  tableEntry * var_entry;
+  CTableEntry * var_entry;
 public:
-  ASTNode_Variable(tableEntry * in_entry)
+  ASTNodeVariable(CTableEntry * in_entry)
     : ASTNode(in_entry->GetType()), var_entry(in_entry) {;}
 
-  tableEntry * GetVarEntry() { return var_entry; }
-  tableEntry * CompileTubeIC(symbolTable & table, IC_Array & ica);
+  CTableEntry * GetVarEntry() { return var_entry; }
+  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
 };
 
-class ASTNode_Literal : public ASTNode {
+class ASTNodeLiteral : public ASTNode {
 private:
   std::string lexeme;     // When we print, how should this node look?
 public:
-  ASTNode_Literal(int in_type, std::string in_lex);
-  tableEntry * CompileTubeIC(symbolTable & table, IC_Array & ica);
+  ASTNodeLiteral(int in_type, std::string in_lex);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
 };
 
 // Math...
 
-class ASTNode_Assign : public ASTNode {
+class ASTNodeAssign : public ASTNode {
 public:
-  ASTNode_Assign(ASTNode * lhs, ASTNode * rhs);
-  ~ASTNode_Assign() { ; }
+  ASTNodeAssign(ASTNode * lhs, ASTNode * rhs);
+  ~ASTNodeAssign() { ; }
 
-  tableEntry * CompileTubeIC(symbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
 };
 
-class ASTNode_Math1 : public ASTNode {
+class ASTNodeMath1 : public ASTNode {
 protected:
   int math_op;
 public:
-  ASTNode_Math1(ASTNode * in_child, int op);
-  virtual ~ASTNode_Math1() { ; }
+  ASTNodeMath1(ASTNode * in_child, int op);
+  virtual ~ASTNodeMath1() { ; }
 
-  tableEntry * CompileTubeIC(symbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
 };
 
-class ASTNode_Math2 : public ASTNode {
+class ASTNodeMath2 : public ASTNode {
 protected:
   int math_op;
 public:
-  ASTNode_Math2(ASTNode * in1, ASTNode * in2, int op);
-  virtual ~ASTNode_Math2() { ; }
+  ASTNodeMath2(ASTNode * in1, ASTNode * in2, int op);
+  virtual ~ASTNodeMath2() { ; }
 
-  tableEntry * CompileTubeIC(symbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
 };
 
-class ASTNode_Bool2 : public ASTNode {
+class ASTNodeBool2 : public ASTNode {
 protected:
   int bool_op;
 public:
-  ASTNode_Bool2(ASTNode * in1, ASTNode * in2, int op);
-  virtual ~ASTNode_Bool2() { ; }
+  ASTNodeBool2(ASTNode * in1, ASTNode * in2, int op);
+  virtual ~ASTNodeBool2() { ; }
 
-  tableEntry * CompileTubeIC(symbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
 };
 
-class ASTNode_If : public ASTNode {
+class ASTNodeIf : public ASTNode {
 public:
-  ASTNode_If(ASTNode * in1, ASTNode * in2, ASTNode * in3);
-  virtual ~ASTNode_If() { ; }
+  ASTNodeIf(ASTNode * in1, ASTNode * in2, ASTNode * in3);
+  virtual ~ASTNodeIf() { ; }
 
-  tableEntry * CompileTubeIC(symbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
 };
 
-class ASTNode_While : public ASTNode {
+class ASTNodeWhile : public ASTNode {
 public:
-  ASTNode_While(ASTNode * in1, ASTNode * in2);
-  virtual ~ASTNode_While() { ; }
+  ASTNodeWhile(ASTNode * in1, ASTNode * in2);
+  virtual ~ASTNodeWhile() { ; }
 
-  tableEntry * CompileTubeIC(symbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
 };
 
-class ASTNode_Break : public ASTNode {
+class ASTNodeBreak : public ASTNode {
 public:
-  ASTNode_Break();
-  virtual ~ASTNode_Break() { ; }
+  ASTNodeBreak();
+  virtual ~ASTNodeBreak() { ; }
 
-  tableEntry * CompileTubeIC(symbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
 };
 
-class ASTNode_Print : public ASTNode {
+class ASTNodePrint : public ASTNode {
 public:
-  ASTNode_Print(ASTNode * out_child);
-  virtual ~ASTNode_Print() {;}
+  ASTNodePrint(ASTNode * out_child);
+  virtual ~ASTNodePrint() {;}
 
-  tableEntry * CompileTubeIC(symbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
 };
 
 

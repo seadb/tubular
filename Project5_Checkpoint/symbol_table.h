@@ -5,10 +5,10 @@
 //
 // This file contains all of the information about the symbol table.
 //
-// symbolTable : interacted with by the rest of the code to look up information about variables,
+// CSymbolTable : interacted with by the rest of the code to look up information about variables,
 //               labels, and (eventually) functions.
 //
-// tableEntry : all of the stored information about a single variable.
+// CTableEntry : all of the stored information about a single variable.
 //
 
 #include <cstdlib>
@@ -20,160 +20,160 @@
 
 #include "type_info.h"
 
-class symbolTable;
+class CSymbolTable;
 
-class tableEntry {
-  friend class symbolTable;
+class CTableEntry {
+  friend class CSymbolTable;
 protected:
-  int type_id;       // What is the type of this variable?
-  std::string name;  // Variable name used by sourcecode.
-  int scope;         // What scope was this variable declared at?
-  bool is_temp;      // Is this variable just temporary (internal to compiler)
-  int var_id;        // What is the intermediate code ID for this variable?
-  tableEntry * next; // A pointer to another variable that this one is shadowing
+  int mTypeID;       // What is the type of this variable?
+  std::string mName;  // Variable mName used by sourcecode.
+  int mScope;         // What mScope was this variable declared at?
+  bool mIsTemp;      // Is this variable just temporary (internal to compiler)
+  int mVarID;        // What is the intermediate code ID for this variable?
+  CTableEntry * mNext; // A pointer to another variable that this one is shadowing
 
-  tableEntry(int in_type) 
-    : type_id (in_type)
-    , name("__TEMP__")
-    , scope(-1)
-    , is_temp(true)
-    , var_id(-1)
-    , next(NULL)
+  CTableEntry(int in_type) 
+    : mTypeID (in_type)
+    , mName("__TEMP__")
+    , mScope(-1)
+    , mIsTemp(true)
+    , mVarID(-1)
+    , mNext(NULL)
   {
   }
 
-  tableEntry(int in_type, const std::string in_name)
-    : type_id(in_type)
-    , name(in_name)
-    , scope(-1)
-    , is_temp(false)
-    , var_id(-1)
-    , next(NULL)
+  CTableEntry(int in_type, const std::string in_name)
+    : mTypeID(in_type)
+    , mName(in_name)
+    , mScope(-1)
+    , mIsTemp(false)
+    , mVarID(-1)
+    , mNext(NULL)
   {
   }
-  virtual ~tableEntry() { ; }
+  virtual ~CTableEntry() { ; }
 
 public:
-  int GetType()          const { return type_id; }
-  std::string GetName()  const { return name; }
-  int GetScope()         const { return scope; }
-  bool GetTemp()         const { return is_temp; }
-  int GetVarID()         const { return var_id; }
-  tableEntry * GetNext() const { return next; }
+  int GetType()           const { return mTypeID; }
+  std::string GetName()   const { return mName; }
+  int GetScope()          const { return mScope; }
+  bool GetTemp()          const { return mIsTemp; }
+  int GetVarID()          const { return mVarID; }
+  CTableEntry * GetNext() const { return mNext; }
 
-  void SetName(std::string in_name) { name = in_name; }
-  void SetScope(int in_scope) { scope = in_scope; }
-  void SetVarID(int in_id) { var_id = in_id; }
-  void SetNext(tableEntry * in_next) { next = in_next; }
+  void SetName(std::string in_name)     { mName = in_name; }
+  void SetScope(int in_scope)           { mScope = in_scope; }
+  void SetVarID(int in_id)              { mVarID = in_id; }
+  void SetNext(CTableEntry * in_next)   { mNext = in_next; }
 };
 
 
 
-class symbolTable {
+class CSymbolTable {
 private:
-  std::map<std::string, tableEntry *> tbl_map;          // A map of active variables
-  std::vector<std::vector<tableEntry *> *> scope_info;  // Variables declared in each scope
-  std::vector<tableEntry *> var_archive;                // Variables that are out of scope
-  int cur_scope;                                        // Current scope level
-  int next_var_id;                                      // Next variable ID to use.
-  int next_label_id;                                    // Next label ID to use.
-  std::vector<std::string> while_end_stack;             // End labels of active while commands
+  std::map<std::string, CTableEntry *> mTableMap;          // A map of active variables
+  std::vector<std::vector<CTableEntry *> *> mScopeInfo;  // Variables declared in each scope
+  std::vector<CTableEntry *> mVarArchive;                // Variables that are out of scope
+  int mCurrentScope;                                        // Current mScope level
+  int mNextVarID;                                      // Next variable ID to use.
+  int mNextLabelID;                                    // Next label ID to use.
+  std::vector<std::string> mWhileEndStack;             // End labels of active while commands
 
   // Figure out the next memory position to use.  Ideally, we should be recycling these!!
-  int GetNextID() { return next_var_id++; }
+  int GetNextID() { return mNextVarID++; }
 public:
-  symbolTable() : cur_scope(0), next_var_id(0), next_label_id(0) { 
-    scope_info.push_back(new std::vector<tableEntry *>);
+  CSymbolTable() : mCurrentScope(0), mNextVarID(0), mNextLabelID(0) { 
+    mScopeInfo.push_back(new std::vector<CTableEntry *>);
   }
-  ~symbolTable() {
+  ~CSymbolTable() {
     // Clean up all variable entries
-    while (cur_scope >= 0) DecScope();
-    for (int i = 0; i < (int) var_archive.size(); i++) delete var_archive[i];
+    while (mCurrentScope >= 0) DecScope();
+    for (int i = 0; i < (int) mVarArchive.size(); i++) delete mVarArchive[i];
   }
 
-  int GetSize() const { return (int) tbl_map.size(); }
-  int GetCurScope() const { return cur_scope; }
-  const std::vector<tableEntry *> & GetScopeVars(int scope) {
-    if (scope < 0 || scope >= (int) scope_info.size()) {
+  int GetSize() const { return (int) mTableMap.size(); }
+  int GetCurScope() const { return mCurrentScope; }
+  const std::vector<CTableEntry *> & GetScopeVars(int scope) {
+    if (scope < 0 || scope >= (int) mScopeInfo.size()) {
       std::cerr << "Internal Compiler Error: Requesting vars from scope #" << scope
-                << ", but only " << scope_info.size() << " scopes exist." << std::endl;
+                << ", but only " << mScopeInfo.size() << " scopes exist." << std::endl;
     }
-    return *(scope_info[scope]);
+    return *(mScopeInfo[scope]);
   }
 
   void IncScope() {
-    scope_info.push_back(new std::vector<tableEntry *>);
-    cur_scope++;
+    mScopeInfo.push_back(new std::vector<CTableEntry *>);
+    mCurrentScope++;
   }
   void DecScope() {
-    // Remove variables in the old scope and store them in the archive.
-    std::vector<tableEntry *> * old_scope = scope_info.back();
-    scope_info.pop_back();
-    var_archive.insert(var_archive.end(), old_scope->begin(), old_scope->end());
+    // Remove variables in the old mScope and store them in the archive.
+    std::vector<CTableEntry *> * old_scope = mScopeInfo.back();
+    mScopeInfo.pop_back();
+    mVarArchive.insert(mVarArchive.end(), old_scope->begin(), old_scope->end());
 
-    // Make sure to clean up the tbl_map.
+    // Make sure to clean up the mTableMap.
     for (int i = 0; i < (int) old_scope->size(); i++) {
-      tableEntry * old_entry = (*old_scope)[i];
+      CTableEntry * old_entry = (*old_scope)[i];
 
       // If this entry is shadowing another, make shadowed version active again.
       if (old_entry->GetNext() != NULL) {
-        tbl_map[old_entry->GetName()] = old_entry->GetNext();
+        mTableMap[old_entry->GetName()] = old_entry->GetNext();
       }
 
-      // Otherwise just remove it from being an active variable name.
+      // Otherwise just remove it from being an active variable mName.
       else {
-        tbl_map.erase(old_entry->GetName());
+        mTableMap.erase(old_entry->GetName());
       }
     }
 
     delete old_scope;
-    cur_scope--;
+    mCurrentScope--;
   }
 
-  int NextLabelID() { return next_label_id++; }
+  int NextLabelID() { return mNextLabelID++; }
   std::string NextLabelID(std::string prefix) {
     std::stringstream sstm;
-    sstm << prefix << next_label_id++;
+    sstm << prefix << mNextLabelID++;
     return sstm.str();
   }
 
-  int GetWhileDepth() { return (int) while_end_stack.size(); }
-  void PushWhileEndLabel(const std::string & end_label) { while_end_stack.push_back(end_label); }
-  const std::string & GetWhileEndLabel() { return while_end_stack.back(); }
-  void PopWhileEndLabel() { while_end_stack.pop_back(); }
+  int GetWhileDepth() { return (int) mWhileEndStack.size(); }
+  void PushWhileEndLabel(const std::string & end_label) { mWhileEndStack.push_back(end_label); }
+  const std::string & GetWhileEndLabel() { return mWhileEndStack.back(); }
+  void PopWhileEndLabel() { mWhileEndStack.pop_back(); }
       
   // Lookup will find an entry and return it.  If that entry is not in the table, it will return NULL
-  tableEntry * Lookup(std::string in_name) {
-    if (tbl_map.find(in_name) == tbl_map.end()) return NULL;
-    return tbl_map[in_name];
+  CTableEntry * Lookup(std::string in_name) {
+    if (mTableMap.find(in_name) == mTableMap.end()) return NULL;
+    return mTableMap[in_name];
   }
 
   // Determine if a variable has been declared in the current scope.
   bool InCurScope(std::string in_name) {
-    if (tbl_map.find(in_name) == tbl_map.end()) return false;
-    return tbl_map[in_name]->GetScope() == cur_scope;
+    if (mTableMap.find(in_name) == mTableMap.end()) return false;
+    return mTableMap[in_name]->GetScope() == mCurrentScope;
   }
 
   // Insert an entry into the symbol table.
-  tableEntry * AddEntry(int in_type, std::string in_name) {
+  CTableEntry * AddEntry(int in_type, std::string in_name) {
     // Create the new entry for this variable.
-    tableEntry * new_entry = new tableEntry(in_type, in_name);
+    CTableEntry * new_entry = new CTableEntry(in_type, in_name);
     new_entry->SetVarID( GetNextID() );
-    new_entry->SetScope(cur_scope);
+    new_entry->SetScope(mCurrentScope);
 
-    // If an old entry exists by this name, shadow it.
-    tableEntry * old_entry = Lookup(in_name);
+    // If an old entry exists by this mName, shadow it.
+    CTableEntry * old_entry = Lookup(in_name);
     if (old_entry) new_entry->SetNext(old_entry);
 
     // Save the information for the new entry.
-    tbl_map[in_name] = new_entry;
-    scope_info[cur_scope]->push_back(new_entry);
+    mTableMap[in_name] = new_entry;
+    mScopeInfo[mCurrentScope]->push_back(new_entry);
     return new_entry;
   }
 
   // Insert a temp variable entry into the symbol table.
-  tableEntry * AddTempEntry(int in_type) {
-    tableEntry * new_entry = new tableEntry(in_type);
+  CTableEntry * AddTempEntry(int in_type) {
+    CTableEntry * new_entry = new CTableEntry(in_type);
     new_entry->SetVarID( GetNextID() );
     return new_entry;
   }
@@ -182,7 +182,7 @@ public:
   int GetTempVarID() { return GetNextID(); }
   void FreeTempVarID(int id) { (void) id; /* Nothing for now... */ }
 
-  void RemoveEntry(tableEntry * del_var) {
+  void RemoveEntry(CTableEntry * del_var) {
     // We no longer nead this entry...
     delete del_var;
   }

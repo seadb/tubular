@@ -8,11 +8,13 @@
 #include "ast.h"
 #include "type_info.h"
 
+#define YYDEBUG 1
+
 extern int line_num;
 extern int yylex();
 extern std::string out_filename;
  
-symbolTable symbol_table;
+CSymbolTable symbol_table;
 int error_count = 0;
 
 // Create an error function to call when the current line has an error
@@ -36,8 +38,11 @@ void yyerror2(std::string err_string, int orig_line) {
   ASTNode * ast_node;
 }
 
-%token ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE BOOL_AND BOOL_OR COMMAND_PRINT COMMAND_IF COMMAND_ELSE COMMAND_WHILE COMMAND_BREAK COMMAND_FOR
-%token <lexeme> INT_LIT CHAR_LIT ID TYPE
+%token ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD ARRAY //
+COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE BOOL_AND BOOL_OR//
+COMMAND_PRINT COMMAND_IF COMMAND_ELSE COMMAND_WHILE COMMAND_BREAK COMMAND_FOR//
+
+%token <lexeme> INT_LIT CHAR_LIT STRING_LIT ID TYPE
 
 %right '=' ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %left BOOL_OR
@@ -52,212 +57,273 @@ void yyerror2(std::string err_string, int orig_line) {
 %nonassoc COMMAND_ELSE
 
 
-%type <ast_node> declare expression declare_assign statement statement_list var_usage lhs_ok command argument_list code_block if_start while_start flow_control
+%type <ast_node> declare expression declare_assign statement statement_list//
+variable command argument_list code_block if_start while_start flow_control//
+literal assignment operation compare negative not_
 %%
 
 program:      statement_list {
-                 IC_Array ic_array;                             // Array to contain the intermediate code
-                 $1->CompileTubeIC(symbol_table, ic_array);     // Traverse AST, filling ic_array with code
+                 IC_Array ic_array;             // Array to contain the IC 
+                 $1->CompileTubeIC(symbol_table, ic_array); //Fill IC array 
                  std::ofstream out_file(out_filename.c_str());  // Open the output file
-                 ic_array.PrintIC(out_file);                    // Write IC to output file!
+                 ic_array.PrintIC(out_file);             // Write ic to output file
               }
-	     ;
+       ;
 
-statement_list:	 {
-	           $$ = new ASTNode_Block;
+statement_list:   {
+             $$ = new ASTNodeBlock;
                  }
-	|        statement_list statement {
+  |        statement_list statement {
                    if ($2 != NULL) $1->AddChild($2);
                    $$ = $1;
-		 }
-	;
+     }
+  ;
 
-statement:   declare ';'    {  $$ = $1;  }
-	|    declare_assign ';' {  $$ = $1;  }
-	|    expression ';'     {  $$ = $1;  }
-	|    command ';'        {  $$ = $1;  }
+statement:   declare ';'        {  $$ = $1;  }
+        |    declare_assign ';' {  $$ = $1;  }
+        |    expression ';'     {  $$ = $1;  }
+        |    command ';'        {  $$ = $1;  }
         |    flow_control       {  $$ = $1;  }
         |    code_block         {  $$ = $1;  }
         |    ';'                {  $$ = NULL;  }
-	;
+  ;
 
-declare:	TYPE ID {
-	          if (symbol_table.InCurScope($2) != 0) {
-		    std::string err_string = "redeclaration of variable '";
-		    err_string += $2;
-                    err_string += "'";
-                    yyerror(err_string);
-		    exit(1);
-                  }
-		  std::string type_name = $1;
-		  int type_id = 0;
-		  if (type_name == "int") type_id = Type::INT;
-		  else if (type_name == "char") type_id = Type::CHAR;
-		  else {
-		    std::string err_string = "unknown type '";
-		    err_string += $1;
-                    err_string += "'";
-		    yyerror(err_string);
-		  }
-	          tableEntry * cur_entry = symbol_table.AddEntry(type_id, $2);
+code_block:  block_start statement_list block_end { $$ = $2; } ;
+block_start: '{' { symbol_table.IncScope(); } ;
+block_end:   '}' { symbol_table.DecScope(); } ;
 
-	          $$ = new ASTNode_Variable(cur_entry);
-                  $$->SetLineNum(line_num);
-	        }
-	;
+declare:  TYPE ID {
+            if (symbol_table.InCurScope($2) != 0) {
+              std::string err_string = "redeclaration of variable '";
+              err_string += $2;
+              err_string += "'";
+              yyerror(err_string);
+              exit(1);
+            }
+            
+            std::string type_name = $1;
+            int type_id = 0;
+            
+            if (type_name == "int") type_id = Type::INT;
+            else if (type_name == "char") type_id = Type::CHAR;
+            else if (type_name == "string") type_id = Type::CHAR_ARRAY;
+            else {
+              std::string err_string = "unknown type '";
+              err_string += $1;
+              err_string += "'";
+              yyerror(err_string);
+            }
+            
+            CTableEntry * cur_entry = symbol_table.AddEntry(type_id, $2);
 
-declare_assign:  declare '=' expression {
-	           $$ = new ASTNode_Assign($1, $3);
-                   $$->SetLineNum(line_num);
-	         }
-	;
+            $$ = new ASTNodeVariable(cur_entry);
+            $$->SetLineNum(line_num);
+          }
+      |   ARRAY '(' TYPE ')' ID {
+            if (symbol_table.InCurScope($5) != 0) {
+              std::string err_string = "redeclaration of variable '";
+              err_string += $5;
+              err_string += "'";
+              yyerror(err_string);
+              exit(1);
+            }
+            
+            std::string type_name = $3;
+            int type_id = 0;
 
-var_usage:   ID {
-	       tableEntry * cur_entry = symbol_table.Lookup($1);
-               if (cur_entry == NULL) {
-		 std::string err_string = "unknown variable '";
-		 err_string += $1;
-                 err_string += "'";
-		 yyerror(err_string);
-                 exit(1);
-               }
-	       $$ = new ASTNode_Variable(cur_entry);
-               $$->SetLineNum(line_num);
-             }
-	;
-
-lhs_ok:  var_usage { $$ = $1; }
+            if (type_name == "int") type_id = Type::INT_ARRAY;
+            else if (type_name == "char") type_id = Type::CHAR_ARRAY;
+            else {
+              std::string err_string = "unknown type '";
+              err_string += $3;
+              err_string += "'";
+              yyerror(err_string);
+            }
+            
+            CTableEntry * cur_entry = symbol_table.AddEntry(type_id, $5);
+            
+            $$ = new ASTNodeVariable(cur_entry);
+            $$->SetLineNum(line_num);
+      
+      }
       ;
 
-expression:  expression '+' expression { 
-	       $$ = new ASTNode_Math2($1, $3, '+');
-               $$->SetLineNum(line_num);
-             }
-	|    expression '-' expression {
-	       $$ = new ASTNode_Math2($1, $3, '-');
-               $$->SetLineNum(line_num);
-             }
-	|    expression '*' expression {
-	       $$ = new ASTNode_Math2($1, $3, '*');
-               $$->SetLineNum(line_num);
-             }
-	|    expression '/' expression {
-	       $$ = new ASTNode_Math2($1, $3, '/');
-               $$->SetLineNum(line_num);
-             }
-	|    expression '%' expression {
-	       $$ = new ASTNode_Math2($1, $3, '%');
-               $$->SetLineNum(line_num);
-             }
-	|    expression COMP_EQU expression {
-               $$ = new ASTNode_Math2($1, $3, COMP_EQU);
-               $$->SetLineNum(line_num);
-             }
-	|    expression COMP_NEQU expression {
-               $$ = new ASTNode_Math2($1, $3, COMP_NEQU);
-               $$->SetLineNum(line_num);
-             }
-	|    expression COMP_LESS expression {
-               $$ = new ASTNode_Math2($1, $3, COMP_LESS);
-               $$->SetLineNum(line_num);
-             }
-	|    expression COMP_LTE expression {
-               $$ = new ASTNode_Math2($1, $3, COMP_LTE);
-               $$->SetLineNum(line_num);
-             }
-	|    expression COMP_GTR expression {
-               $$ = new ASTNode_Math2($1, $3, COMP_GTR);
-               $$->SetLineNum(line_num);
-             }
-	|    expression COMP_GTE expression {
-               $$ = new ASTNode_Math2($1, $3, COMP_GTE);
-               $$->SetLineNum(line_num);
-             }
-	|    expression BOOL_AND expression {
-               $$ = new ASTNode_Bool2($1, $3, '&');
-               $$->SetLineNum(line_num);
-             }
-	|    expression BOOL_OR expression {
-               $$ = new ASTNode_Bool2($1, $3, '|');
-               $$->SetLineNum(line_num);
-             }
-	|    lhs_ok '=' expression {
-               $$ = new ASTNode_Assign($1, $3);
-               $$->SetLineNum(line_num);
-             }
-	|    lhs_ok ASSIGN_ADD expression {
-               $$ = new ASTNode_Assign($1, new ASTNode_Math2($1, $3, '+') );
-               $$->SetLineNum(line_num);
-             }
-	|    lhs_ok ASSIGN_SUB expression {
-               $$ = new ASTNode_Assign($1, new ASTNode_Math2($1, $3, '-') );
-               $$->SetLineNum(line_num);
-             }
-	|    lhs_ok ASSIGN_MULT expression {
-               $$ = new ASTNode_Assign($1, new ASTNode_Math2($1, $3, '*') );
-               $$->SetLineNum(line_num);
-             }
-	|    lhs_ok ASSIGN_DIV expression {
-               $$ = new ASTNode_Assign($1, new ASTNode_Math2($1, $3, '/') );
-               $$->SetLineNum(line_num);
-             }
-	|    lhs_ok ASSIGN_MOD expression {
-               $$ = new ASTNode_Assign($1, new ASTNode_Math2($1, $3, '%') );
-               $$->SetLineNum(line_num);
-             }
-	|    '-' expression %prec UMINUS {
-               $$ = new ASTNode_Math1($2, '-');
-               $$->SetLineNum(line_num);
-             }
-	|    '!' expression %prec UMINUS {
-               $$ = new ASTNode_Math1($2, '!');
-               $$->SetLineNum(line_num);
-             }
-	|    '(' expression ')' { $$ = $2; } // Ignore parens; used for order
-	|    INT_LIT {
-               $$ = new ASTNode_Literal(Type::INT, $1);
-               $$->SetLineNum(line_num);
-             }
-	|    CHAR_LIT {
-               $$ = new ASTNode_Literal(Type::CHAR, $1);
-               $$->SetLineNum(line_num);
-             }
-	|    var_usage { $$ = $1; }
-	;
+declare_assign:  declare '=' expression {
+             $$ = new ASTNodeAssign($1, $3);
+                   $$->SetLineNum(line_num);
+           }
+  ;
 
-argument_list:	argument_list ',' expression {
-		  ASTNode * node = $1; // Grab the node used for arg list.
-		  node->AddChild($3);    // Save this argument in the node.
-		  $$ = node;
-		}
-	|	expression {
-		  // Create a temporary AST node to hold the arg list.
-		  $$ = new ASTNode_TempNode(Type::VOID);
-		  $$->AddChild($1);   // Save this argument in the temp node.
+
+expression:     literal    { $$ = $1; }
+          |     negative   { $$ = $1; }
+          |     not_       { $$ = $1; }
+          |     variable   { $$ = $1; }
+          |     operation  { $$ = $1; }
+          |     compare    { $$ = $1; }
+          |     assignment { $$ = $1; }
+
+literal:   
+       INT_LIT {
+               $$ = new ASTNodeLiteral(Type::INT, $1);
+               $$->SetLineNum(line_num);
+             }
+  |    CHAR_LIT {
+               $$ = new ASTNodeLiteral(Type::CHAR, $1);
+               $$->SetLineNum(line_num);
+             }
+  |    STRING_LIT {
+              $$ = new ASTNodeLiteral(Type::CHAR_ARRAY, $1);
+             } 
+          
+negative:    '-' expression %prec UMINUS {
+               $$ = new ASTNodeMath1($2, '-');
+               $$->SetLineNum(line_num);
+             }
+
+not_:         '!' expression %prec UMINUS {
+               $$ = new ASTNodeMath1($2, '!');
+               $$->SetLineNum(line_num);
+             }
+
+variable:   ID {
+                CTableEntry * cur_entry = symbol_table.Lookup($1);
+                if (cur_entry == NULL) {
+                  std::string err_string = "unknown variable '";
+                  err_string += $1;
+                  err_string += "'";
+                  yyerror(err_string);
+                  exit(1);
+                }
+                $$ = new ASTNodeVariable(cur_entry);
+                $$->SetLineNum(line_num);
+             }
+
+        |    ID '[' INT_LIT ']' {
+        
+        }
+;
+
+operation:
+       expression '+' expression { 
+              $$ = new ASTNodeMath2($1, $3, '+');
+              $$->SetLineNum(line_num);
+             }
+  |    expression '-' expression {
+              $$ = new ASTNodeMath2($1, $3, '-');
+              $$->SetLineNum(line_num);
+             }
+  |    expression '*' expression {
+              $$ = new ASTNodeMath2($1, $3, '*');
+              $$->SetLineNum(line_num);
+             }
+  |    expression '/' expression {
+              $$ = new ASTNodeMath2($1, $3, '/');
+              $$->SetLineNum(line_num);
+             }
+  |    expression '%' expression {
+              $$ = new ASTNodeMath2($1, $3, '%');
+              $$->SetLineNum(line_num);
+             }
+  |    '(' expression ')' { $$ = $2; } // Ignore parens used for order
+  
+ /* |    expression '?' expression ':' expression {}
+   */           
+             
+compare: 
+       
+       expression COMP_NEQU expression {
+               $$ = new ASTNodeMath2($1, $3, COMP_NEQU);
+               $$->SetLineNum(line_num);
+             }
+  |    expression COMP_EQU expression {
+              $$ = new ASTNodeMath2($1, $3, COMP_EQU);
+              $$->SetLineNum(line_num);
+             }
+  |    expression COMP_LESS expression {
+               $$ = new ASTNodeMath2($1, $3, COMP_LESS);
+               $$->SetLineNum(line_num);
+             }
+  |    expression COMP_LTE expression {
+               $$ = new ASTNodeMath2($1, $3, COMP_LTE);
+               $$->SetLineNum(line_num);
+             }
+  |    expression COMP_GTR expression {
+               $$ = new ASTNodeMath2($1, $3, COMP_GTR);
+               $$->SetLineNum(line_num);
+             }
+  |    expression COMP_GTE expression {
+               $$ = new ASTNodeMath2($1, $3, COMP_GTE);
+               $$->SetLineNum(line_num);
+             }
+  |    expression BOOL_AND expression {
+               $$ = new ASTNodeBool2($1, $3, '&');
+               $$->SetLineNum(line_num);
+             }
+  |    expression BOOL_OR expression {
+               $$ = new ASTNodeBool2($1, $3, '|');
+               $$->SetLineNum(line_num);
+             }
+assignment:
+       variable '=' expression {
+               $$ = new ASTNodeAssign($1, $3);
+               $$->SetLineNum(line_num);
+             }
+  |    variable ASSIGN_ADD expression {
+               $$ = new ASTNodeAssign($1, new ASTNodeMath2($1, $3, '+') );
+               $$->SetLineNum(line_num);
+             }
+  |    variable ASSIGN_SUB expression {
+               $$ = new ASTNodeAssign($1, new ASTNodeMath2($1, $3, '-') );
+               $$->SetLineNum(line_num);
+             }
+  |    variable ASSIGN_MULT expression {
+               $$ = new ASTNodeAssign($1, new ASTNodeMath2($1, $3, '*') );
+               $$->SetLineNum(line_num);
+             }
+  |    variable ASSIGN_DIV expression {
+               $$ = new ASTNodeAssign($1, new ASTNodeMath2($1, $3, '/') );
+               $$->SetLineNum(line_num);
+             }
+  |    variable ASSIGN_MOD expression {
+               $$ = new ASTNodeAssign($1, new ASTNodeMath2($1, $3, '%') );
+               $$->SetLineNum(line_num);
+             }
+  ;
+
+argument_list:  argument_list ',' expression {
+      ASTNode * node = $1; // Grab the node used for arg list.
+      node->AddChild($3);    // Save this argument in the node.
+      $$ = node;
+    }
+  |  expression {
+      // Create a temporary AST node to hold the arg list.
+      $$ = new ASTNodeTempNode(Type::VOID);
+      $$->AddChild($1);   // Save this argument in the temp node.
                   $$->SetLineNum(line_num);
-		}
-	;
+    }
+  ;
 
 command:   COMMAND_PRINT argument_list {
-	     $$ = new ASTNode_Print(NULL);
-	     $$->TransferChildren($2);
+       $$ = new ASTNodePrint(NULL);
+       $$->TransferChildren($2);
              $$->SetLineNum(line_num);
-	     delete $2;
+       delete $2;
            }
         |  COMMAND_BREAK {
-             $$ = new ASTNode_Break();
+             $$ = new ASTNodeBreak();
              $$->SetLineNum(line_num);
            }
-	;
+  ;
 
 if_start:  COMMAND_IF '(' expression ')' {
-             $$ = new ASTNode_If($3, NULL, NULL);
+             $$ = new ASTNodeIf($3, NULL, NULL);
              $$->SetLineNum(line_num);
            }
         ;
 
 while_start:  COMMAND_WHILE '(' expression ')' {
-                $$ = new ASTNode_While($3, NULL);
+                $$ = new ASTNodeWhile($3, NULL);
                 $$->SetLineNum(line_num);
               }
            ;
@@ -277,9 +343,6 @@ flow_control:  if_start statement COMMAND_ELSE statement {
                }
             ;
 
-block_start: '{' { symbol_table.IncScope(); } ;
-block_end:   '}' { symbol_table.DecScope(); } ;
-code_block:  block_start statement_list block_end { $$ = $2; } ;
 
 %%
 void LexMain(int argc, char * argv[]);

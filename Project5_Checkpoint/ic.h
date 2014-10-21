@@ -126,8 +126,8 @@ private:
   std::map<std::string, std::vector<ArgType::type> > arg_type_map;
   
   // Helper method to identify types of arguments expected with each instruction
-  void SetupArgs(std::string inst_name, ArgType::type type1, ArgType::type type2, ArgType::type type3) {
-    std::vector<ArgType::type> & arg_types = arg_type_map[inst_name];
+  void SetupArgs(std::string inst_mName, ArgType::type type1, ArgType::type type2, ArgType::type type3) {
+    std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
     arg_types.push_back(type1);
     arg_types.push_back(type2);
     arg_types.push_back(type3);

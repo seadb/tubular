@@ -21,13 +21,13 @@ void ASTNode::TransferChildren(ASTNode * from_node)
 
 
 /////////////////////
-//  ASTNode_Block
+//  ASTNodeBlock
 
-tableEntry * ASTNode_Block::CompileTubeIC(symbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeBlock::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
 {
   // Compile the code for each sub-tree below a block.
   for (int i = 0; i < (int) children.size(); i++) {
-    tableEntry * cur_entry = children[i]->CompileTubeIC(table, ica);
+    CTableEntry * cur_entry = children[i]->CompileTubeIC(table, ica);
     if (cur_entry != NULL && cur_entry->GetTemp() == true) {
       table.RemoveEntry( cur_entry );
     }
@@ -37,27 +37,30 @@ tableEntry * ASTNode_Block::CompileTubeIC(symbolTable & table, IC_Array & ica)
 
 
 /////////////////////////
-//  ASTNode_Variable
+//  ASTNodeVariable
 
-tableEntry * ASTNode_Variable::CompileTubeIC(symbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeVariable::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
 {
   return var_entry;   // Return the symbol-table entry associated with this variable.
 }
 
 
 ////////////////////////
-//  ASTNode_Literal
+//  ASTNodeLiteral
 
-ASTNode_Literal::ASTNode_Literal(int in_type, std::string in_lex)
+ASTNodeLiteral::ASTNodeLiteral(int in_type, std::string in_lex)
   : ASTNode(in_type), lexeme(in_lex)
 {
 }  
 
-tableEntry * ASTNode_Literal::CompileTubeIC(symbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
 {
-  tableEntry * out_var = table.AddTempEntry(type);
+  CTableEntry * out_var = table.AddTempEntry(type);
   if (type == Type::INT || type == Type::CHAR) {
     ica.Add("val_copy", lexeme, out_var->GetVarID());
+  }
+  else if (type == Type::INT_ARRAY || type == Type::CHAR_ARRAY){
+    //TODO: add intermediate code to ica
   }
   // --- Add code to deal with other literal types here! ---
   else {
@@ -69,9 +72,9 @@ tableEntry * ASTNode_Literal::CompileTubeIC(symbolTable & table, IC_Array & ica)
 
 
 //////////////////////
-// ASTNode_Assign
+// ASTNodeAssign
 
-ASTNode_Assign::ASTNode_Assign(ASTNode * lhs, ASTNode * rhs)
+ASTNodeAssign::ASTNodeAssign(ASTNode * lhs, ASTNode * rhs)
   : ASTNode(lhs->GetType())
 { 
   if (lhs->GetType() != rhs->GetType()) {
@@ -87,14 +90,17 @@ ASTNode_Assign::ASTNode_Assign(ASTNode * lhs, ASTNode * rhs)
   children.push_back(rhs);
 }
 
-tableEntry * ASTNode_Assign::CompileTubeIC(symbolTable & table,
+CTableEntry * ASTNodeAssign::CompileTubeIC(CSymbolTable & table,
 						IC_Array & ica)
 {
-  tableEntry * lhs_var = children[0]->CompileTubeIC(table, ica);
-  tableEntry * rhs_var = children[1]->CompileTubeIC(table, ica);
+  CTableEntry * lhs_var = children[0]->CompileTubeIC(table, ica);
+  CTableEntry * rhs_var = children[1]->CompileTubeIC(table, ica);
 
   if (type == Type::INT || type == Type::CHAR) {
     ica.Add("val_copy", rhs_var->GetVarID(), lhs_var->GetVarID());
+  }
+  else if (type == Type::INT_ARRAY || type == Type::CHAR_ARRAY){
+  //TODO: add intermediate code to ica
   }
   // --- Add code to deal with other types of assignments here! ---
   else {
@@ -109,9 +115,9 @@ tableEntry * ASTNode_Assign::CompileTubeIC(symbolTable & table,
 
 
 /////////////////////
-// ASTNode_Math1
+// ASTNodeMath1
 
-ASTNode_Math1::ASTNode_Math1(ASTNode * in_child, int op)
+ASTNodeMath1::ASTNodeMath1(ASTNode * in_child, int op)
   : ASTNode(Type::INT), math_op(op)
 {
   if (in_child->GetType() != Type::INT) {
@@ -124,10 +130,10 @@ ASTNode_Math1::ASTNode_Math1(ASTNode * in_child, int op)
   children.push_back(in_child);
 }
 
-tableEntry * ASTNode_Math1::CompileTubeIC(symbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeMath1::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
 {
-  tableEntry * in_var = children[0]->CompileTubeIC(table, ica);
-  tableEntry * out_var = table.AddTempEntry(type);
+  CTableEntry * in_var = children[0]->CompileTubeIC(table, ica);
+  CTableEntry * out_var = table.AddTempEntry(type);
 
   switch (math_op) {
   case '-':
@@ -148,9 +154,9 @@ tableEntry * ASTNode_Math1::CompileTubeIC(symbolTable & table, IC_Array & ica)
 
 
 /////////////////////
-// ASTNode_Math2
+// ASTNodeMath2
 
-ASTNode_Math2::ASTNode_Math2(ASTNode * in1, ASTNode * in2, int op)
+ASTNodeMath2::ASTNodeMath2(ASTNode * in1, ASTNode * in2, int op)
   : ASTNode(Type::INT), math_op(op)
 {
   bool rel_op = (op==COMP_EQU) || (op==COMP_NEQU) || (op==COMP_LESS) || (op==COMP_LTE) ||
@@ -180,11 +186,11 @@ ASTNode_Math2::ASTNode_Math2(ASTNode * in1, ASTNode * in2, int op)
 }
 
 
-tableEntry * ASTNode_Math2::CompileTubeIC(symbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeMath2::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
 {
-  tableEntry * in_var1 = children[0]->CompileTubeIC(table, ica);
-  tableEntry * in_var2 = children[1]->CompileTubeIC(table, ica);
-  tableEntry * out_var = table.AddTempEntry(type);
+  CTableEntry * in_var1 = children[0]->CompileTubeIC(table, ica);
+  CTableEntry * in_var2 = children[1]->CompileTubeIC(table, ica);
+  CTableEntry * out_var = table.AddTempEntry(type);
 
   int i1 = in_var1->GetVarID();
   int i2 = in_var2->GetVarID();
@@ -215,9 +221,9 @@ tableEntry * ASTNode_Math2::CompileTubeIC(symbolTable & table, IC_Array & ica)
 
 
 /////////////////////
-// ASTNode_Bool2
+// ASTNodeBool2
 
-ASTNode_Bool2::ASTNode_Bool2(ASTNode * in1, ASTNode * in2, int op)
+ASTNodeBool2::ASTNodeBool2(ASTNode * in1, ASTNode * in2, int op)
   : ASTNode(Type::INT), bool_op(op)
 {
   ASTNode * in_test = (in1->GetType() != Type::INT) ? in1 : in2;
@@ -234,10 +240,10 @@ ASTNode_Bool2::ASTNode_Bool2(ASTNode * in1, ASTNode * in2, int op)
 }
 
 
-tableEntry * ASTNode_Bool2::CompileTubeIC(symbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeBool2::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
 {
-  tableEntry * in_var1 = children[0]->CompileTubeIC(table, ica);
-  tableEntry * out_var = table.AddTempEntry(type);
+  CTableEntry * in_var1 = children[0]->CompileTubeIC(table, ica);
+  CTableEntry * out_var = table.AddTempEntry(type);
   std::string end_label = table.NextLabelID("end_bool_");
 
   // Convert the first answer to a 0 or 1 and put it in out_var.
@@ -253,7 +259,7 @@ tableEntry * ASTNode_Bool2::CompileTubeIC(symbolTable & table, IC_Array & ica)
   else { std::cerr << "INTERNAL ERROR: Unknown Bool2 type '" << bool_op << "'" << std::endl; }
 
   // The output code should only get here if the first part didn't short-circuit...
-  tableEntry * in_var2 = children[1]->CompileTubeIC(table, ica);
+  CTableEntry * in_var2 = children[1]->CompileTubeIC(table, ica);
 
   // Convert the second answer to a 0 or 1 and put it in out_var.
   ica.Add("test_nequ", in_var2->GetVarID(), "0", out_var->GetVarID());
@@ -270,9 +276,9 @@ tableEntry * ASTNode_Bool2::CompileTubeIC(symbolTable & table, IC_Array & ica)
 
 
 /////////////////////
-// ASTNode_If
+// ASTNodeIf
 
-ASTNode_If::ASTNode_If(ASTNode * in1, ASTNode * in2, ASTNode * in3)
+ASTNodeIf::ASTNodeIf(ASTNode * in1, ASTNode * in2, ASTNode * in3)
   : ASTNode(Type::VOID)
 {
   if (in1->GetType() != Type::INT) {
@@ -286,18 +292,18 @@ ASTNode_If::ASTNode_If(ASTNode * in1, ASTNode * in2, ASTNode * in3)
 }
 
 
-tableEntry * ASTNode_If::CompileTubeIC(symbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeIf::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
 {
   std::string else_label = table.NextLabelID("if_else_");
   std::string end_label = table.NextLabelID("if_end_");
 
-  tableEntry * in_var0 = children[0]->CompileTubeIC(table, ica);
+  CTableEntry * in_var0 = children[0]->CompileTubeIC(table, ica);
 
   // If the condition is false, jump to else.  Otherwise continue through if.
   ica.Add("jump_if_0", in_var0->GetVarID(), else_label);
 
   if (children[1]) {
-    tableEntry * in_var1 = children[1]->CompileTubeIC(table, ica);
+    CTableEntry * in_var1 = children[1]->CompileTubeIC(table, ica);
     if (in_var1 && in_var1->GetTemp() == true) table.RemoveEntry( in_var1 );
   }
 
@@ -306,7 +312,7 @@ tableEntry * ASTNode_If::CompileTubeIC(symbolTable & table, IC_Array & ica)
   ica.AddLabel(else_label);
 
   if (children[2]) {
-    tableEntry * in_var2 = children[2]->CompileTubeIC(table, ica);
+    CTableEntry * in_var2 = children[2]->CompileTubeIC(table, ica);
     if (in_var2 && in_var2->GetTemp() == true) table.RemoveEntry( in_var2 );
   }
 
@@ -318,9 +324,9 @@ tableEntry * ASTNode_If::CompileTubeIC(symbolTable & table, IC_Array & ica)
 
 
 /////////////////////
-// ASTNode_While
+// ASTNodeWhile
 
-ASTNode_While::ASTNode_While(ASTNode * in1, ASTNode * in2)
+ASTNodeWhile::ASTNodeWhile(ASTNode * in1, ASTNode * in2)
   : ASTNode(Type::VOID)
 {
   children.push_back(in1);
@@ -333,7 +339,7 @@ ASTNode_While::ASTNode_While(ASTNode * in1, ASTNode * in2)
 }
 
 
-tableEntry * ASTNode_While::CompileTubeIC(symbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeWhile::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
 {
   std::string start_label = table.NextLabelID("while_start_");
   std::string end_label = table.NextLabelID("while_end_");
@@ -342,13 +348,13 @@ tableEntry * ASTNode_While::CompileTubeIC(symbolTable & table, IC_Array & ica)
 
   ica.AddLabel(start_label);
 
-  tableEntry * in_var0 = children[0]->CompileTubeIC(table, ica);
+  CTableEntry * in_var0 = children[0]->CompileTubeIC(table, ica);
 
   // If the condition is false, jump to end.  Otherwise continue through body.
   ica.Add("jump_if_0", in_var0->GetVarID(), end_label);
 
   if (children[1]) {
-    tableEntry * in_var1 = children[1]->CompileTubeIC(table, ica);
+    CTableEntry * in_var1 = children[1]->CompileTubeIC(table, ica);
     if (in_var1 && in_var1->GetTemp() == true) table.RemoveEntry( in_var1 );
   }
 
@@ -363,15 +369,15 @@ tableEntry * ASTNode_While::CompileTubeIC(symbolTable & table, IC_Array & ica)
 
 
 /////////////////////
-// ASTNode_Break
+// ASTNodeBreak
 
-ASTNode_Break::ASTNode_Break()
+ASTNodeBreak::ASTNodeBreak()
   : ASTNode(Type::VOID)
 {
 }
 
 
-tableEntry * ASTNode_Break::CompileTubeIC(symbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeBreak::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
 {
   if (table.GetWhileDepth() == 0) {
     yyerror2("'break' command used outside of any loop", line_num);
@@ -386,9 +392,9 @@ tableEntry * ASTNode_Break::CompileTubeIC(symbolTable & table, IC_Array & ica)
 
 
 /////////////////////
-// ASTNode_Print
+// ASTNodePrint
 
-ASTNode_Print::ASTNode_Print(ASTNode * out_child)
+ASTNodePrint::ASTNodePrint(ASTNode * out_child)
   : ASTNode(Type::VOID)
 {
   // Save the child...
@@ -396,11 +402,11 @@ ASTNode_Print::ASTNode_Print(ASTNode * out_child)
 }
 
 
-tableEntry * ASTNode_Print::CompileTubeIC(symbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodePrint::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
 {
   // Collect the output arguments as they are calculated...
   for (int i = 0; i < (int) children.size(); i++) {
-    tableEntry * cur_var = children[i]->CompileTubeIC(table, ica);
+    CTableEntry * cur_var = children[i]->CompileTubeIC(table, ica);
     switch (cur_var->GetType()) {
     case Type::INT:
       ica.Add("out_int", cur_var->GetVarID());

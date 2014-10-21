@@ -15,11 +15,11 @@ std::string out_filename = "";
 
 %option nounput
 
-type		int|char|array|string
+type		int|char|string
 id	        [_a-zA-Z][a-zA-Z0-9_]*
 int_lit         [0-9]+
 char_lit        '(.|(\\[\\'nt]))'
-string_lit     \"[A-Za-z\t\n\\\"#+\"
+string_lit      \"[A-Za-z\t\n\\\"#]+\"
 comment		#.*
 whitespace	[ \t\r]
 passthrough	[+\-*/%=(),!{}[\].;]
@@ -32,6 +32,7 @@ passthrough	[+\-*/%=(),!{}[\].;]
 "while" { return COMMAND_WHILE; }
 "break" { return COMMAND_BREAK; }
 "for"   { return COMMAND_FOR; }
+"array" { return ARRAY;}
 
 {type}        { yylval.lexeme = strdup(yytext);  return TYPE; }
 {id}          { yylval.lexeme = strdup(yytext);  return ID; }
@@ -75,7 +76,7 @@ void LexMain(int argc, char * argv[])
 
     if (cur_arg == "-h") {
       std::cout << "Tubular Compiler v. 0.4 (Project 4)"  << std::endl
-           << "Format: " << argv[0] << "[flags] [filename]" << std::endl
+           << "Format: " << argv[0] << "[flags] [filemName]" << std::endl
            << std::endl
            << "Available Flags:" << std::endl
            << "  -h  :  Help (this information)" << std::endl
@@ -91,7 +92,7 @@ void LexMain(int argc, char * argv[])
       exit(1);
     }
 
-    // Assume the current argument is a filename (first input, then output)
+    // Assume the current argument is a filemName (first input, then output)
     if (!input_found) {
       file = fopen(argv[arg_id], "r");
       if (!file) {
@@ -112,9 +113,9 @@ void LexMain(int argc, char * argv[])
     }
   }
 
-  // Make sure we've loaded input and output filenames before we finish...
+  // Make sure we've loaded input and output filemNames before we finish...
   if (input_found == false || out_filename == "") {
-    std::cerr << "Format: " << argv[0] << "[flags] [input filename] [output filename]" << std::endl;
+    std::cerr << "Format: " << argv[0] << "[flags] [input filemName] [output filemName]" << std::endl;
     std::cerr << "Type '" << argv[0] << " -h' for help." << std::endl;
     exit(1);
   }

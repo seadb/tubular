@@ -1,6 +1,6 @@
 # Setup some aliases to these can be easily altered in the future.
 GCC = g++
-CFLAGS = -g
+CFLAGS = -g 
 YACC = bison
 LEX = flex
 
@@ -25,7 +25,7 @@ tube5-lexer.cc: tube5.lex tube5-parser.tab.cc symbol_table.h
 	$(LEX) -otube5-lexer.cc tube5.lex
 
 tube5-parser.tab.cc: tube5.y symbol_table.h
-	$(YACC) -o tube5-parser.tab.cc -d tube5.y
+	$(YACC) -o tube5-parser.tab.cc -d tube5.y -v -t
 
 ast.o: ast.cc ast.h symbol_table.h
 	$(GCC) $(CFLAGS) -c ast.cc

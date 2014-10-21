@@ -90,13 +90,13 @@ void IC_Array::AddArg(IC_Entry * entry, const std::string & in_arg, ArgType::typ
 
 // This Add is called when all numbers are given to the Add method -- in other words all
 // arguments should be scalars, arrays, or none based on type layout.
-IC_Entry& IC_Array::Add(std::string inst_name, int arg1, int arg2, int arg3, std::string cmt)
+IC_Entry& IC_Array::Add(std::string inst_mName, int arg1, int arg2, int arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_name);
-  if (arg_type_map.find(inst_name) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
+  IC_Entry * new_entry = new IC_Entry(inst_mName);
+  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_name];
+  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
@@ -105,13 +105,13 @@ IC_Entry& IC_Array::Add(std::string inst_name, int arg1, int arg2, int arg3, std
   return *new_entry;
 }
 
-IC_Entry& IC_Array::Add(std::string inst_name, int arg1, int arg2, std::string arg3, std::string cmt)
+IC_Entry& IC_Array::Add(std::string inst_mName, int arg1, int arg2, std::string arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_name);
-  if (arg_type_map.find(inst_name) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
+  IC_Entry * new_entry = new IC_Entry(inst_mName);
+  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_name];
+  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
@@ -120,13 +120,13 @@ IC_Entry& IC_Array::Add(std::string inst_name, int arg1, int arg2, std::string a
   return *new_entry;
 }
 
-IC_Entry& IC_Array::Add(std::string inst_name, int arg1, std::string arg2, int arg3, std::string cmt)
+IC_Entry& IC_Array::Add(std::string inst_mName, int arg1, std::string arg2, int arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_name);
-  if (arg_type_map.find(inst_name) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
+  IC_Entry * new_entry = new IC_Entry(inst_mName);
+  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_name];
+  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
@@ -135,13 +135,13 @@ IC_Entry& IC_Array::Add(std::string inst_name, int arg1, std::string arg2, int a
   return *new_entry;
 }
 
-IC_Entry& IC_Array::Add(std::string inst_name, int arg1, std::string arg2, std::string arg3, std::string cmt)
+IC_Entry& IC_Array::Add(std::string inst_mName, int arg1, std::string arg2, std::string arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_name);
-  if (arg_type_map.find(inst_name) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
+  IC_Entry * new_entry = new IC_Entry(inst_mName);
+  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_name];
+  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
@@ -150,13 +150,13 @@ IC_Entry& IC_Array::Add(std::string inst_name, int arg1, std::string arg2, std::
   return *new_entry;
 }
 
-IC_Entry& IC_Array::Add(std::string inst_name, std::string arg1, int arg2, int arg3, std::string cmt)
+IC_Entry& IC_Array::Add(std::string inst_mName, std::string arg1, int arg2, int arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_name);
-  if (arg_type_map.find(inst_name) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
+  IC_Entry * new_entry = new IC_Entry(inst_mName);
+  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_name];
+  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
@@ -165,13 +165,13 @@ IC_Entry& IC_Array::Add(std::string inst_name, std::string arg1, int arg2, int a
   return *new_entry;
 }
 
-IC_Entry& IC_Array::Add(std::string inst_name, std::string arg1, int arg2, std::string arg3, std::string cmt)
+IC_Entry& IC_Array::Add(std::string inst_mName, std::string arg1, int arg2, std::string arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_name);
-  if (arg_type_map.find(inst_name) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
+  IC_Entry * new_entry = new IC_Entry(inst_mName);
+  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_name];
+  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
@@ -180,13 +180,13 @@ IC_Entry& IC_Array::Add(std::string inst_name, std::string arg1, int arg2, std::
   return *new_entry;
 }
 
-IC_Entry& IC_Array::Add(std::string inst_name, std::string arg1, std::string arg2, int arg3, std::string cmt)
+IC_Entry& IC_Array::Add(std::string inst_mName, std::string arg1, std::string arg2, int arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_name);
-  if (arg_type_map.find(inst_name) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
+  IC_Entry * new_entry = new IC_Entry(inst_mName);
+  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_name];
+  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
@@ -195,13 +195,13 @@ IC_Entry& IC_Array::Add(std::string inst_name, std::string arg1, std::string arg
   return *new_entry;
 }
 
-IC_Entry& IC_Array::Add(std::string inst_name, std::string arg1, std::string arg2, std::string arg3, std::string cmt)
+IC_Entry& IC_Array::Add(std::string inst_mName, std::string arg1, std::string arg2, std::string arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_name);
-  if (arg_type_map.find(inst_name) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
+  IC_Entry * new_entry = new IC_Entry(inst_mName);
+  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_name];
+  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
