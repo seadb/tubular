@@ -30,8 +30,8 @@ function run_error_test {
     echo [ $proj_error ] && [ $ref_error ]
     if  [ $proj_error -eq "0" ] ; then
     	if [ $ref_error -ne "0" ] ; then
-		echo $1 " gave an when there should not be an error";
-		summary=$summary"\n"$1" gave an when there should not be an error";
+		echo $1 " gave an error when there should not be an error";
+		summary=$summary"\n"$1" gave an error when there should not be an error";
 		rm $project.tic;
 		if [ -e ref.tic ] ; then 
 		    rm ref.tic;
