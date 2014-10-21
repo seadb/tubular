@@ -91,6 +91,8 @@ class CSymbolTable {
       mTableMap[name] = newEntry;
       return newEntry;
     }
+    
+    // Insert an array entry into the symbol table
     CTableEntry * AddArray(std::string name, int nextVarID, std::string type, int size) {
       CTableEntry * newEntry = new CArrayEntry(name, type, size);
       newEntry->SetVarID( nextVarID );
@@ -103,16 +105,16 @@ class CSymbolTable {
 class CSymbolTables {
 private:
   std::vector<CSymbolTable*> mTables;
- // std::vector<CSymbolTable*> mDiscarded;
-  int mScope;
+ // std::vector<CSymbolTable*> mDiscarded;      // not used
+  //int mScope;                                 // not used
   int mNextVarID;                // Next variable ID to use.
   int mNextLabelID;              // Next label ID to use.
-  std::vector<std::string> mBreaks;
+  std::vector<std::string> mBreaks;             // Keeps track of "break;" statements
 
   // Figure out the next memory position to use. Ideally, we should recycle these!
 
 public:
-  CSymbolTables() : mNextVarID(1), mNextLabelID(0), mScope(-1) {
+  CSymbolTables() : mNextVarID(1), mNextLabelID(0)/*, mScope(-1)*/ {
       AddTable();
   }
 
@@ -125,6 +127,8 @@ public:
 
   void PopBackBreaks(){ mBreaks.pop_back(); }
   void PushBackBreaks(std::string element){ mBreaks.push_back(element); }
+  int BreaksSize(){ return mBreaks.size();}
+  std::string BreaksBack() { return mBreaks.back(); }
 
   CSymbolTable * current() {
     for(int i=mTables.size()-1; i >= 0; i--){
@@ -147,13 +151,13 @@ public:
   void AddTable() {
     mTables.push_back(new CSymbolTable(/*this*/));//doesnt use scope as the index
     mTables.back()->SetVisible(true);
-    mScope +=1;
+    //mScope +=1;
     }
   
   // Hide the last table
   void HideTable() {
     mTables.pop_back();
-    mScope -=1;
+    //mScope -=1;
   }
 
 

@@ -670,11 +670,13 @@ public:
 
     std::stringstream ss;
     ss << "while_end" << o4;
-    tables.breaks.push_back(ss.str());
+    //tables.breaks.push_back(ss.str());
+    tables.PushBackBreaks(ss.str());
 
     CTableEntry * in_var2 = mChildren[1]->CompileTubeIC(tables, out);
 
-    if(tables.breaks.size() > 0) tables.breaks.pop_back();
+    if (tables.BreaksSize() > 0 ) tables.PopBackBreaks();
+    //if(tables.breaks.size() > 0) tables.breaks.pop_back();
 
     out << "jump while_begin" << o4 << std::endl;
 
@@ -725,12 +727,13 @@ public:
 
     std::stringstream ss;
     ss << "for_end" << o4;
-    tables.breaks.push_back(ss.str());
+    //tables.breaks.push_back(ss.str());
+    tables.PushBackBreaks(ss.str());
 
     CTableEntry * in_var4 = mChildren[3]->CompileTubeIC(tables, out);
 
-    if(tables.breaks.size() > 0)
-      tables.breaks.pop_back();
+    //if(tables.breaks.size() > 0) tables.breaks.pop_back();
+    if(tables.BreaksSize() > 0 ) tables.PopBackBreaks();
 
     CTableEntry * in_var3 = mChildren[2]->CompileTubeIC(tables, out);
 
@@ -755,10 +758,15 @@ public:
   ~CNodeBreak() { ; }
 
   CTableEntry * CompileTubeIC(CSymbolTables & tables, std::ostream & out) {
-    if(tables.breaks.size() > 0) {
-      out << "jump " << tables.breaks.back() << std::endl;
-      //breaks.pop_back();
+    //if(tables.breaks.size() > 0) {
+    //  out << "jump " << tables.breaks.back() << std::endl;
+    //}
+    
+    if(tables.BreaksSize() > 0){
+      out << "jump " << tables.BreaksBack() << std::endl;
     }
+
+      //breaks.pop_back();
     else {
 	std::string e;
 	e += "'break' command used outside of any loop";

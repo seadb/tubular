@@ -11,7 +11,7 @@ int line_num = 1;
 id              [a-zA-Z_][a-zA-Z0-9_]*
 ascii           [+\-*/;\(\)\{\}=,%?:\!]
 string          \"[A-Za-z\t\n\\\"#]+\"
-char            \'[A-Za-z\t\n\\\'#]\'  
+char            \'\\\'\'|\'\\\\\'|'\\n'|'\\t'|\'[\40-\132\136-\176\t\n\\\']\' 
 %%
 
 #.* ; // Comment, ignore remainder of line
