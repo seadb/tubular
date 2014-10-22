@@ -1,6 +1,6 @@
 #include "ic.h"
 
-void IC_Entry::PrintIC(std::ostream & ofs)
+void ICEntry::PrintIC(std::ostream & ofs)
 {
   std::stringstream out_line;
 
@@ -25,18 +25,18 @@ void IC_Entry::PrintIC(std::ostream & ofs)
   ofs << out_line.str() << std::endl;
 }
 
-IC_Entry& IC_Array::AddLabel(std::string label_id, std::string cmt)
+ICEntry& ICArray::AddLabel(std::string label_id, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry();
+  ICEntry * new_entry = new ICEntry();
   new_entry->SetLabel(label_id);
   new_entry->SetComment(cmt);
-  ic_array.push_back(new_entry);
+  mICArray.push_back(new_entry);
   return *new_entry;
 }
 
 
 // This is a quick way to add scalar/array/none args, with all needed error checking.
-void IC_Array::AddArg(IC_Entry * entry, int in_arg, ArgType::type expected_type)
+void ICArray::AddArg(ICEntry * entry, int in_arg, ArgType::type expected_type)
 {
   switch (expected_type) {
   case ArgType::NONE:       // No argument expected...
@@ -69,7 +69,7 @@ void IC_Array::AddArg(IC_Entry * entry, int in_arg, ArgType::type expected_type)
 }
 
 
-void IC_Array::AddArg(IC_Entry * entry, const std::string & in_arg, ArgType::type expected_type)
+void ICArray::AddArg(ICEntry * entry, const std::string & in_arg, ArgType::type expected_type)
 {
   switch (expected_type) {
   case ArgType::NONE:       // No argument expected, but in input string means we received one!
@@ -90,131 +90,131 @@ void IC_Array::AddArg(IC_Entry * entry, const std::string & in_arg, ArgType::typ
 
 // This Add is called when all numbers are given to the Add method -- in other words all
 // arguments should be scalars, arrays, or none based on type layout.
-IC_Entry& IC_Array::Add(std::string inst_mName, int arg1, int arg2, int arg3, std::string cmt)
+ICEntry& ICArray::Add(std::string inst_name, int arg1, int arg2, int arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_mName);
-  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
+  ICEntry * new_entry = new ICEntry(inst_name);
+  if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
+  std::vector<ArgType::type> & arg_types = mArgTypeMap[inst_name];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
   new_entry->SetComment(cmt);
-  ic_array.push_back(new_entry);
+  mICArray.push_back(new_entry);
   return *new_entry;
 }
 
-IC_Entry& IC_Array::Add(std::string inst_mName, int arg1, int arg2, std::string arg3, std::string cmt)
+ICEntry& ICArray::Add(std::string inst_name, int arg1, int arg2, std::string arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_mName);
-  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
+  ICEntry * new_entry = new ICEntry(inst_name);
+  if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
+  std::vector<ArgType::type> & arg_types = mArgTypeMap[inst_name];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
   new_entry->SetComment(cmt);
-  ic_array.push_back(new_entry);
+  mICArray.push_back(new_entry);
   return *new_entry;
 }
 
-IC_Entry& IC_Array::Add(std::string inst_mName, int arg1, std::string arg2, int arg3, std::string cmt)
+ICEntry& ICArray::Add(std::string inst_name, int arg1, std::string arg2, int arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_mName);
-  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
+  ICEntry * new_entry = new ICEntry(inst_name);
+  if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
+  std::vector<ArgType::type> & arg_types = mArgTypeMap[inst_name];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
   new_entry->SetComment(cmt);
-  ic_array.push_back(new_entry);
+  mICArray.push_back(new_entry);
   return *new_entry;
 }
 
-IC_Entry& IC_Array::Add(std::string inst_mName, int arg1, std::string arg2, std::string arg3, std::string cmt)
+ICEntry& ICArray::Add(std::string inst_name, int arg1, std::string arg2, std::string arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_mName);
-  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
+  ICEntry * new_entry = new ICEntry(inst_name);
+  if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
+  std::vector<ArgType::type> & arg_types = mArgTypeMap[inst_name];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
   new_entry->SetComment(cmt);
-  ic_array.push_back(new_entry);
+  mICArray.push_back(new_entry);
   return *new_entry;
 }
 
-IC_Entry& IC_Array::Add(std::string inst_mName, std::string arg1, int arg2, int arg3, std::string cmt)
+ICEntry& ICArray::Add(std::string inst_name, std::string arg1, int arg2, int arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_mName);
-  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
+  ICEntry * new_entry = new ICEntry(inst_name);
+  if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
+  std::vector<ArgType::type> & arg_types = mArgTypeMap[inst_name];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
   new_entry->SetComment(cmt);
-  ic_array.push_back(new_entry);
+  mICArray.push_back(new_entry);
   return *new_entry;
 }
 
-IC_Entry& IC_Array::Add(std::string inst_mName, std::string arg1, int arg2, std::string arg3, std::string cmt)
+ICEntry& ICArray::Add(std::string inst_name, std::string arg1, int arg2, std::string arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_mName);
-  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
+  ICEntry * new_entry = new ICEntry(inst_name);
+  if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
+  std::vector<ArgType::type> & arg_types = mArgTypeMap[inst_name];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
   new_entry->SetComment(cmt);
-  ic_array.push_back(new_entry);
+  mICArray.push_back(new_entry);
   return *new_entry;
 }
 
-IC_Entry& IC_Array::Add(std::string inst_mName, std::string arg1, std::string arg2, int arg3, std::string cmt)
+ICEntry& ICArray::Add(std::string inst_name, std::string arg1, std::string arg2, int arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_mName);
-  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
+  ICEntry * new_entry = new ICEntry(inst_name);
+  if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
+  std::vector<ArgType::type> & arg_types = mArgTypeMap[inst_name];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
   new_entry->SetComment(cmt);
-  ic_array.push_back(new_entry);
+  mICArray.push_back(new_entry);
   return *new_entry;
 }
 
-IC_Entry& IC_Array::Add(std::string inst_mName, std::string arg1, std::string arg2, std::string arg3, std::string cmt)
+ICEntry& ICArray::Add(std::string inst_name, std::string arg1, std::string arg2, std::string arg3, std::string cmt)
 {
-  IC_Entry * new_entry = new IC_Entry(inst_mName);
-  if (arg_type_map.find(inst_mName) == arg_type_map.end()) {
-    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_mName << "'." << std::endl;
+  ICEntry * new_entry = new ICEntry(inst_name);
+  if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
+    std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
-  std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
+  std::vector<ArgType::type> & arg_types = mArgTypeMap[inst_name];
   AddArg(new_entry, arg1, arg_types[0]);
   AddArg(new_entry, arg2, arg_types[1]);
   AddArg(new_entry, arg3, arg_types[2]);
   new_entry->SetComment(cmt);
-  ic_array.push_back(new_entry);
+  mICArray.push_back(new_entry);
   return *new_entry;
 }
 
 
-void IC_Array::PrintIC(std::ostream & ofs)
+void ICArray::PrintIC(std::ostream & ofs)
 {
-  ofs << "# Output from Dr. Charles Ofria's sample compiler." << std::endl;
-  for (int i = 0; i < (int) ic_array.size(); i++) {
-    ic_array[i]->PrintIC(ofs);
+  //ofs << "# Output from Dr. Charles Ofria's sample compiler." << std::endl;
+  for (int i = 0; i < (int) mICArray.size(); i++) {
+    mICArray[i]->PrintIC(ofs);
   }
 }

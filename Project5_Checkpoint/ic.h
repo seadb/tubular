@@ -1,21 +1,21 @@
-#ifndef IC_H
-#define IC_H
+#ifndef ICH
+#define ICH
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  The classes in this file hold information about the intermediate code (IC) and how it is stored
 //  in memory before the file is printed out.
 //
-//  The IC_Entry class holds information about a single instruction.
+//  The ICEntry class holds information about a single instruction.
 //
-//  The IC_Array class holds an array of IC_Entries that make up the full intermediate code program.
+//  The ICArray class holds an array of ICEntries that make up the full intermediate code program.
 //
-//  The IC_Arg_* classes are private within IC_Entry and hold information about the arguments
+//  The ICArg_* classes are private within ICEntry and hold information about the arguments
 //  associated with each instruction
-//    IC_Arg_Base is the base class that all of the others are derived from.
-//    IC_Arg_VarScalar holds info about scalar variables used as arguments (eg, s27).
-//    IC_Arg_VarConst holds info about literal numbers or chars used as arguments (eg 10 or 'Q').
-//    IC_Arg_VarArray holds info about array variables used as arguments (eg, a5).
+//    ICArg_Base is the base class that all of the others are derived from.
+//    ICArg_VarScalar holds info about scalar variables used as arguments (eg, s27).
+//    ICArg_VarConst holds info about literal numbers or chars used as arguments (eg 10 or 'Q').
+//    ICArg_VarArray holds info about array variables used as arguments (eg, a5).
 //
 
 #include <iostream>
@@ -25,12 +25,12 @@
 #include <vector>
 
 
-class IC_Entry {
+class ICEntry {
 private:
-  class IC_Arg_Base {
+  class ICArg_Base {
   public:
-    IC_Arg_Base() { ; }
-    virtual ~IC_Arg_Base() { ; }
+    ICArg_Base() { ; }
+    virtual ~ICArg_Base() { ; }
     
     virtual std::string AsString() = 0;
     virtual int GetID() { return -1; }
@@ -39,69 +39,69 @@ private:
     virtual bool IsConst() { return false; }
   };
 
-  class IC_Arg_VarScalar : public IC_Arg_Base {
+  class ICArg_VarScalar : public ICArg_Base {
   private:
-    int var_id;
+    int mVarID;
   public:
-    IC_Arg_VarScalar(int _id) : var_id(_id) { ; }
-    ~IC_Arg_VarScalar() { ; }
+    ICArg_VarScalar(int _id) : mVarID(_id) { ; }
+    ~ICArg_VarScalar() { ; }
     
     std::string AsString() {
       std::stringstream out_str;
-      out_str << "s" << var_id;
+      out_str << "s" << mVarID;
       return out_str.str();
     }
-    int GetID() { return var_id; }
+    int GetID() { return mVarID; }
     
     bool IsScalar() { return true; }
   };
   
   // All constant values: int, char, or label.
-  class IC_Arg_Const : public IC_Arg_Base {
+  class ICArg_Const : public ICArg_Base {
   private:
-    std::string value;
+    std::string mValue;
   public:
-    IC_Arg_Const(std::string _val) : value(_val) { ; }
-    ~IC_Arg_Const() { ; }
+    ICArg_Const(std::string val) : mValue(val) { ; }
+    ~ICArg_Const() { ; }
     
-    std::string AsString() { return value; }
+    std::string AsString() { return mValue; }
     
     bool IsConst() { return true; }
   };
 
   // Hint: This is only useful starting in project 5!
-  class IC_Arg_VarArray : public IC_Arg_Base {
+  class ICArg_VarArray : public ICArg_Base {
   private:
-    int var_id;
+    int mVarID;
   public:
-    IC_Arg_VarArray(int _id) : var_id(_id) { ; }
-    ~IC_Arg_VarArray() { ; }
+    ICArg_VarArray(int _id) : mVarID(_id) { ; }
+    ~ICArg_VarArray() { ; }
     
     std::string AsString() {
       std::stringstream out_str;
-      out_str << "a" << var_id;
+      out_str << "a" << mVarID;
       return out_str.str();
     }
-    int GetID() { return var_id; }
+    int GetID() { return mVarID; }
   };
 
   std::string inst;
   std::string label;
   std::string comment;
-  std::vector<IC_Arg_Base*> args;
+  std::vector<ICArg_Base*> args;
 
 public:
-  IC_Entry(std::string in_inst="", std::string in_label="") : inst(in_inst), label(in_label) { ; }
-  ~IC_Entry() { ; }
+  ICEntry(std::string in_inst="", std::string in_label="") : inst(in_inst), label(in_label) { ; }
+  ~ICEntry() { ; }
 
   const std::string & GetInstName() const { return inst; }
   const std::string & GetLabel() const { return label; }
   const std::string & GetComment() const { return comment; }
   unsigned int GetNumArgs() const { return args.size(); }
 
-  void AddArrayArg(int id)    { args.push_back(new IC_Arg_VarArray(id)); }
-  void AddConstArg(std::string id) { args.push_back(new IC_Arg_Const(id)); }
-  void AddScalarArg(int id)    { args.push_back(new IC_Arg_VarScalar(id)); }
+  void AddArrayArg(int id)    { args.push_back(new ICArg_VarArray(id)); }
+  void AddConstArg(std::string id) { args.push_back(new ICArg_Const(id)); }
+  void AddScalarArg(int id)    { args.push_back(new ICArg_VarScalar(id)); }
 
   void SetLabel(std::string in_lab) { label = in_lab; }
   void SetComment(std::string cmt) { comment = cmt; }
@@ -110,9 +110,9 @@ public:
 };
 
 
-class IC_Array {
+class ICArray {
 private:
-  std::vector <IC_Entry*> ic_array;
+  std::vector <ICEntry*> mICArray;
 
   // There are three types of argument requirements for instructions:
   // * VALUE  - This arg is an input value: literal numbers or chars, scalars, labels, etc.
@@ -123,22 +123,22 @@ private:
     enum type { NONE=0, VALUE, SCALAR, ARRAY };
   };
   
-  std::map<std::string, std::vector<ArgType::type> > arg_type_map;
+  std::map<std::string, std::vector<ArgType::type> > mArgTypeMap;
   
   // Helper method to identify types of arguments expected with each instruction
-  void SetupArgs(std::string inst_mName, ArgType::type type1, ArgType::type type2, ArgType::type type3) {
-    std::vector<ArgType::type> & arg_types = arg_type_map[inst_mName];
+  void SetupArgs(std::string inst_name, ArgType::type type1, ArgType::type type2, ArgType::type type3) {
+    std::vector<ArgType::type> & arg_types = mArgTypeMap[inst_name];
     arg_types.push_back(type1);
     arg_types.push_back(type2);
     arg_types.push_back(type3);
   }
 
   // Helper methods to add arguments to instructions, while verifying their types.
-  void AddArg(IC_Entry * entry, int in_arg, ArgType::type expected_type);
-  void AddArg(IC_Entry * entry, const std::string & in_arg, ArgType::type expected_type);
+  void AddArg(ICEntry * entry, int in_arg, ArgType::type expected_type);
+  void AddArg(ICEntry * entry, const std::string & in_arg, ArgType::type expected_type);
 
 public:
-  IC_Array() {
+  ICArray() {
     // Fill out the arg types for each instruction
     SetupArgs("val_copy",    ArgType::VALUE,  ArgType::SCALAR, ArgType::NONE);
     SetupArgs("add",         ArgType::VALUE,  ArgType::VALUE,  ArgType::SCALAR);
@@ -169,22 +169,22 @@ public:
     SetupArgs("ar_push",     ArgType::ARRAY,  ArgType::NONE,   ArgType::NONE);
     SetupArgs("ar_pop",      ArgType::ARRAY,  ArgType::NONE,   ArgType::NONE);
   }
-  ~IC_Array() { ; }
+  ~ICArray() { ; }
 
-  IC_Entry& AddLabel(std::string label_id, std::string cmt="");
+  ICEntry& AddLabel(std::string label_id, std::string cmt="");
 
   // All forms of Add() method.
   // Arguments can either be variables (where an int represents the variable ID) or
   // constant values (where a string holds the constant's lexeme).  And 'a' or 's' will
   // automatically be prepended to an int for a variable based on the instruction used.
-  IC_Entry& Add(std::string inst, int arg1=-1, int arg2=-1, int arg3=-1, std::string cmt="");
-  IC_Entry& Add(std::string inst, std::string arg1, int arg2=-1, int arg3=-1, std::string cmt="");
-  IC_Entry& Add(std::string inst, int arg1, std::string arg2, int arg3=-1, std::string cmt="");
-  IC_Entry& Add(std::string inst, std::string arg1, std::string arg2, int arg3=-1, std::string cmt="");
-  IC_Entry& Add(std::string inst, int arg1, int arg2, std::string arg3, std::string cmt="");
-  IC_Entry& Add(std::string inst, std::string arg1, int arg2, std::string arg3, std::string cmt="");
-  IC_Entry& Add(std::string inst, int arg1, std::string arg2, std::string arg3, std::string cmt="");
-  IC_Entry& Add(std::string inst, std::string arg1, std::string arg2, std::string arg3, std::string cmt="");
+  ICEntry& Add(std::string inst, int arg1=-1, int arg2=-1, int arg3=-1, std::string cmt="");
+  ICEntry& Add(std::string inst, std::string arg1, int arg2=-1, int arg3=-1, std::string cmt="");
+  ICEntry& Add(std::string inst, int arg1, std::string arg2, int arg3=-1, std::string cmt="");
+  ICEntry& Add(std::string inst, std::string arg1, std::string arg2, int arg3=-1, std::string cmt="");
+  ICEntry& Add(std::string inst, int arg1, int arg2, std::string arg3, std::string cmt="");
+  ICEntry& Add(std::string inst, std::string arg1, int arg2, std::string arg3, std::string cmt="");
+  ICEntry& Add(std::string inst, int arg1, std::string arg2, std::string arg3, std::string cmt="");
+  ICEntry& Add(std::string inst, std::string arg1, std::string arg2, std::string arg3, std::string cmt="");
 
   void PrintIC(std::ostream & ofs);
 };

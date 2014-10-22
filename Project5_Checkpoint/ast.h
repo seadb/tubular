@@ -55,7 +55,7 @@ public:
 
   // Convert a single node to TubeIC and return information about the
   // variable where the results are saved.  Call mChildren recursively.
-  virtual CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica) = 0;
+  virtual CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica) = 0;
 };
 
 
@@ -64,14 +64,14 @@ class ASTNodeTempNode : public ASTNode {
 public:
   ASTNodeTempNode(int in_type) : ASTNode(in_type) { ; }
   ~ASTNodeTempNode() { ; }
-  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica) { return NULL; }
+  CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica) { return NULL; }
 };
 
 // Block...
 class ASTNodeBlock : public ASTNode {
 public:
   ASTNodeBlock() : ASTNode(Type::VOID) { ; }
-  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
 
 // Leaves...
@@ -83,7 +83,7 @@ public:
     : ASTNode(in_entry->GetType()), mVarEntry(in_entry) {;}
 
   CTableEntry * GetVarEntry() { return mVarEntry; }
-  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
 
 class ASTNodeLiteral : public ASTNode {
@@ -91,7 +91,7 @@ private:
   std::string mLexeme;     // When we print, how should this node look?
 public:
   ASTNodeLiteral(int in_type, std::string in_lex);
-  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
 
 // Math...
@@ -101,7 +101,7 @@ public:
   ASTNodeAssign(ASTNode * lhs, ASTNode * rhs);
   ~ASTNodeAssign() { ; }
 
-  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
 
 class ASTNodeMath1 : public ASTNode {
@@ -111,7 +111,7 @@ public:
   ASTNodeMath1(ASTNode * in_child, int op);
   virtual ~ASTNodeMath1() { ; }
 
-  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
 
 class ASTNodeMath2 : public ASTNode {
@@ -121,7 +121,7 @@ public:
   ASTNodeMath2(ASTNode * in1, ASTNode * in2, int op);
   virtual ~ASTNodeMath2() { ; }
 
-  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
 
 class ASTNodeBool2 : public ASTNode {
@@ -131,7 +131,7 @@ public:
   ASTNodeBool2(ASTNode * in1, ASTNode * in2, int op);
   virtual ~ASTNodeBool2() { ; }
 
-  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
 
 class ASTNodeIf : public ASTNode {
@@ -139,7 +139,7 @@ public:
   ASTNodeIf(ASTNode * in1, ASTNode * in2, ASTNode * in3);
   virtual ~ASTNodeIf() { ; }
 
-  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
 
 class ASTNodeWhile : public ASTNode {
@@ -147,7 +147,7 @@ public:
   ASTNodeWhile(ASTNode * in1, ASTNode * in2);
   virtual ~ASTNodeWhile() { ; }
 
-  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
 
 class ASTNodeBreak : public ASTNode {
@@ -155,7 +155,7 @@ public:
   ASTNodeBreak();
   virtual ~ASTNodeBreak() { ; }
 
-  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
 
 class ASTNodePrint : public ASTNode {
@@ -163,7 +163,7 @@ public:
   ASTNodePrint(ASTNode * out_child);
   virtual ~ASTNodePrint() {;}
 
-  CTableEntry * CompileTubeIC(CSymbolTable & table, IC_Array & ica);
+  CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
 
 

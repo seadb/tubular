@@ -23,7 +23,7 @@ void ASTNode::TransferChildren(ASTNode * from_node)
 /////////////////////
 //  ASTNodeBlock
 
-CTableEntry * ASTNodeBlock::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeBlock::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 {
   // Compile the code for each sub-tree below a block.
   for (int i = 0; i < (int) mChildren.size(); i++) {
@@ -39,7 +39,7 @@ CTableEntry * ASTNodeBlock::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
 /////////////////////////
 //  ASTNodeVariable
 
-CTableEntry * ASTNodeVariable::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeVariable::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 {
   return mVarEntry;   // Return the symbol-table entry associated with this variable.
 }
@@ -53,13 +53,18 @@ ASTNodeLiteral::ASTNodeLiteral(int in_type, std::string in_lex)
 {
 }  
 
-CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 {
   CTableEntry * out_var = table.AddTempEntry(mType);
   if (mType == Type::INT || mType == Type::CHAR) {
     ica.Add("val_copy", mLexeme, out_var->GetVarID());
   }
   else if (mType == Type::INT_ARRAY || mType == Type::CHAR_ARRAY){
+    ica.Add("ar_set_size", out_var->GetVarID(), mLexeme.size());
+    for(int i=0; i < mLexeme.size()-1; i++ )
+    {
+      ica.Add("ar_set_idx", out_var->GetVarID(), i, mLexeme[i]);
+    }
     //TODO: add intermediate code to ica
   }
   // --- Add code to deal with other literal types here! ---
@@ -91,7 +96,7 @@ ASTNodeAssign::ASTNodeAssign(ASTNode * lhs, ASTNode * rhs)
 }
 
 CTableEntry * ASTNodeAssign::CompileTubeIC(CSymbolTable & table,
-						IC_Array & ica)
+						ICArray & ica)
 {
   CTableEntry * lhs_var = mChildren[0]->CompileTubeIC(table, ica);
   CTableEntry * rhs_var = mChildren[1]->CompileTubeIC(table, ica);
@@ -130,7 +135,7 @@ ASTNodeMath1::ASTNodeMath1(ASTNode * in_child, int op)
   mChildren.push_back(in_child);
 }
 
-CTableEntry * ASTNodeMath1::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeMath1::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 {
   CTableEntry * in_var = mChildren[0]->CompileTubeIC(table, ica);
   CTableEntry * out_var = table.AddTempEntry(mType);
@@ -186,7 +191,7 @@ ASTNodeMath2::ASTNodeMath2(ASTNode * in1, ASTNode * in2, int op)
 }
 
 
-CTableEntry * ASTNodeMath2::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeMath2::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 {
   CTableEntry * in_var1 = mChildren[0]->CompileTubeIC(table, ica);
   CTableEntry * in_var2 = mChildren[1]->CompileTubeIC(table, ica);
@@ -240,7 +245,7 @@ ASTNodeBool2::ASTNodeBool2(ASTNode * in1, ASTNode * in2, int op)
 }
 
 
-CTableEntry * ASTNodeBool2::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeBool2::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 {
   CTableEntry * in_var1 = mChildren[0]->CompileTubeIC(table, ica);
   CTableEntry * out_var = table.AddTempEntry(mType);
@@ -292,7 +297,7 @@ ASTNodeIf::ASTNodeIf(ASTNode * in1, ASTNode * in2, ASTNode * in3)
 }
 
 
-CTableEntry * ASTNodeIf::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeIf::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 {
   std::string else_label = table.NextLabelID("if_else_");
   std::string end_label = table.NextLabelID("if_end_");
@@ -339,7 +344,7 @@ ASTNodeWhile::ASTNodeWhile(ASTNode * in1, ASTNode * in2)
 }
 
 
-CTableEntry * ASTNodeWhile::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeWhile::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 {
   std::string start_label = table.NextLabelID("while_start_");
   std::string end_label = table.NextLabelID("while_end_");
@@ -377,7 +382,7 @@ ASTNodeBreak::ASTNodeBreak()
 }
 
 
-CTableEntry * ASTNodeBreak::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodeBreak::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 {
   if (table.GetWhileDepth() == 0) {
     yyerror2("'break' command used outside of any loop", mLineNum);
@@ -402,7 +407,7 @@ ASTNodePrint::ASTNodePrint(ASTNode * out_child)
 }
 
 
-CTableEntry * ASTNodePrint::CompileTubeIC(CSymbolTable & table, IC_Array & ica)
+CTableEntry * ASTNodePrint::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 {
   // Collect the output arguments as they are calculated...
   for (int i = 0; i < (int) mChildren.size(); i++) {
