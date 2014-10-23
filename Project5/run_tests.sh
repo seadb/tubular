@@ -25,9 +25,6 @@ function run_error_test {
     ref_error=$?
     grep -Fq "ERROR" $project.cout
     proj_error=$?    
-    echo $ref_error
-    echo $proj_error
-    echo [ $proj_error ] && [ $ref_error ]
     if  [ $proj_error -eq "0" ] ; then
     	if [ $ref_error -ne "0" ] ; then
 		echo $1 " gave an error when there should not be an error";
