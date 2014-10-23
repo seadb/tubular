@@ -1,0 +1,2 @@
+array(int) a;
+a.notallowed();
