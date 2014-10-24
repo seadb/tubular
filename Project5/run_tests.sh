@@ -25,34 +25,47 @@ function run_error_test {
     ref_error=$?
     grep -Fq "ERROR" $project.cout
     proj_error=$?    
-    echo $ref_error
-    echo $proj_error
-    echo [ $proj_error ] && [ $ref_error ]
-    if  [ $proj_error -eq "0" ] ; then
-    	if [ $ref_error -ne "0" ] ; then
-		echo $1 " gave an error when there should not be an error";
-		summary=$summary"\n"$1" gave an error when there should not be an error";
-		rm $project.tic;
-		if [ -e ref.tic ] ; then 
-		    rm ref.tic;
+    #Check the extra credit
+    if [ $2 -eq "1" ] ; then 
+ 	 diff -w ref.cout $project.cout > /dev/null
+	 if [ $?  -ne 0 ]; then
+		echo $1 " gave a different error than the reference";
+		summary=$summary"\n"$1" gave a different error than the reference";
+		if [ -e $project.tic ] ; then
+			rm $project.tic
 		fi
-		return 1;
-
-	fi
+		if [ -e ref.tic ] ; then
+			rm ref.tic;
+		fi
+		return 1
+	 fi
     else
-    	if [ $ref_error -eq "0" ] ; then
-		echo $1 " did not give an error when it should have";
-		summary=$summary"\n"$1" did not give an error when it should have";
-		rm $project.tic;
-		if [ -e ref.tic ] ; then 
-		    rm ref.tic;
+
+	    if  [ $proj_error -eq "0" ] ; then
+		if [ $ref_error -ne "0" ] ; then
+			echo $1 " gave an error when there should not be an error";
+			summary=$summary"\n"$1" gave an error when there should not be an error";
+			rm $project.tic;
+			if [ -e ref.tic ] ; then 
+			    rm ref.tic;
+			fi
+			return 1;
+
 		fi
-		return 1;
+	    else
+		if [ $ref_error -eq "0" ] ; then
+			echo $1 " did not give an error when it should have";
+			summary=$summary"\n"$1" did not give an error when it should have";
+			rm $project.tic;
+			if [ -e ref.tic ] ; then 
+			    rm ref.tic;
+			fi
+			return 1;
 
-	fi
-    	
+		fi
+		
+	    fi
     fi
-
     if [ -e ref.tic ] ; then
 	    Test_Suite/TubeIC -t 1000000 $project.tic > $project.out
 	    Test_Suite/TubeIC -t 1000000 ref.tic > ref.out
@@ -75,16 +88,16 @@ function run_error_test {
 
 }
 for F in Test_Suite/good*.tube; do 
-	run_error_test $F
+	run_error_test $F "0"
 done
 for F in Test_Suite/fail*.tube; do 
-	run_error_test $F
+	run_error_test $F "0"
 done
 
 echo Extra Credit Results:
 
 for F in Test_Suite/extra.*.tube; do 
-	run_error_test $F
+	run_error_test $F "1"
 done
 
 
