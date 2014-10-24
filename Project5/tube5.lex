@@ -1,108 +1,51 @@
 %{
-#include <iostream>
-
-#include "ast.h"
 #include "symbol_table.h"
-#include "tube5.tab.hh"
+#include "type_info.h"
+#include "ast.h"
+#include "tube5-parser.tab.hh"
 
+#include <iostream>
+#include <stdio.h>
+#include <string>
+
+// Two global variables (not clean, but works...)
 int line_num = 1;
+std::string out_filename = "";
 %}
 
-id              [a-zA-Z_][a-zA-Z0-9_]*
-ascii           [+\-*/;\(\)\{\}=,%?:\!]
-string          \"[A-Za-z\t\n\\\"#]+\"
-char            \'\\\'\'|\'\\\\\'|'\\n'|'\\t'|\'[\40-\132\136-\176\t\n\\\']\' 
+%option nounput
+
+type		int|char|string
+id	        [_a-zA-Z][a-zA-Z0-9_]*
+int_lit         [0-9]+
+char_lit        '(.|(\\[\\'nt]))'
+string_lit      \"[A-Za-z\t\n\\\"#]+\"
+comment		#.*
+whitespace	[ \t\r]
+passthrough	[+\-*/%=(),!{}[\].;]
+
 %%
 
-#.* ; // Comment, ignore remainder of line
+"print" { return COMMAND_PRINT; }
+"if"    { return COMMAND_IF; }
+"else"  { return COMMAND_ELSE; }
+"while" { return COMMAND_WHILE; }
+"break" { return COMMAND_BREAK; }
+"for"   { return COMMAND_FOR; }
+"array" { return ARRAY;}
 
-"int"   { /* Types; right now, just "int" */
-          yylval.lexeme = strdup(yytext);
-	  return TYPE_INT;
-        }
+{type}        { yylval.lexeme = strdup(yytext);  return TYPE; }
+{id}          { yylval.lexeme = strdup(yytext);  return ID; }
+{int_lit}     { yylval.lexeme = strdup(yytext);  return INT_LIT; }
+{char_lit}    { yylval.lexeme = strdup(yytext);  return CHAR_LIT; }
+{string_lit}  { yylval.lexeme = strdup(yytext);  return STRING_LIT; }
+{passthrough}  { yylval.lexeme = strdup(yytext);  return (int) yytext[0]; }
 
-"char"  {
-	  yylval.lexeme = strdup(yytext);
-	  return TYPE_CHAR;
-	}
-
-"array" {
-          yylval.lexeme = strdup(yytext);
-          return TYPE_ARRAY;
-        }
-
-"string" {
-          yylval.lexeme = strdup(yytext);
-          return TYPE_STRING;
-        }
-
-"else"  { yylval.lexeme = strdup(yytext);
-	  return ELSE;
-	}
-
-"while" { yylval.lexeme = strdup(yytext);
-	  return WHILE;
-	}
-
-"break" { yylval.lexeme = strdup(yytext);
-	  return BREAK;
-	}
-
-"print" {
-          yylval.lexeme = strdup(yytext);
-	  return COMMAND_PRINT;
-        }
-
-"for"   { yylval.lexeme = strdup(yytext);
-	  return FOR;
-        }
-
-random  {
- 	  yylval.lexeme = strdup(yytext);
-	  return COMMAND_RANDOM;
-        }
-
-"if"	{
-	  yylval.lexeme = strdup(yytext);
-	  return IF;
-	}
-
-{id}    { /* Identifier */
-          yylval.lexeme = strdup(yytext);
-	  return ID;
-        }
-
-[0-9]+  { /* Int Literal */
-          yylval.lexeme = strdup(yytext);
-          return INT_LITERAL;
-        }
-
-{string} {
-          yylval.lexeme = strdup(yytext);
-          return STRING_LITERAL;
-          }
-
- /*'[\40-\176]'*/
-{char} {
-	  yylval.lexeme = strdup(yytext);
-	  return CHAR_LITERAL;
-        }
-'\\n' {
-          yylval.lexeme = strdup(yytext);
-          return CHAR_LITERAL_NEWLINE;
-        }
-'\\t' {
-          yylval.lexeme = strdup(yytext);
-          return CHAR_LITERAL_TAB;
-        }
-'\\'' {
-          yylval.lexeme = strdup(yytext);
-          return CHAR_LITERAL_QUOTE;
-        }
-'\\\\' {
-          yylval.lexeme = strdup(yytext);
-          return CHAR_LITERAL_BACKSLASH;
-        }
+"+=" { return ASSIGN_ADD; }
+"-=" { return ASSIGN_SUB; }
+"*=" { return ASSIGN_MULT; }
+"/=" { return ASSIGN_DIV; }
+"%=" { return ASSIGN_MOD; }
 
 "==" { return COMP_EQU; }
 "!=" { return COMP_NEQU; }
@@ -110,50 +53,73 @@ random  {
 "<=" { return COMP_LTE; }
 ">" { return COMP_GTR; }
 ">=" { return COMP_GTE; }
+
 "&&" { return BOOL_AND; }
 "||" { return BOOL_OR; }
-"+=" { return ASSIGN_ADD; }
-"-=" { return ASSIGN_SUB; }
-"*=" { return ASSIGN_MULT; }
-"/=" { return ASSIGN_DIV; }
-"%=" { return ASSIGN_MOD; }
-"{"  { return OPEN_BRACE; }
-"}"  { return CLOSE_BRACE; }
 
-{ascii} { /* Chars to return directly! */
-          return yytext[0];
-        }
+{comment} { ; }
+{whitespace} { ; }
+\n  { line_num++; }
 
-[ \t\r] ; /* Ignore whitespace*/
-
-[\n]    { /* Increment line number */
-          line_num++;
-        }
-
-.       { /* Deal with unknown token! */
-          std::cout << "ERROR(line " << line_num << "): Unknown Token '"
-                    << yytext << "'." << std::endl;
-          exit(1);
-        }
+.      { std::cout << "ERROR(line " << line_num << "): Unknown Token '" << yytext << "'." << std::endl; exit(1); }
 
 %%
 
 void LexMain(int argc, char * argv[])
 {
-  int arg_id = 0;
+  FILE * file = NULL;
+  bool input_found = false;
 
-  if (argc != 3) {
-    std::cerr << "Format: " << argv[0] << " [filename] [filename]" << std::endl;
+  // Loop through all of the command-line arguments.
+  for (int arg_id = 1; arg_id < argc; arg_id++) {
+    std::string cur_arg(argv[arg_id]);
+
+    if (cur_arg == "-h") {
+      std::cout << "Tubular Compiler v. 0.4 (Project 4)"  << std::endl
+           << "Format: " << argv[0] << "[flags] [filemName]" << std::endl
+           << std::endl
+           << "Available Flags:" << std::endl
+           << "  -h  :  Help (this information)" << std::endl
+        ;
+      exit(0);
+    }
+
+    // PROCESS OTHER ARGUMENTS HERE IF YOU ADD THEM
+
+    // If the next argument begins with a dash, assume it's an unknown flag...
+    if (cur_arg[0] == '-') {
+      std::cerr << "ERROR: Unknown command-line flag: " << cur_arg << std::endl;
+      exit(1);
+    }
+
+    // Assume the current argument is a filemName (first input, then output)
+    if (!input_found) {
+      file = fopen(argv[arg_id], "r");
+      if (!file) {
+        std::cerr << "Error opening " << cur_arg << std::endl;
+        exit(1);
+      }
+      yyin = file;
+      input_found = true;
+      continue;
+    } else if (out_filename == "") {
+      out_filename = cur_arg;
+    }
+
+    // Both files already loaded!
+    else {
+      std::cout << "ERROR: Unknown argument '" << cur_arg << "'" << std::endl;
+      exit(1);
+    }
+  }
+
+  // Make sure we've loaded input and output filemNames before we finish...
+  if (input_found == false || out_filename == "") {
+    std::cerr << "Format: " << argv[0] << "[flags] [input filemName] [output filemName]" << std::endl;
+    std::cerr << "Type '" << argv[0] << " -h' for help." << std::endl;
     exit(1);
   }
-
-  // The only thing left to do is assume the current argument is the filename.
-  FILE *file = fopen(argv[1], "r");
-  if (!file) {
-    std::cerr << "Error opening " << argv[1] << std::endl;
-    exit(2);
-  }
-  yyin = file;
-
+ 
   return;
 }
+
