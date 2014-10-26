@@ -179,7 +179,7 @@ literal:
               for(int i = 1; i < literal.size()-1; i++ )
               {
                 array[i] = literal[i];
-                std::cout << array[i] << std::endl;
+//                std::cout << array[i] << std::endl;
               }
               
               $$ = new ASTNodeLiteral(Type::CHAR_ARRAY, literal.substr(1,literal.size()-2));
@@ -223,8 +223,8 @@ variable:   ID {
 
                 //$$ = new ASTNodeVariable(cur_entry);
 
-             $$ = new ASTNodeIndex(cur_entry,$3);
-             $$->SetLineNum(line_num);
+                $$ = new ASTNodeIndex(cur_entry,$3);
+                $$->SetLineNum(line_num);
 
         
         }
@@ -318,23 +318,23 @@ assignment:
   ;
 
 argument_list:  argument_list ',' expression {
-      ASTNode * node = $1; // Grab the node used for arg list.
-      node->AddChild($3);    // Save this argument in the node.
-      $$ = node;
+                  ASTNode * node = $1; // Grab the node used for arg list.
+                  node->AddChild($3);    // Save this argument in the node.
+                  $$ = node;
     }
   |  expression {
-      // Create a temporary AST node to hold the arg list.
-      $$ = new ASTNodeTempNode(Type::VOID);
-      $$->AddChild($1);   // Save this argument in the temp node.
+                  // Create a temporary AST node to hold the arg list.
+                  $$ = new ASTNodeTempNode(Type::VOID);
+                  $$->AddChild($1);   // Save this argument in the temp node.
                   $$->SetLineNum(line_num);
     }
   ;
 
 command:   COMMAND_PRINT argument_list {
-       $$ = new ASTNodePrint(NULL);
-       $$->TransferChildren($2);
+             $$ = new ASTNodePrint(NULL);
+             $$->TransferChildren($2);
              $$->SetLineNum(line_num);
-       delete $2;
+             delete $2;
            }
         |  COMMAND_BREAK {
              $$ = new ASTNodeBreak();

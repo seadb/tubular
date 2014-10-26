@@ -88,23 +88,32 @@ public:
 
 class ASTNodeIndex : public ASTNode {
   private:
-    CTableEntry * mEntry;
+    CTableEntry * mArray;
     ASTNode * mIndex;
   public:
     ASTNodeIndex(CTableEntry * entry, ASTNode * index);
+    ASTNode * GetIndex() { return mIndex; }
     CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
+
 };
                     
 class ASTNodeLiteral : public ASTNode {
 private:
  std::string mLexeme;     // When we print, how should this node look?
- char * mArray;
+ char * mCharArray;
+ int * mIntArray;
 public:
   ASTNodeLiteral(int in_type, std::string in_lex);
-  ASTNodeLiteral(int in_type, char * array);
+  ASTNodeLiteral(int in_type, char * in_char);
   CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
-
+/*
+class ASTNodeArray : public ASTNode {
+  public:
+    ASTNodeArray(std::string in_array);
+    ASTNodeArray(int * in_array);
+    CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
+}*/
 // Math...
 
 class ASTNodeAssign : public ASTNode {

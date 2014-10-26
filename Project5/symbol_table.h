@@ -31,6 +31,8 @@ protected:
   bool mIsTemp;      // Is this variable just temporary (internal to compiler)
   int mVarID;        // What is the intermediate code ID for this variable?
   CTableEntry * mNext; // A pointer to another variable that this one is shadowing
+  std::string mIndex;         // Is there an index associated with this var
+  CTableEntry * mArray; // Is there an array? 
 
   CTableEntry(int inType) 
     : mTypeID (inType)
@@ -39,6 +41,8 @@ protected:
     , mIsTemp(true)
     , mVarID(-1)
     , mNext(NULL)
+    , mIndex("")
+    , mArray(NULL)
   {
   }
 
@@ -49,6 +53,8 @@ protected:
     , mIsTemp(false)
     , mVarID(-1)
     , mNext(NULL)
+    , mIndex("")
+    , mArray(NULL)
   {
   }
   virtual ~CTableEntry() { ; }
@@ -59,12 +65,16 @@ public:
   int GetScope()          const { return mScope; }
   bool GetTemp()          const { return mIsTemp; }
   int GetVarID()          const { return mVarID; }
+  std::string GetIndex()          const { return mIndex;}
   CTableEntry * GetNext() const { return mNext; }
+  CTableEntry * GetArray() const { return mArray; }
 
   void SetName(std::string inName)     { mName = inName; }
-  void SetScope(int in_scope)           { mScope = in_scope; }
-  void SetVarID(int in_id)              { mVarID = in_id; }
-  void SetNext(CTableEntry * in_next)   { mNext = in_next; }
+  void SetScope(int inScope)           { mScope = inScope; }
+  void SetVarID(int inID)              { mVarID = inID; }
+  void SetNext(CTableEntry * inNext)   { mNext = inNext; }
+  void SetIndex(std::string inIndex)              { mIndex = inIndex; }
+  void SetArray(CTableEntry * inArray ) { mArray = inArray;  }
 };
 
 
