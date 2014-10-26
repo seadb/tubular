@@ -56,7 +56,7 @@ ASTNodeLiteral::ASTNodeLiteral(int in_type, std::string in_lex)
 ASTNodeLiteral::ASTNodeLiteral(int in_type, char * in_char)
                             : ASTNode(in_type), mCharArray(in_char)
 {
-  std::cout << "mCharArrayConstructor" << std::endl;
+  std::cout << "mCharArrayConstructor" << in_char << std::endl;
 }
 
 CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, ICArray & ica)
@@ -69,6 +69,7 @@ CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, ICArray & ica)
   }
   else if (mType == Type::INT_ARRAY || mType == Type::CHAR_ARRAY)
   {
+    //std::cout << "mCharArray" << mCharArray << std::endl; 
     std::stringstream s;
     std::stringstream ss; ss << mLexeme.size(); //convert the size to a string
     ica.Add("ar_set_size", out_var->GetVarID(), ss.str());
@@ -112,15 +113,21 @@ ASTNodeAssign::ASTNodeAssign(ASTNode * lhs, ASTNode * rhs)
 CTableEntry * ASTNodeAssign::CompileTubeIC(CSymbolTable & table,
 						ICArray & ica)
 {
-  CTableEntry * lhs_var = mChildren[0]->CompileTubeIC(table, ica);
-  CTableEntry * rhs_var = mChildren[1]->CompileTubeIC(table, ica);
+  CTableEntry * left = mChildren[0]->CompileTubeIC(table, ica);
+  CTableEntry * right = mChildren[1]->CompileTubeIC(table, ica);
 
   if (mType == Type::INT || mType == Type::CHAR) {
-    ica.Add("val_copy", rhs_var->GetVarID(), lhs_var->GetVarID());
+    ica.Add("val_copy", right->GetVarID(), left->GetVarID());
   }
   else if (mType == Type::INT_ARRAY || mType == Type::CHAR_ARRAY){
     //TODO: add intermediate code to ica
     //ica.Add("ar_set_idx")
+    if(left->GetIndex() != "NULL")
+    {
+
+    }
+    ica.Add("val_copy", right->GetVarID());
+    CTableEntry * left = mChildren[0]->CompileTubeIC(table, ica);
   }
   else if (mType = Type::INT_ARRAY_IDX || mType == Type::CHAR_ARRAY_IDX)
   {
@@ -135,9 +142,9 @@ CTableEntry * ASTNodeAssign::CompileTubeIC(CSymbolTable & table,
     exit(1);
   }
 
-  if (rhs_var->GetTemp() == true) table.RemoveEntry( rhs_var );
+  if (right->GetTemp() == true) table.RemoveEntry( right );
 
-  return lhs_var;
+  return left;
 }
 
 

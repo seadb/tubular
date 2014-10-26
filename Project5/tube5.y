@@ -165,11 +165,11 @@ expression:     literal    { $$ = $1; }
 
 literal:   
        INT_LIT {
-               $$ = new ASTNodeLiteral(Type::INT, $1);
+               $$ = new ASTNodeLiteral(Type::INT, (std::string)$1);
                $$->SetLineNum(line_num);
              }
   |    CHAR_LIT {
-               $$ = new ASTNodeLiteral(Type::CHAR, $1);
+               $$ = new ASTNodeLiteral(Type::CHAR, (std::string)$1);
                $$->SetLineNum(line_num);
              }
   |    STRING_LIT {
