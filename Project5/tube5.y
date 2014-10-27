@@ -178,7 +178,6 @@ literal:
                         literal.substr(1,literal.size()-2));
               $$->SetLineNum(line_num);
             }
-
           
 negative:    '-' expression %prec UMINUS {
                $$ = new ASTNodeMath1($2, '-');
@@ -243,6 +242,21 @@ variable:   ID {
                 }
                 $$ = new ASTNodeResize(cur_entry, $5);
             }
+	|   ID '.' ID '(' ')' {
+		std::string errString = "unknown method '";
+		errString += $3;
+		errString += "'";
+		yyerror(errString);
+		exit(1);
+		}
+	|   ID '.' ID '(' expression ')' {
+                std::string errString = "unknown method '";
+                errString += $3;
+                errString += "'";
+                yyerror(errString);
+                exit(1);
+                }
+
 ;
 
 operation:
