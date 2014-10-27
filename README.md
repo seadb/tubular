@@ -28,8 +28,8 @@ Test Results
 - [x] good.07.tube
 - [x] good.08.tube
 - [ ] good.09.tube
-- [ ] good.10.tube
-- [ ] good.11.tube
+- [x] good.10.tube
+- [x] good.11.tube
 - [ ] good.12.tube
 - [ ] good.13.tube
 - [x] good.14.tube
