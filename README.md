@@ -1,7 +1,7 @@
 Raven-tube
 ==========
 
-Test Status
+Test Results
 ==========
 - [ ] extra.00.tube
 - [ ] extra.01.tube
@@ -38,7 +38,8 @@ Test Status
 - [ ] good.18.tube
 - [ ] good.999.tube
 
-Required Error messages 
+Required Error Messages 
+====================
 
 - [x] ERROR(line #): unknown token '@'
 - [x] ERROR(line #): syntax error
