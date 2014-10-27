@@ -24,16 +24,16 @@ Test Results
 - [x] good.03.tube
 - [x] good.04.tube
 - [x] good.05.tube
-- [ ] good.06.tube
+- [ ] good.06.tube  Escape characters aren't being output properly
 - [x] good.07.tube
 - [x] good.08.tube
 - [x] good.09.tube
 - [x] good.10.tube
 - [x] good.11.tube
-- [ ] good.12.tube
+- [ ] good.12.tube  ERROR(line 19): Unknown Token '_'.
 - [x] good.13.tube
 - [x] good.14.tube
-- [ ] good.15.tube
+- [ ] good.15.tube 
 - [x] good.16.tube
 - [x] good.17.tube
 - [x] good.18.tube
