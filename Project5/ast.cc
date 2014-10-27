@@ -120,14 +120,10 @@ CTableEntry * ASTNodeAssign::CompileTubeIC(CSymbolTable & table,
     ica.Add("val_copy", right->GetVarID(), left->GetVarID());
   }
   else if (mType == Type::INT_ARRAY || mType == Type::CHAR_ARRAY){
-    //TODO: add intermediate code to ica
-    //ica.Add("ar_set_idx")
     if(left->GetIndex() != "NULL")
     {
-
+      ica.Add("ar_copy", right->GetVarID(), left->GetVarID());
     }
-    ica.Add("val_copy", right->GetVarID());
-    CTableEntry * left = mChildren[0]->CompileTubeIC(table, ica);
   }
   else if (mType = Type::INT_ARRAY_IDX || mType == Type::CHAR_ARRAY_IDX)
   {
@@ -449,6 +445,60 @@ CTableEntry * ASTNodePrint::CompileTubeIC(CSymbolTable & table, ICArray & ica)
     case Type::CHAR:
       ica.Add("out_char", cur_var->GetVarID());
       break;
+    case Type::INT_ARRAY: {
+      CTableEntry * loop_var = table.AddTempEntry(Type::INT);
+      CTableEntry * size_var = table.AddTempEntry(Type::INT);
+
+      ica.Add("val_copy", "0", loop_var->GetVarID());
+      ica.Add("ar_get_siz", cur_var->GetVarID(), size_var->GetVarID());
+
+      std::string start_label = table.NextLabelID("print_array_start_");
+      ica.AddLabel(start_label);
+
+      CTableEntry * test_var = table.AddTempEntry(Type::INT);
+      ica.Add("test_gte", loop_var->GetVarID(), size_var->GetVarID(),
+              test_var->GetVarID());
+      ica.Add("jump_if_n0", test_var->GetVarID(),
+              "print_array_end_" + loop_var->GetVarID());
+      ica.Add("ar_get_idx", cur_var->GetVarID(), loop_var->GetVarID(),
+              test_var->GetVarID());
+      ica.Add("out_int", test_var->GetVarID());
+      ica.Add("add", loop_var->GetVarID(), "1", loop_var->GetVarID());
+      ica.Add("jump print_array_start_" + loop_var->GetVarID());
+
+      std::string end_label = table.NextLabelID("print_array_end_");
+      ica.AddLabel(end_label);
+
+      ica.Add("out_char", "'\n'");
+
+      break;
+    }
+    case Type::CHAR_ARRAY: {
+      CTableEntry * loop_var = table.AddTempEntry(Type::INT);
+      CTableEntry * size_var = table.AddTempEntry(Type::INT);
+
+      ica.Add("val_copy", "0", loop_var->GetVarID());
+      ica.Add("ar_get_size", cur_var->GetVarID(), size_var->GetVarID());
+
+      std::string start_label = table.NextLabelID("print_array_start_");
+      std::string end_label = table.NextLabelID("print_array_end_");
+      ica.AddLabel(start_label);
+
+      CTableEntry * test_var = table.AddTempEntry(Type::INT);
+      ica.Add("test_gte", loop_var->GetVarID(), size_var->GetVarID(),
+              test_var->GetVarID());
+      ica.Add("jump_if_n0", test_var->GetVarID(), end_label);
+      CTableEntry * elem_var = table.AddTempEntry(Type::CHAR);
+      ica.Add("ar_get_idx", cur_var->GetVarID(), loop_var->GetVarID(),
+              elem_var->GetVarID());
+      ica.Add("out_char", elem_var->GetVarID());
+      ica.Add("add", loop_var->GetVarID(), "1", loop_var->GetVarID());
+      ica.Add("jump", start_label);
+
+      ica.AddLabel(end_label);
+
+      break;
+    }
     default:
       std::cerr << "Internal Compiler ERROR: Unknown Type in Write::CompilerTubeIC" << std::endl;
       exit(1);
