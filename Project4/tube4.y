@@ -23,14 +23,14 @@ void yyerror(std::string err_string) {
   ASTNode * ast_node;
 }
 
-%token<lexeme> ID INT_LITERAL CHAR_LITERAL TYPE_INT TYPE_CHAR IF BREAK WHILE ELSE
+%token<lexeme> ID INT_LITERAL CHAR_LITERAL TYPE_INT TYPE_CHAR IF BREAK WHILE ELSE FOR
 %token<lexeme> COMMAND_PRINT COMMAND_RANDOM CHAR_LITERAL_NEWLINE CHAR_LITERAL_TAB CHAR_LITERAL_QUOTE CHAR_LITERAL_BACKSLASH
 %token<lexeme> COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE
 %token<lexeme> BOOL_AND BOOL_OR
 %token<lexeme> ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %type<ast_node> statement_list statement block declare declare_assign//
 variable expression assignment operation compare literal negative flow_control//
-command parameters if_ while_ not_ //
+command parameters if_ while_ not_ for_ //
   /* if_ while_ not_ have a '_' so they won't clash w/ c types 'if while not'*/
 
 
@@ -109,6 +109,7 @@ declare_assign:  declare '=' expression {
 
 flow_control:   if_                 { $$ = $1; }
         |       while_              { $$ = $1; }
+        |       for_                { $$ = $1; }
 
 if_:        IF '(' expression ')' statement 
               { $$ = new ASTNode_If($3, $5, line_num); }
@@ -129,9 +130,19 @@ if_:        IF '(' expression ')' statement
                 ASTNode * blank = new ASTNode_Blank();
                 $$ = new ASTNode_Else($3, $5, blank, line_num); }
    
-while_:      WHILE '(' expression ')' statement
+while_:     WHILE '(' expression ')' statement
                { $$ = new ASTNode_While($3, $5, line_num); }
 
+for_:       FOR '(' expression ';' expression ';' expression ')' statement
+               { $$ = new ASTNode_For($3, $5, $7, $9, line_num); }
+
+    |       FOR '(' declare_assign ';' expression ';' expression ')' statement
+               { $$ = new ASTNode_For($3, $5, $7, $9, line_num); }
+
+    |       FOR '(' ';' ';' ')' statement
+              { ASTNode * temp = new ASTNode_Blank(); 
+                $$ = new ASTNode_For(temp, temp, temp, $6, line_num);
+              }
 expression:     literal    { $$ = $1; }
           |     negative   { $$ = $1; }
           |     not_       { $$ = $1; }

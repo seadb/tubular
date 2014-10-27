@@ -1,6 +1,6 @@
 # Specific Files
 ################
-tube4
+tube5
 out.tic
 *~
 *.map
@@ -8,6 +8,9 @@ ss.js
 Project1/
 Project2/
 Project3/
+Project4/
+*.output #bison debugging file
+Project5/*.output
 
 # Text Editor Backups #
 ###########################
