@@ -1,0 +1,2 @@
+string a = "Hey\nWhat\nIs\nUp\n\t\t\t#hey";
+print a;
