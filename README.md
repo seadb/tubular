@@ -1,5 +1,6 @@
 Raven-tube
 ==========
+Here you will find an updated log of the current project.  Ideally this would be automatically generated with a bash script.
 
 Test Results
 ==========
