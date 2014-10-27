@@ -27,16 +27,16 @@ Test Results
 - [ ] good.06.tube
 - [x] good.07.tube
 - [x] good.08.tube
-- [ ] good.09.tube
-- [ ] good.10.tube
-- [ ] good.11.tube
+- [x] good.09.tube
+- [x] good.10.tube
+- [x] good.11.tube
 - [ ] good.12.tube
-- [ ] good.13.tube
+- [x] good.13.tube
 - [x] good.14.tube
 - [ ] good.15.tube
-- [ ] good.16.tube
-- [ ] good.17.tube
-- [ ] good.18.tube
+- [x] good.16.tube
+- [x] good.17.tube
+- [x] good.18.tube
 - [ ] good.999.tube
 
 Required Error Messages 
