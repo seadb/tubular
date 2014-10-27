@@ -104,7 +104,16 @@ class ASTNodeSize : public ASTNode {
     ASTNodeSize(CTableEntry * entry);
     CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
-                   
+
+class ASTNodeResize : public ASTNode {
+  private:
+    CTableEntry * mArray;
+    ASTNode *mSize;
+  public:
+    ASTNodeResize(CTableEntry * entry, ASTNode *size);
+    CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
+};
+                  
 class ASTNodeLiteral : public ASTNode {
 private:
  std::string mLexeme;     // When we print, how should this node look?

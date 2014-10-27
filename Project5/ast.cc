@@ -615,3 +615,37 @@ CTableEntry * ASTNodeSize::CompileTubeIC(CSymbolTable & table, ICArray & ica)
   return outVar; 
 
 }
+
+/////////////////////////
+// ASTNodeResize
+
+ASTNodeResize::ASTNodeResize(CTableEntry * array, ASTNode *size) 
+    : ASTNode(array->GetType()), mArray(array)
+{
+  int idType = array->GetType();           
+  if (idType != Type::INT_ARRAY && idType != Type::CHAR_ARRAY) 
+  {
+    std::string errString = "cannot get size of non-array type";
+    yyerror(errString);
+    exit(1);
+  }
+
+  int sizeType = size->GetType();
+  if( sizeType != Type::INT  )
+    {
+      std::string errString = "argument one must be of type int";
+      yyerror(errString);
+      exit(1);
+    }
+  mSize = size;
+}
+
+CTableEntry * ASTNodeResize::CompileTubeIC(CSymbolTable & table, ICArray & ica)
+{ 
+  CTableEntry * size = mSize->CompileTubeIC(table, ica);
+
+  ica.Add("ar_set_size", mArray->GetVarID(), size->GetVarID());
+  
+  return NULL; 
+
+}

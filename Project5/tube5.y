@@ -41,7 +41,7 @@ void yyerror2(std::string errString, int orig_line) {
 %token ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD ARRAY //
 COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE BOOL_AND BOOL_OR//
 COMMAND_PRINT COMMAND_IF COMMAND_ELSE COMMAND_WHILE COMMAND_BREAK COMMAND_FOR//
-COMMAND_RANDOM SIZE
+COMMAND_RANDOM SIZE RESIZE
 %token <lexeme> INT_LIT CHAR_LIT STRING_LIT ID TYPE
 
 %right '=' ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
@@ -237,6 +237,18 @@ variable:   ID {
                   exit(1);
                 }
                 $$ = new ASTNodeSize(cur_entry);
+            }
+        |   ID '.' RESIZE '(' expression ')' {
+                CTableEntry * cur_entry = symbol_table.Lookup($1);
+                if (cur_entry == NULL) 
+                {
+                  std::string errString = "unknown variable '";
+                  errString += $1;
+                  errString += "'";
+                  yyerror(errString);
+                  exit(1);
+                }
+                $$ = new ASTNodeResize(cur_entry, $5);
             }
 ;
 

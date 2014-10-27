@@ -35,6 +35,7 @@ passthrough	[+\-*/%=(),!{}[\].;]
 "array" { return ARRAY;}
 "random" { return COMMAND_RANDOM;}
 "size"  { return SIZE; }
+"resize"  { return RESIZE; }
 {type}        { yylval.lexeme = strdup(yytext);  return TYPE; }
 {id}          { yylval.lexeme = strdup(yytext);  return ID; }
 {int_lit}     { yylval.lexeme = strdup(yytext);  return INT_LIT; }
