@@ -94,20 +94,20 @@ CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 //////////////////////
 // ASTNodeAssign
 
-ASTNodeAssign::ASTNodeAssign(ASTNode * lhs, ASTNode * rhs)
-                                 : ASTNode(lhs->GetType())
+ASTNodeAssign::ASTNodeAssign(ASTNode * left, ASTNode * right)
+                                 : ASTNode(left->GetType())
 { 
-  if (lhs->GetType() != rhs->GetType()) {
+  if (left->GetType() != right->GetType()) {
     std::string err_message = "types do not match for assignment (lhs='";
-    err_message += Type::AsString(lhs->GetType());
+    err_message += Type::AsString(left->GetType());
     err_message += "', rhs='";
-    err_message += Type::AsString(rhs->GetType());
+    err_message += Type::AsString(right->GetType());
     err_message += "')";
     yyerror(err_message);
     exit(1);
   }
-  mChildren.push_back(lhs);
-  mChildren.push_back(rhs);
+  mChildren.push_back(left);
+  mChildren.push_back(right);
 }
 
 CTableEntry * ASTNodeAssign::CompileTubeIC(CSymbolTable & table,
@@ -117,24 +117,25 @@ CTableEntry * ASTNodeAssign::CompileTubeIC(CSymbolTable & table,
   CTableEntry * right = mChildren[1]->CompileTubeIC(table, ica);
 
   if (mType == Type::INT || mType == Type::CHAR) {
-    ica.Add("val_copy", right->GetVarID(), left->GetVarID());
+    if(left->GetIndex() != NULL)
+    {
+      std::stringstream arrayID, rightID, index;
+      arrayID << left->GetArray()->GetVarID();
+      rightID << right->GetVarID();
+      index << left->GetIndex();
+      //ica.Add("ar_copy", right->GetVarID(), left->GetVarID());
+      ica.Add("ar_set_idx", left->GetArray()->GetVarID(), left->GetIndex()->GetVarID(), right->GetVarID()); 
+    }
+    else
+    {
+      ica.Add("val_copy", right->GetVarID(), left->GetVarID());
+    }
   }
   else if (mType == Type::INT_ARRAY || mType == Type::CHAR_ARRAY){
-    if(left->GetIndex() != "NULL")
-    {
-      ica.Add("ar_copy", right->GetVarID(), left->GetVarID());
-    }
-    //ica.Add("ar_copy", right->GetVarID(), left->GetVarID());
-    //CTableEntry * left = mChildren[0]->CompileTubeIC(table, ica);
-  }
-  else if (mType = Type::INT_ARRAY_IDX || mType == Type::CHAR_ARRAY_IDX)
-  {
-    CTableEntry * left = mChildren[0]->CompileTubeIC(table, ica);
-    CTableEntry * right = mChildren[0]->CompileTubeIC(table,ica);
-     
-
+    ica.Add("ar_copy", right->GetVarID(), left->GetVarID());
   }
   // --- Add code to deal with other types of assignments here! ---
+  
   else {
     std::cerr << "Internal Compiler ERROR: Unknown type in Assign!" << std::endl;
     exit(1);
@@ -582,7 +583,7 @@ CTableEntry * ASTNodeIndex::CompileTubeIC(CSymbolTable & table, ICArray & ica)
   std::stringstream ss;
   ss << index->GetVarID(); 
   
-  outVar->SetIndex(ss.str());
+  outVar->SetIndex(index);
   outVar->SetArray(mArray);
 
   ica.Add("ar_get_idx", mArray->GetVarID(), index->GetVarID(), o3);

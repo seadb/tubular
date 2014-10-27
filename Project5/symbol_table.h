@@ -30,8 +30,8 @@ protected:
   int mScope;         // What mScope was this variable declared at?
   bool mIsTemp;      // Is this variable just temporary (internal to compiler)
   int mVarID;        // What is the intermediate code ID for this variable?
-  CTableEntry * mNext; // A pointer to another variable that this one is shadowing
-  std::string mIndex;         // Is there an index associated with this var
+  CTableEntry * mNext; // A pointer to another entry that this one is shadowing
+  CTableEntry * mIndex; // Is there an index associated with this var
   CTableEntry * mArray; // Is there an array? 
 
   CTableEntry(int inType) 
@@ -41,7 +41,7 @@ protected:
     , mIsTemp(true)
     , mVarID(-1)
     , mNext(NULL)
-    , mIndex("")
+    , mIndex(NULL)
     , mArray(NULL)
   {
   }
@@ -53,27 +53,27 @@ protected:
     , mIsTemp(false)
     , mVarID(-1)
     , mNext(NULL)
-    , mIndex("")
+    , mIndex(NULL)
     , mArray(NULL)
   {
   }
   virtual ~CTableEntry() { ; }
 
 public:
-  int GetType()           const { return mTypeID; }
-  std::string GetName()   const { return mName; }
-  int GetScope()          const { return mScope; }
-  bool GetTemp()          const { return mIsTemp; }
-  int GetVarID()          const { return mVarID; }
-  std::string GetIndex()          const { return mIndex;}
-  CTableEntry * GetNext() const { return mNext; }
+  int GetType()            const { return mTypeID; }
+  std::string GetName()    const { return mName; }
+  int GetScope()           const { return mScope; }
+  bool GetTemp()           const { return mIsTemp; }
+  int GetVarID()           const { return mVarID; }
+  CTableEntry * GetIndex() const { return mIndex;}
+  CTableEntry * GetNext()  const { return mNext; }
   CTableEntry * GetArray() const { return mArray; }
 
   void SetName(std::string inName)     { mName = inName; }
   void SetScope(int inScope)           { mScope = inScope; }
   void SetVarID(int inID)              { mVarID = inID; }
   void SetNext(CTableEntry * inNext)   { mNext = inNext; }
-  void SetIndex(std::string inIndex)              { mIndex = inIndex; }
+  void SetIndex(CTableEntry * inIndex) { mIndex = inIndex; }
   void SetArray(CTableEntry * inArray ) { mArray = inArray;  }
 };
 
@@ -101,12 +101,14 @@ public:
     for (int i = 0; i < (int) mVarArchive.size(); i++) delete mVarArchive[i];
   }
 
-  int GetSize() const { return (int) mTableMap.size(); }
+  int GetSize()     const { return (int) mTableMap.size(); }
   int GetCurScope() const { return mCurrentScope; }
-  const std::vector<CTableEntry *> & GetScopeVars(int scope) {
+  const std::vector<CTableEntry *> & GetScopeVars(int scope) 
+  {
     if (scope < 0 || scope >= (int) mScopeInfo.size()) {
-      std::cerr << "Internal Compiler Error: Requesting vars from scope #" << scope
-                << ", but only " << mScopeInfo.size() << " scopes exist." << std::endl;
+      std::cerr << "Internal Compiler Error: Requesting vars from scope #" 
+        << scope << ", but only " << mScopeInfo.size() << " scopes exist." 
+        << std::endl;
     }
     return *(mScopeInfo[scope]);
   }
@@ -123,16 +125,16 @@ public:
 
     // Make sure to clean up the mTableMap.
     for (int i = 0; i < (int) old_scope->size(); i++) {
-      CTableEntry * old_entry = (*old_scope)[i];
+      CTableEntry * oldEntry = (*old_scope)[i];
 
       // If this entry is shadowing another, make shadowed version active again.
-      if (old_entry->GetNext() != NULL) {
-        mTableMap[old_entry->GetName()] = old_entry->GetNext();
+      if (oldEntry->GetNext() != NULL) {
+        mTableMap[oldEntry->GetName()] = oldEntry->GetNext();
       }
 
       // Otherwise just remove it from being an active variable mName.
       else {
-        mTableMap.erase(old_entry->GetName());
+        mTableMap.erase(oldEntry->GetName());
       }
     }
 
@@ -167,25 +169,25 @@ public:
   // Insert an entry into the symbol table.
   CTableEntry * AddEntry(int inType, std::string inName) {
     // Create the new entry for this variable.
-    CTableEntry * new_entry = new CTableEntry(inType, inName);
-    new_entry->SetVarID( GetNextID() );
-    new_entry->SetScope(mCurrentScope);
+    CTableEntry * newEntry = new CTableEntry(inType, inName);
+    newEntry->SetVarID( GetNextID() );
+    newEntry->SetScope(mCurrentScope);
 
     // If an old entry exists by this mName, shadow it.
-    CTableEntry * old_entry = Lookup(inName);
-    if (old_entry) new_entry->SetNext(old_entry);
+    CTableEntry * oldEntry = Lookup(inName);
+    if (oldEntry) newEntry->SetNext(oldEntry);
 
     // Save the information for the new entry.
-    mTableMap[inName] = new_entry;
-    mScopeInfo[mCurrentScope]->push_back(new_entry);
-    return new_entry;
+    mTableMap[inName] = newEntry;
+    mScopeInfo[mCurrentScope]->push_back(newEntry);
+    return newEntry;
   }
 
   // Insert a temp variable entry into the symbol table.
   CTableEntry * AddTempEntry(int inType) {
-    CTableEntry * new_entry = new CTableEntry(inType);
-    new_entry->SetVarID( GetNextID() );
-    return new_entry;
+    CTableEntry * newEntry = new CTableEntry(inType);
+    newEntry->SetVarID( GetNextID() );
+    return newEntry;
   }
 
   // Don't create a full variable; just get an unused variable ID.
