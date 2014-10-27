@@ -477,7 +477,7 @@ CTableEntry * ASTNodePrint::CompileTubeIC(CSymbolTable & table, ICArray & ica)
       CTableEntry * size_var = table.AddTempEntry(Type::INT);
 
       ica.Add("val_copy", "0", loop_var->GetVarID());
-      ica.Add("ar_get_siz", cur_var->GetVarID(), size_var->GetVarID());
+      ica.Add("ar_get_size", cur_var->GetVarID(), size_var->GetVarID());
 
       std::string start_label = table.NextLabelID("print_array_start_");
       ica.AddLabel(start_label);
@@ -491,7 +491,8 @@ CTableEntry * ASTNodePrint::CompileTubeIC(CSymbolTable & table, ICArray & ica)
               test_var->GetVarID());
       ica.Add("out_int", test_var->GetVarID());
       ica.Add("add", loop_var->GetVarID(), "1", loop_var->GetVarID());
-      ica.Add("jump print_array_start_" + loop_var->GetVarID());
+      std::stringstream ss; ss << "print_array_start_" << loop_var->GetVarID();
+      ica.Add("jump",ss.str());
 
       std::string end_label = table.NextLabelID("print_array_end_");
       ica.AddLabel(end_label);
@@ -596,7 +597,7 @@ CTableEntry * ASTNodeIndex::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 // ASTNodeSize
 
 ASTNodeSize::ASTNodeSize(CTableEntry * array) 
-    : ASTNode(array->GetType()), mArray(array) 
+    : ASTNode(Type::INT), mArray(array) 
 {
   int idType = array->GetType();           
   if (idType != Type::INT_ARRAY && idType != Type::CHAR_ARRAY) 
