@@ -19,7 +19,7 @@ type		int|char|string
 id	        [_a-zA-Z][a-zA-Z0-9_]*
 int_lit         [0-9]+
 char_lit        '(.|(\\[\\'nt]))'
-string_lit      \"(.|\n\t_|(\\[\\"nt]))+\"
+string_lit      \"(.|\n\t_|(\\[\\"nt]))*\"
 comment		#.*
 whitespace	[ \t\r]
 passthrough	[+\-*/%=(),!{}[\].;]
