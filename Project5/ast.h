@@ -96,7 +96,15 @@ class ASTNodeIndex : public ASTNode {
     CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 
 };
-                    
+
+class ASTNodeSize : public ASTNode {
+  private:
+    CTableEntry * mArray;
+  public:
+    ASTNodeSize(CTableEntry * entry);
+    CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
+};
+                   
 class ASTNodeLiteral : public ASTNode {
 private:
  std::string mLexeme;     // When we print, how should this node look?
