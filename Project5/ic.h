@@ -180,14 +180,28 @@ public:
   // Arguments can either be variables (where an int represents the variable ID) or
   // constant values (where a string holds the constant's lexeme).  And 'a' or 's' will
   // automatically be prepended to an int for a variable based on the mInstruction used.
-  ICEntry& Add(std::string mInst, int arg1=-1, int arg2=-1, int arg3=-1, std::string cmt="");
-  ICEntry& Add(std::string mInst, std::string arg1, int arg2=-1, int arg3=-1, std::string cmt="");
-  ICEntry& Add(std::string mInst, int arg1, std::string arg2, int arg3=-1, std::string cmt="");
-  ICEntry& Add(std::string mInst, std::string arg1, std::string arg2, int arg3=-1, std::string cmt="");
-  ICEntry& Add(std::string mInst, int arg1, int arg2, std::string arg3, std::string cmt="");
-  ICEntry& Add(std::string mInst, std::string arg1, int arg2, std::string arg3, std::string cmt="");
-  ICEntry& Add(std::string mInst, int arg1, std::string arg2, std::string arg3, std::string cmt="");
-  ICEntry& Add(std::string mInst, std::string arg1, std::string arg2, std::string arg3, std::string cmt="");
+  ICEntry& Add(std::string mInst, int arg1=-1, int arg2=-1, int arg3=-1, 
+                                                    std::string cmt="");
+  
+  ICEntry& Add(std::string mInst, std::string arg1, int arg2=-1, int arg3=-1, 
+                                                         std::string cmt="");
+  
+  ICEntry& Add(std::string mInst, int arg1, std::string arg2, int arg3=-1, 
+                                                      std::string cmt="");
+  
+  ICEntry& Add(std::string mInst, std::string arg1, std::string arg2, 
+                                    int arg3=-1, std::string cmt="");
+  
+  ICEntry& Add(std::string mInst, int arg1, int arg2, std::string arg3, 
+                                                   std::string cmt="");
+  
+  ICEntry& Add(std::string mInst, std::string arg1, int arg2, std::string arg3,
+                                                           std::string cmt="");
+  
+  ICEntry& Add(std::string mInst, int arg1, std::string arg2, std::string arg3, 
+                                                           std::string cmt="");
+  ICEntry& Add(std::string mInst, std::string arg1, std::string arg2, 
+                               std::string arg3, std::string cmt="");
 
   void PrintIC(std::ostream & ofs);
 };

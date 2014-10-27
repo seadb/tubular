@@ -1,5 +1,6 @@
+tube5
 example.tube
-out.tic
+*.tic
 *.output
 test_prev.sh
 *-lexer.cc

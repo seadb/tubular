@@ -19,7 +19,7 @@ type		int|char|string
 id	        [_a-zA-Z][a-zA-Z0-9_]*
 int_lit         [0-9]+
 char_lit        '(.|(\\[\\'nt]))'
-string_lit      \"(.|(\\[\\'nt]))+\"
+string_lit      \"(.|\n\t_|(\\[\\"nt]))*\"
 comment		#.*
 whitespace	[ \t\r]
 passthrough	[+\-*/%=(),!{}[\].;]
@@ -33,7 +33,9 @@ passthrough	[+\-*/%=(),!{}[\].;]
 "break" { return COMMAND_BREAK; }
 "for"   { return COMMAND_FOR; }
 "array" { return ARRAY;}
-
+"random" { return COMMAND_RANDOM;}
+"size"  { return SIZE; }
+"resize"  { return RESIZE; }
 {type}        { yylval.lexeme = strdup(yytext);  return TYPE; }
 {id}          { yylval.lexeme = strdup(yytext);  return ID; }
 {int_lit}     { yylval.lexeme = strdup(yytext);  return INT_LIT; }

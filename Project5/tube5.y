@@ -41,7 +41,7 @@ void yyerror2(std::string errString, int orig_line) {
 %token ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD ARRAY //
 COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE BOOL_AND BOOL_OR//
 COMMAND_PRINT COMMAND_IF COMMAND_ELSE COMMAND_WHILE COMMAND_BREAK COMMAND_FOR//
-
+COMMAND_RANDOM SIZE RESIZE
 %token <lexeme> INT_LIT CHAR_LIT STRING_LIT ID TYPE
 
 %right '=' ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
@@ -173,18 +173,11 @@ literal:
                $$->SetLineNum(line_num);
              }
   |    STRING_LIT {
-              std::cout << $1 << std::endl;
               std::string literal = $1;
-              char array[literal.size()];
-              for(int i = 1; i < literal.size()-1; i++ )
-              {
-                array[i] = literal[i];
-//                std::cout << array[i] << std::endl;
-              }
-              
-              $$ = new ASTNodeLiteral(Type::CHAR_ARRAY, literal.substr(1,literal.size()-2));
+              $$ = new ASTNodeLiteral(Type::CHAR_ARRAY,
+                        literal.substr(1,literal.size()-2));
               $$->SetLineNum(line_num);
-             } 
+            }
 
           
 negative:    '-' expression %prec UMINUS {
@@ -225,9 +218,31 @@ variable:   ID {
 
                 $$ = new ASTNodeIndex(cur_entry,$3);
                 $$->SetLineNum(line_num);
-
-        
         }
+        |   ID '.' SIZE '(' ')' {
+                CTableEntry * cur_entry = symbol_table.Lookup($1);
+                if (cur_entry == NULL) 
+                {
+                  std::string errString = "unknown variable '";
+                  errString += $1;
+                  errString += "'";
+                  yyerror(errString);
+                  exit(1);
+                }
+                $$ = new ASTNodeSize(cur_entry);
+            }
+        |   ID '.' RESIZE '(' expression ')' {
+                CTableEntry * cur_entry = symbol_table.Lookup($1);
+                if (cur_entry == NULL) 
+                {
+                  std::string errString = "unknown variable '";
+                  errString += $1;
+                  errString += "'";
+                  yyerror(errString);
+                  exit(1);
+                }
+                $$ = new ASTNodeResize(cur_entry, $5);
+            }
 ;
 
 operation:
@@ -252,8 +267,12 @@ operation:
               $$->SetLineNum(line_num);
              }
   |    '(' expression ')' { $$ = $2; } // Ignore parens used for order
-  
+
+  |    COMMAND_RANDOM '(' expression ')'{
+              $$ = new ASTNodeRandom($3);
+             }
  /* |    expression '?' expression ':' expression {}
+  }
    */           
              
 compare: 
