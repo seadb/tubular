@@ -30,10 +30,10 @@ Test Results
 - [x] good.09.tube
 - [x] good.10.tube
 - [x] good.11.tube
-- [ ] good.12.tube  ERROR(line 19): Unknown Token '_'.
+- [x] good.12.tube
 - [x] good.13.tube
 - [x] good.14.tube
-- [ ] good.15.tube 
+- [x] good.15.tube 
 - [x] good.16.tube
 - [x] good.17.tube
 - [x] good.18.tube
