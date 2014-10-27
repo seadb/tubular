@@ -41,7 +41,7 @@ void yyerror2(std::string errString, int orig_line) {
 %token ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD ARRAY //
 COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE BOOL_AND BOOL_OR//
 COMMAND_PRINT COMMAND_IF COMMAND_ELSE COMMAND_WHILE COMMAND_BREAK COMMAND_FOR//
-
+COMMAND_RANDOM
 %token <lexeme> INT_LIT CHAR_LIT STRING_LIT ID TYPE
 
 %right '=' ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
@@ -252,8 +252,12 @@ operation:
               $$->SetLineNum(line_num);
              }
   |    '(' expression ')' { $$ = $2; } // Ignore parens used for order
-  
+
+  |    COMMAND_RANDOM '(' expression ')'{
+              $$ = new ASTNodeRandom($3);
+             }
  /* |    expression '?' expression ':' expression {}
+  }
    */           
              
 compare: 

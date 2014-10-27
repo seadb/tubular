@@ -33,7 +33,7 @@ passthrough	[+\-*/%=(),!{}[\].;]
 "break" { return COMMAND_BREAK; }
 "for"   { return COMMAND_FOR; }
 "array" { return ARRAY;}
-
+"random" { return COMMAND_RANDOM;}
 {type}        { yylval.lexeme = strdup(yytext);  return TYPE; }
 {id}          { yylval.lexeme = strdup(yytext);  return ID; }
 {int_lit}     { yylval.lexeme = strdup(yytext);  return INT_LIT; }

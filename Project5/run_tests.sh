@@ -74,15 +74,15 @@ function run_error_test {
 	    result=$?;
 	    rm $project.out ref.out;
 	    if [ $result -ne 0 ]; then
-		echo $1 "failed different executed result on TubeIC";
+		echo $1 "Test Failed: different executed result on TubeIC";
 		summary=$summary"\n"$1" failed different executed result on TubeIC"
 		return 1;
 	    else
-		echo $1 "passed";
-		summary=$summary"\n"$1" passed"
+		echo $1 " : Test Passed: ";
+		summary=$summary"\n"$1" : Test Passed"
 	    fi;
     else 
-		summary=$summary"\n"$1" passed"
+		summary=$summary"\n"$1" : Test Passed"
     	echo $1 "passed";
     fi
 

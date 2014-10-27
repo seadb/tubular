@@ -181,11 +181,18 @@ public:
 class ASTNodePrint : public ASTNode {
 public:
   ASTNodePrint(ASTNode * out_child);
-  virtual ~ASTNodePrint() {;}
+  virtual ~ASTNodePrint() { ; }
 
   CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
 
 
+class ASTNodeRandom : public ASTNode {
+public:
+  ASTNodeRandom(ASTNode * in);
+  virtual ~ASTNodeRandom() { ; }
 
+  CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
+
+};
 #endif
