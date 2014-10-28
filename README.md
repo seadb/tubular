@@ -1,8 +1,8 @@
 Raven-tube
 ==========
-Team members:       Chelsea Bridson
-                    Justin Grothe
-                    Josh Curl
+Team members:       - Chelsea Bridson
+                    - Justin Grothe
+                    - Josh Curl
                     
 Sources:
 http://stackoverflow.com/questions/17015970/how-does-c-compiler-convert-escape-sequence-to-actual-bytes
