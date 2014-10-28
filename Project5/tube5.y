@@ -42,7 +42,7 @@ void yyerror2(std::string errString, int orig_line) {
 COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE BOOL_AND BOOL_OR//
 COMMAND_PRINT COMMAND_IF COMMAND_ELSE COMMAND_WHILE COMMAND_BREAK COMMAND_FOR//
 COMMAND_RANDOM SIZE RESIZE
-%token <lexeme> INT_LIT CHAR_LIT STRING_LIT ID TYPE
+%token <lexeme> INT_LIT CHAR_LIT STRING_LIT UNTERM_STRING ID TYPE
 
 %right '=' ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %left BOOL_OR
@@ -154,7 +154,6 @@ declare_assign:  declare '=' expression {
            }
   ;
 
-
 expression:     literal    { $$ = $1; }
           |     negative   { $$ = $1; }
           |     not_       { $$ = $1; }
@@ -179,6 +178,9 @@ literal:
               $$->SetLineNum(line_num);
             }
           
+  |    UNTERM_STRING {
+            yyerror("Unterminated string.");
+            }
 negative:    '-' expression %prec UMINUS {
                $$ = new ASTNodeMath1($2, '-');
                $$->SetLineNum(line_num);

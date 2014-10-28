@@ -157,11 +157,15 @@ CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, ICArray & ica)
       switch (mLexeme[i])
       {
         case '\\':
+          //yyerror("Unknown escape char in string.");
           s << "'\\'";
           break;
+        //case "\\":
+        //break;
         case '\r':
-          s << "'\\r'";
-          break;
+          yyerror("Unknown escape char in string.");
+          //s << "'\\r'";
+          //break;
         case '\n':
           s << "'\\n'";
           break;
