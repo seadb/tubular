@@ -1,3 +1,7 @@
+#include <cstring>
+#include <cstdlib>
+#include <string>
+
 #include "ast.h"
 #include "tube5-parser.tab.hh"
 
@@ -48,15 +52,86 @@ CTableEntry * ASTNodeVariable::CompileTubeIC(CSymbolTable & table, ICArray & ica
 ////////////////////////
 //  ASTNodeLiteral
 
-ASTNodeLiteral::ASTNodeLiteral(int in_type, std::string in_lex)
-                            : ASTNode(in_type), mLexeme(in_lex)
+char *translate(char *string)
 {
+      char *here=string;
+      size_t len=strlen(string);
+      int num;
+      int numlen;
+
+      while (NULL!=(here=strchr(here,'\\')))
+      {
+            numlen=1;
+            switch (here[1])
+            {
+            case '\\':
+                  break;
+
+            case 'r':
+                  *here = '\r';
+                  break;
+
+            case 'n':
+                  *here = '\n';
+                  break;
+
+            case 't':
+                  *here = '\t';
+                  break;
+
+            case 'v':
+                  *here = '\v';
+                  break;
+
+            case 'a':
+                  *here = '\a';
+                  break;
+
+            case '"':
+                  *here = '"';
+                  break;
+
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+                  numlen = sscanf(here,"%o",&num);
+                  *here = (char)num;
+                  break;
+
+            case 'x':
+                  numlen = sscanf(here,"%x",&num);
+                  *here = (char) num;
+                  break;
+            }
+            num = here - string + numlen;
+            here++;
+            memmove(here,here+numlen,len-num );
+      }
+      return string;
+}
+
+ASTNodeLiteral::ASTNodeLiteral(int in_type, std::string in_lex)
+                            : ASTNode(in_type)
+{
+  if(mType == Type::CHAR_ARRAY)
+  {
+    char *lex = new char[in_lex.length() + 1];
+    strcpy(lex, in_lex.c_str());
+    lex = translate(lex);
+    mLexeme = std::string(lex);
+  }
+  else
+    mLexeme = in_lex;
 }  
 
 ASTNodeLiteral::ASTNodeLiteral(int in_type, char * in_char)
                             : ASTNode(in_type), mCharArray(in_char)
 {
-  std::cout << "mCharArrayConstructor" << in_char << std::endl;
 }
 
 CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, ICArray & ica)
@@ -71,12 +146,41 @@ CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, ICArray & ica)
   {
     //std::cout << "mCharArray" << mCharArray << std::endl; 
     std::stringstream s;
-    std::stringstream ss; ss << mLexeme.size(); //convert the size to a string
+    std::stringstream ss;
+    ss << mLexeme.size(); //convert the size to a string
     ica.Add("ar_set_size", outVar->GetVarID(), ss.str());
     for(int i=0; i < mLexeme.size(); i++ )
     {
-      ss.str(""); ss.clear(); ss << i; //convert the index to string
-      s.str(""); s.clear(); s << "'" <<  mLexeme[i] << "'"; 
+      ss.str(""); ss.clear();
+      ss << i; //convert the index to string
+      s.str(""); s.clear();
+      switch (mLexeme[i])
+      {
+        case '\\':
+          s << "'\\'";
+          break;
+        case '\r':
+          s << "'\\r'";
+          break;
+        case '\n':
+          s << "'\\n'";
+          break;
+        case '\t':
+          s << "'\\t'";
+          break;
+        case '\v':
+          s << "'\\v'";
+          break;
+        case '\a':
+          s << "'\\a'";
+          break;
+        case '\"':
+          s << "'\\\"'";
+          break;
+        default:
+          s << "'" <<  mLexeme[i] << "'"; 
+          break;
+      }
       ica.Add("ar_set_idx", outVar->GetVarID(), ss.str(), s.str());
     }
     //TODO: add intermediate code to ica
@@ -476,28 +580,25 @@ CTableEntry * ASTNodePrint::CompileTubeIC(CSymbolTable & table, ICArray & ica)
       CTableEntry * loop_var = table.AddTempEntry(Type::INT);
       CTableEntry * size_var = table.AddTempEntry(Type::INT);
 
+      std::string start_label = table.NextLabelID("print_array_start_");
+      std::string end_label = table.NextLabelID("print_array_end_");
+
       ica.Add("val_copy", "0", loop_var->GetVarID());
       ica.Add("ar_get_size", cur_var->GetVarID(), size_var->GetVarID());
 
-      std::string start_label = table.NextLabelID("print_array_start_");
       ica.AddLabel(start_label);
 
       CTableEntry * test_var = table.AddTempEntry(Type::INT);
       ica.Add("test_gte", loop_var->GetVarID(), size_var->GetVarID(),
               test_var->GetVarID());
-      ica.Add("jump_if_n0", test_var->GetVarID(),
-              "print_array_end_" + loop_var->GetVarID());
+      ica.Add("jump_if_n0", test_var->GetVarID(), end_label);
       ica.Add("ar_get_idx", cur_var->GetVarID(), loop_var->GetVarID(),
               test_var->GetVarID());
       ica.Add("out_int", test_var->GetVarID());
       ica.Add("add", loop_var->GetVarID(), "1", loop_var->GetVarID());
-      std::stringstream ss; ss << "print_array_start_" << loop_var->GetVarID();
       ica.Add("jump", start_label);
 
-      std::string end_label = table.NextLabelID("print_array_end_");
       ica.AddLabel(end_label);
-
-      ica.Add("out_char", "'\n'");
 
       break;
     }

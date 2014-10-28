@@ -173,19 +173,11 @@ literal:
                $$->SetLineNum(line_num);
              }
   |    STRING_LIT {
-              std::cout << $1 << std::endl;
               std::string literal = $1;
-              char array[literal.size()];
-              for(int i = 1; i < literal.size()-1; i++ )
-              {
-                array[i] = literal[i];
-//                std::cout << array[i] << std::endl;
-              }
-              
-              $$ = new ASTNodeLiteral(Type::CHAR_ARRAY, literal.substr(1,literal.size()-2));
+              $$ = new ASTNodeLiteral(Type::CHAR_ARRAY,
+                        literal.substr(1,literal.size()-2));
               $$->SetLineNum(line_num);
-             } 
-
+            }
           
 negative:    '-' expression %prec UMINUS {
                $$ = new ASTNodeMath1($2, '-');
@@ -250,6 +242,21 @@ variable:   ID {
                 }
                 $$ = new ASTNodeResize(cur_entry, $5);
             }
+	|   ID '.' ID '(' ')' {
+		std::string errString = "unknown method '";
+		errString += $3;
+		errString += "'";
+		yyerror(errString);
+		exit(1);
+		}
+	|   ID '.' ID '(' expression ')' {
+                std::string errString = "unknown method '";
+                errString += $3;
+                errString += "'";
+                yyerror(errString);
+                exit(1);
+                }
+
 ;
 
 operation:
