@@ -42,7 +42,7 @@ void yyerror2(std::string errString, int orig_line) {
 COMP_EQU COMP_NEQU COMP_LESS COMP_LTE COMP_GTR COMP_GTE BOOL_AND BOOL_OR//
 COMMAND_PRINT COMMAND_IF COMMAND_ELSE COMMAND_WHILE COMMAND_BREAK COMMAND_FOR//
 COMMAND_RANDOM SIZE RESIZE
-%token <lexeme> INT_LIT CHAR_LIT STRING_LIT ID TYPE
+%token <lexeme> INT_LIT CHAR_LIT STRING_LIT UNTERM_STRING ID TYPE
 
 %right '=' ASSIGN_ADD ASSIGN_SUB ASSIGN_MULT ASSIGN_DIV ASSIGN_MOD
 %left BOOL_OR
@@ -154,7 +154,6 @@ declare_assign:  declare '=' expression {
            }
   ;
 
-
 expression:     literal    { $$ = $1; }
           |     negative   { $$ = $1; }
           |     not_       { $$ = $1; }
@@ -174,11 +173,24 @@ literal:
              }
   |    STRING_LIT {
               std::string literal = $1;
+              bool good = (literal[0] == '"');
+              good = good && (literal[literal.size() - 1] == '"');
+              good = good && (literal[literal.size() - 2] != '\\');
+              for(int i = 1; i < literal.size() - 1; i++)
+              {
+                if(literal[i] == '"' && literal[i - 1] != '\\')
+                 good = false;
+              }
+              if(!good)
+                yyerror("Unterminated string.");
               $$ = new ASTNodeLiteral(Type::CHAR_ARRAY,
                         literal.substr(1,literal.size()-2));
               $$->SetLineNum(line_num);
             }
           
+  |    UNTERM_STRING {
+            yyerror("Unterminated string.");
+            }
 negative:    '-' expression %prec UMINUS {
                $$ = new ASTNodeMath1($2, '-');
                $$->SetLineNum(line_num);

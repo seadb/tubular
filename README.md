@@ -1,6 +1,12 @@
 Raven-tube
 ==========
-Here you will find an updated log of the current project.  Ideally this would be automatically generated with a bash script.
+Team members:       - Chelsea Bridson
+                    - Justin Grothe
+                    - Josh Curl
+                    
+Sources:
+http://stackoverflow.com/questions/17015970/how-does-c-compiler-convert-escape-sequence-to-actual-bytes
+http://flex.sourceforge.net/manual/Start-Conditions.html
 
 Test Results
 ==========
@@ -24,7 +30,7 @@ Test Results
 - [x] good.03.tube
 - [x] good.04.tube
 - [x] good.05.tube
-- [ ] good.06.tube  Escape characters aren't being output properly
+- [x] good.06.tube
 - [x] good.07.tube
 - [x] good.08.tube
 - [x] good.09.tube
