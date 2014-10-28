@@ -10,11 +10,11 @@ http://flex.sourceforge.net/manual/Start-Conditions.html
 
 Test Results
 ==========
-- [ ] extra.00.tube
-- [ ] extra.01.tube
-- [ ] extra.02.tube
-- [ ] extra.03.tube
-- [ ] extra.04.tube
+- [x] extra.00.tube
+- [x] extra.01.tube
+- [x] extra.02.tube
+- [x] extra.03.tube
+- [x] extra.04.tube
 - [x] fail.01.tube
 - [x] fail.02.tube
 - [x] fail.03.tube
@@ -62,8 +62,8 @@ Required Error Messages
 - [x] ERROR(line #): cannot use type 'type' as an argument to random 
 - [x] ERROR(line #): cannot index into a non-array type
 - [x] ERROR(line #): array indices must be of type int
-- [ ] ERROR(line #): array methods cannot be run on type 'type'
+- [x] ERROR(line #): array methods cannot be run on type 'type'
           size() and resize() are the two legal array methods; the identifier before them must represent an array variable.
-- [ ] ERROR(line #): array size() method does not take any arguments."
-- [ ] ERROR(line #): array resize() method takes exactly one (int) argument.
-- [ ] ERROR(line #): array resize() method argument must be of type int. 
+- [x] ERROR(line #): array size() method does not take any arguments."
+- [x] ERROR(line #): array resize() method takes exactly one (int) argument.
+- [x] ERROR(line #): array resize() method argument must be of type int. 
