@@ -64,6 +64,6 @@ Required Error Messages
 - [x] ERROR(line #): array indices must be of type int
 - [ ] ERROR(line #): array methods cannot be run on type 'type'
           size() and resize() are the two legal array methods; the identifier before them must represent an array variable.
-- [ ] ERROR(line #): array size() method does not take any arguments."
-- [ ] ERROR(line #): array resize() method takes exactly one (int) argument.
-- [ ] ERROR(line #): array resize() method argument must be of type int. 
+- [x] ERROR(line #): array size() method does not take any arguments."
+- [x] ERROR(line #): array resize() method takes exactly one (int) argument.
+- [x] ERROR(line #): array resize() method argument must be of type int. 
