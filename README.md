@@ -6,6 +6,7 @@ Team members:       - Chelsea Bridson
                     
 Sources:
 http://stackoverflow.com/questions/17015970/how-does-c-compiler-convert-escape-sequence-to-actual-bytes
+http://flex.sourceforge.net/manual/Start-Conditions.html
 
 Test Results
 ==========
