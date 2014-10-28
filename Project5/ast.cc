@@ -68,8 +68,9 @@ char *translate(char *string)
                   break;
 
             case 'r':
-                  *here = '\r';
-                  break;
+                  yyerror("Unknown escape char in string.");
+                  //*here = '\r';
+                  //break;
 
             case 'n':
                   *here = '\n';
@@ -80,12 +81,14 @@ char *translate(char *string)
                   break;
 
             case 'v':
-                  *here = '\v';
-                  break;
+                  yyerror("Unknown escape char in string.");
+                  //*here = '\v';
+                  //break;
 
             case 'a':
-                  *here = '\a';
-                  break;
+                  yyerror("Unknown escape char in string.");
+                  //*here = '\a';
+                  //break;
 
             case '"':
                   *here = '"';
