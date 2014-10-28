@@ -1,0 +1,2 @@
+array(char) elements = "string";
+elements[0+1] = 'p';
