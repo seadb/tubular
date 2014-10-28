@@ -230,7 +230,12 @@ variable:   ID {
                 $$ = new ASTNodeIndex(cur_entry,$3);
                 $$->SetLineNum(line_num);
         }
-        |   ID '.' SIZE '(' ')' {
+        |   ID '.' SIZE '(' ')' 
+        {
+        //These are in the wrong spot. things in this section
+        //should be for left side of the equation only
+        //id.size() = 3; is an invalid expression and should throw an error..
+
                 CTableEntry * cur_entry = symbol_table.Lookup($1);
                 if (cur_entry == NULL) 
                 {
@@ -268,7 +273,18 @@ variable:   ID {
                 yyerror(errString);
                 exit(1);
                 }
-
+        | expression '[' expression ']' {
+                int type_id = $3->GetType();
+                if(type_id!=Type::INT_ARRAY && type_id !=Type::CHAR_ARRAY)
+                {
+                  std::string type_str = Type::AsString($3->GetType());
+		  std::string errString = "array methods cannot be run on type  '";
+		  errString += type_str;
+		  errString += "'";
+		  yyerror(errString);
+		  exit(1);
+		}
+        } 
 ;
 
 operation:

@@ -603,6 +603,7 @@ CTableEntry * ASTNodePrint::CompileTubeIC(CSymbolTable & table, ICArray & ica)
               test_var->GetVarID());
       ica.Add("out_int", test_var->GetVarID());
       ica.Add("add", loop_var->GetVarID(), "1", loop_var->GetVarID());
+      //std::stringstream ss; ss << "print_array_start_" << loop_var->GetVarID();
       ica.Add("jump", start_label);
 
       ica.AddLabel(end_label);
