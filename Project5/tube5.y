@@ -173,6 +173,16 @@ literal:
              }
   |    STRING_LIT {
               std::string literal = $1;
+              bool good = (literal[0] == '"');
+              good = good && (literal[literal.size() - 1] == '"');
+              good = good && (literal[literal.size() - 2] != '\\');
+              for(int i = 1; i < literal.size() - 1; i++)
+              {
+                if(literal[i] == '"' && literal[i - 1] != '\\')
+                 good = false;
+              }
+              if(!good)
+                yyerror("Unterminated string.");
               $$ = new ASTNodeLiteral(Type::CHAR_ARRAY,
                         literal.substr(1,literal.size()-2));
               $$->SetLineNum(line_num);
