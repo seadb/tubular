@@ -62,7 +62,7 @@ Required Error Messages
 - [x] ERROR(line #): cannot use type 'type' as an argument to random 
 - [x] ERROR(line #): cannot index into a non-array type
 - [x] ERROR(line #): array indices must be of type int
-- [ ] ERROR(line #): array methods cannot be run on type 'type'
+- [x] ERROR(line #): array methods cannot be run on type 'type'
           size() and resize() are the two legal array methods; the identifier before them must represent an array variable.
 - [x] ERROR(line #): array size() method does not take any arguments."
 - [x] ERROR(line #): array resize() method takes exactly one (int) argument.
