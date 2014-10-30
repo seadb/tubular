@@ -8,7 +8,6 @@ void ICEntry::PrintIC(std::ostream & ofs)
   if (label != "") { out_line << label << ": "; }
   else { out_line << "  "; }
 
-  // If there is an instruction, print it and all its arguments.
   if (mInst != "") {
     out_line << mInst << " ";
     for (int i = 0; i < (int) args.size(); i++) {
