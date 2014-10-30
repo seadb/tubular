@@ -1,2 +1,4 @@
 array(char) elements = "string";
 elements[0+1] = 'p';
+string a = "Hey\nWhat\nIs\nUp\n\t\t\t#hey";
+print a;

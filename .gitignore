@@ -7,8 +7,8 @@ Project1/
 Project2/
 Project3/
 Project4/
+Project5/
 *.output #bison debugging file
-Project5/*.output
 
 # Text Editor Backups #
 ###########################
