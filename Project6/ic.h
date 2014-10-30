@@ -37,6 +37,7 @@ private:
     
     virtual bool IsScalar() { return false; }
     virtual bool IsConst() { return false; }
+    virtual bool IsArray() { return false; }
   };
 
   class ICArg_VarScalar : public ICArg_Base {
@@ -83,6 +84,8 @@ private:
       return out_str.str();
     }
     int GetID() { return mVarID; }
+
+    virtual bool IsArray() { return true; }
   };
 
   std::string mInst;
