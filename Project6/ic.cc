@@ -1,4 +1,8 @@
 #include "ic.h"
+/******************************************
+ * BEGIN ICEntry
+ *****************************************/
+
 
 void ICEntry::PrintIC(std::ostream & ofs)
 {
@@ -23,6 +27,28 @@ void ICEntry::PrintIC(std::ostream & ofs)
 
   ofs << out_line.str() << std::endl;
 }
+
+void ICEntry::PrintAC(std::ostream & ofs)
+{
+  std::stringstream out;
+
+  if (mInst != ""){
+    if(mInst == "val_copy")
+    {
+      out << mInst << " ";
+      out << args[0]->AsString() << " ";
+      out << "regB" << std::endl;
+      out << "store " << "regB" << args[1]->AsString();
+    }
+  }
+
+  ofs << out.str() << std::endl;
+
+}
+
+/***************************************************
+ * BEGIN ICArray
+****************************************************/
 
 ICEntry& ICArray::AddLabel(std::string label_id, std::string cmt)
 {
@@ -217,3 +243,12 @@ void ICArray::PrintIC(std::ostream & ofs)
     mICArray[i]->PrintIC(ofs);
   }
 }
+
+void ICArray::PrintAC(std::ostream & ofs)
+{
+  for (int i=0; i< (int) mICArray.size(); i++)
+  {
+    mICArray[i]->PrintAC(ofs);
+  }
+}
+

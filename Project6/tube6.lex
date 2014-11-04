@@ -10,6 +10,8 @@
 
 // Two global variables (not clean, but works...)
 int line_num = 1;
+enum eMode { IC=1, AC=2 };
+int mode = 0;
 std::string out_filename = "";
 int MAX_STR_CONST=1000;
 char string_buf[1000];
@@ -69,11 +71,11 @@ passthrough	[+\-*/%=(),!{}[\].;]
 {comment} { ; }
 {whitespace} { ; }
 \n  { line_num++; }
-     
-     
-     
+
+
+
 \"      string_buf_ptr = string_buf; BEGIN(str);
-     
+
 <str>\"        { /* saw closing quote - all done */
                 BEGIN(INITIAL);
                  *string_buf_ptr = '\0';
@@ -81,49 +83,49 @@ passthrough	[+\-*/%=(),!{}[\].;]
                   * value to parser
                   */
                  }
-     
+
 <str>\n|;   {
-              std::cout << "ERROR(line " << line_num << 
-              "): Unterminated string." << std::endl; exit(1);        
+              std::cout << "ERROR(line " << line_num <<
+              "): Unterminated string." << std::endl; exit(1);
                /* error - unterminated string constant */
                /* generate error message */
             }
-     
+
 <str>\\[0-7]{1,3} {
                  /* octal escape sequence */
                  int result;
-     
+
                  (void) sscanf( yytext + 1, "%o", &result );
-     
+
                  if ( result > 0xff )
                          /* error, constant is out-of-bounds */
-     
+
                  *string_buf_ptr++ = result;
                  }
-     
+
 <str>\\[0-9]+ {
                  /* generate error - bad escape sequence; something
                   * like '\48' or '\0777777'
                   */
               }
-     
+
 <str>\\n  *string_buf_ptr++ = '\n';
 <str>\\t  *string_buf_ptr++ = '\t';
 <str>\\r  *string_buf_ptr++ = '\r';
 <str>\\b  *string_buf_ptr++ = '\b';
 <str>\\f  *string_buf_ptr++ = '\f';
-    
+
 <str>\\(.|\n)  *string_buf_ptr++ = yytext[1];
-     
+
 <str>[^\\\n\"]+  {
                    char *yptr = yytext;
                    while ( *yptr )
                      *string_buf_ptr++ = *yptr++;
                  }
- 
-.      { 
-        std::cout << "ERROR(line " << line_num << "): Unknown Token '" 
-        << yytext << "'." << std::endl; exit(1); 
+
+.      {
+        std::cout << "ERROR(line " << line_num << "): Unknown Token '"
+        << yytext << "'." << std::endl; exit(1);
        }
 
 %%
@@ -148,7 +150,15 @@ void LexMain(int argc, char * argv[])
     }
 
     // PROCESS OTHER ARGUMENTS HERE IF YOU ADD THEM
+    else if (cur_arg == "-i")
+    {
+      mode = 1;
+    }
 
+    else if (cur_arg == "-a")
+    {
+      mode = 2;
+    }
     // If the next argument begins with a dash, assume it's an unknown flag...
     if (cur_arg[0] == '-') {
       std::cerr << "ERROR: Unknown command-line flag: " << cur_arg << std::endl;
@@ -178,11 +188,11 @@ void LexMain(int argc, char * argv[])
 
   // Make sure we've loaded input and output filemNames before we finish...
   if (input_found == false || out_filename == "") {
-    std::cerr << "Format: " << argv[0] << "[flags] [input filemName] [output filemName]" << std::endl;
+    std::cerr << "Format: " << argv[0] << "[flags] [input filename] [output filename]" << std::endl;
     std::cerr << "Type '" << argv[0] << " -h' for help." << std::endl;
     exit(1);
   }
- 
+
   return;
 }
 
