@@ -23,20 +23,26 @@
 #include <string>
 #include <sstream>
 #include <vector>
-
+#include <map>
 
 class ICEntry {
 private:
+  // Variables for converting to assembly
+
   class ICArg_Base {
   public:
     ICArg_Base() { ; }
     virtual ~ICArg_Base() { ; }
-    
+   
+    virtual void AssemblyRead(std::ostream ofs) { }
+    virtual void AssemblyWrite(std::ostream ofs) { }
+
     virtual std::string AsString() = 0;
     virtual int GetID() { return -1; }
     
     virtual bool IsScalar() { return false; }
     virtual bool IsConst() { return false; }
+    virtual bool IsArray() { return false; }
   };
 
   class ICArg_VarScalar : public ICArg_Base {
@@ -45,6 +51,9 @@ private:
   public:
     ICArg_VarScalar(int _id) : mVarID(_id) { ; }
     ~ICArg_VarScalar() { ; }
+
+    void AssemblyRead(std::ostream ofs) { }
+    void AssemblyWrite(std::ostream ofs) { }
     
     std::string AsString() {
       std::stringstream out_str;
@@ -63,6 +72,9 @@ private:
   public:
     ICArg_Const(std::string val) : mValue(val) { ; }
     ~ICArg_Const() { ; }
+
+    void AssemblyRead(std::ostream ofs) { }
+    void AssemblyWrite(std::ostream ofs) { }
     
     std::string AsString() { return mValue; }
     
@@ -76,13 +88,18 @@ private:
   public:
     ICArg_VarArray(int _id) : mVarID(_id) { ; }
     ~ICArg_VarArray() { ; }
-    
+
+    void AssemblyRead(std::ostream ofs) { }
+    void AssemblyWrite(std::ostream ofs) { }
+
     std::string AsString() {
       std::stringstream out_str;
       out_str << "a" << mVarID;
       return out_str.str();
     }
     int GetID() { return mVarID; }
+
+    virtual bool IsArray() { return true; }
   };
 
   std::string mInst;
