@@ -33,16 +33,16 @@ private:
   public:
     ICArg_Base() { ; }
     virtual ~ICArg_Base() { ; }
-   
+
     virtual void AssemblyRead(std::ostream ofs) { }
     virtual void AssemblyWrite(std::ostream ofs) { }
 
     virtual std::string AsString() = 0;
     virtual int GetID() { return -1; }
-    
+
     virtual bool IsScalar() { return false; }
     virtual bool IsConst() { return false; }
-    virtual bool IsArray() { return false; }
+    //virtual bool IsArray() { return false; }
   };
 
   class ICArg_VarScalar : public ICArg_Base {
@@ -54,17 +54,17 @@ private:
 
     void AssemblyRead(std::ostream ofs) { }
     void AssemblyWrite(std::ostream ofs) { }
-    
+
     std::string AsString() {
       std::stringstream out_str;
       out_str << "s" << mVarID;
       return out_str.str();
     }
     int GetID() { return mVarID; }
-    
+
     bool IsScalar() { return true; }
   };
-  
+
   // All constant values: int, char, or label.
   class ICArg_Const : public ICArg_Base {
   private:
@@ -75,9 +75,9 @@ private:
 
     void AssemblyRead(std::ostream ofs) { }
     void AssemblyWrite(std::ostream ofs) { }
-    
+
     std::string AsString() { return mValue; }
-    
+
     bool IsConst() { return true; }
   };
 
@@ -99,7 +99,7 @@ private:
     }
     int GetID() { return mVarID; }
 
-    virtual bool IsArray() { return true; }
+    //virtual bool IsArray() { return true; }
   };
 
   std::string mInst;
@@ -107,7 +107,7 @@ private:
   std::string comment;
   std::vector<ICArg_Base*> args;
 
-// END OF PRIVATE ICEntry 
+// END OF PRIVATE ICEntry
 
 public:
   ICEntry(std::string inInst="", std::string in_label="") : mInst(inInst), label(in_label) { ; }
@@ -126,6 +126,7 @@ public:
   void SetComment(std::string cmt) { comment = cmt; }
 
   void PrintIC(std::ostream & ofs);
+  void PrintAC(std::ostream & ofs);
 };
 
 //END OF ICEntry
@@ -142,9 +143,9 @@ private:
   struct ArgType {
     enum type { NONE=0, VALUE, SCALAR, ARRAY };
   };
-  
+
   std::map<std::string, std::vector<ArgType::type> > mArgTypeMap;
-  
+
   // Helper method to identify types of arguments expected with each nstruction
   void SetupArgs(std::string inst_name, ArgType::type type1, ArgType::type type2, ArgType::type type3) {
     std::vector<ArgType::type> & arg_types = mArgTypeMap[inst_name];
@@ -197,30 +198,31 @@ public:
   // Arguments can either be variables (where an int represents the variable ID) or
   // constant values (where a string holds the constant's lexeme).  And 'a' or 's' will
   // automatically be prepended to an int for a variable based on the mInstruction used.
-  ICEntry& Add(std::string mInst, int arg1=-1, int arg2=-1, int arg3=-1, 
+  ICEntry& Add(std::string mInst, int arg1=-1, int arg2=-1, int arg3=-1,
                                                     std::string cmt="");
-  
-  ICEntry& Add(std::string mInst, std::string arg1, int arg2=-1, int arg3=-1, 
+
+  ICEntry& Add(std::string mInst, std::string arg1, int arg2=-1, int arg3=-1,
                                                          std::string cmt="");
-  
-  ICEntry& Add(std::string mInst, int arg1, std::string arg2, int arg3=-1, 
+
+  ICEntry& Add(std::string mInst, int arg1, std::string arg2, int arg3=-1,
                                                       std::string cmt="");
-  
-  ICEntry& Add(std::string mInst, std::string arg1, std::string arg2, 
+
+  ICEntry& Add(std::string mInst, std::string arg1, std::string arg2,
                                     int arg3=-1, std::string cmt="");
-  
-  ICEntry& Add(std::string mInst, int arg1, int arg2, std::string arg3, 
+
+  ICEntry& Add(std::string mInst, int arg1, int arg2, std::string arg3,
                                                    std::string cmt="");
-  
+
   ICEntry& Add(std::string mInst, std::string arg1, int arg2, std::string arg3,
                                                            std::string cmt="");
-  
-  ICEntry& Add(std::string mInst, int arg1, std::string arg2, std::string arg3, 
+
+  ICEntry& Add(std::string mInst, int arg1, std::string arg2, std::string arg3,
                                                            std::string cmt="");
-  ICEntry& Add(std::string mInst, std::string arg1, std::string arg2, 
+  ICEntry& Add(std::string mInst, std::string arg1, std::string arg2,
                                std::string arg3, std::string cmt="");
 
   void PrintIC(std::ostream & ofs);
+  void PrintAC(std::ostream & ofs);
 };
 
 #endif
