@@ -13,7 +13,8 @@
 extern int line_num;
 extern int yylex();
 extern std::string out_filename;
- 
+extern int mode;
+
 CSymbolTable symbol_table;
 int error_count = 0;
 
@@ -62,12 +63,22 @@ variable command argument_list code_block if_start while_start flow_control//
 literal assignment operation compare negative not_
 %%
 
-program:      statement_list {
-                 ICArray ic_array;             // Array to contain the IC 
-                 $1->CompileTubeIC(symbol_table, ic_array); //Fill IC array 
-                 std::ofstream out_file(out_filename.c_str());  // Open the output file
-                 ic_array.PrintIC(out_file);             // Write ic to output file
-              }
+program:    statement_list {
+               ICArray ic_array;             // Array to contain the IC
+               $1->CompileTubeIC(symbol_table, ic_array); //Fill IC array
+               std::ofstream out_file(out_filename.c_str());  // Open the output file
+
+               if(mode == 1)
+               {
+                  //$1->CompileTubeIC(symbol_table, ic_array); //Fill IC array
+                  //std::ofstream out_file(out_filename.c_str());  // Open the output file
+                  ic_array.PrintIC(out_file);             // Write ic to output file
+               }
+               else if(mode == 2)
+               {
+                ic_array.PrintAC(out_file);
+               }
+            }
        ;
 
 statement_list:   {
@@ -100,10 +111,10 @@ declare:  TYPE ID {
               yyerror(errString);
               exit(1);
             }
-            
+
             std::string type_name = $1;
             int type_id = 0;
-            
+
             if (type_name == "int") type_id = Type::INT;
             else if (type_name == "char") type_id = Type::CHAR;
             else if (type_name == "string") type_id = Type::CHAR_ARRAY;
@@ -113,7 +124,7 @@ declare:  TYPE ID {
               errString += "'";
               yyerror(errString);
             }
-            
+
             CTableEntry * cur_entry = symbol_table.AddEntry(type_id, $2);
 
             $$ = new ASTNodeVariable(cur_entry);
@@ -127,7 +138,7 @@ declare:  TYPE ID {
               yyerror(errString);
               exit(1);
             }
-            
+
             std::string type_name = $3;
             int type_id = 0;
 
@@ -139,12 +150,12 @@ declare:  TYPE ID {
               errString += "'";
               yyerror(errString);
             }
-            
+
             CTableEntry * cur_entry = symbol_table.AddEntry(type_id, $5);
-            
+
             $$ = new ASTNodeVariable(cur_entry);
             $$->SetLineNum(line_num);
-      
+
       }
       ;
 
@@ -162,7 +173,7 @@ expression:     literal    { $$ = $1; }
           |     compare    { $$ = $1; }
           |     assignment { $$ = $1; }
 
-literal:   
+literal:
        INT_LIT {
                $$ = new ASTNodeLiteral(Type::INT, (std::string)$1);
                $$->SetLineNum(line_num);
@@ -187,7 +198,7 @@ literal:
                         literal.substr(1,literal.size()-2));
               $$->SetLineNum(line_num);
             }
-          
+
   |    UNTERM_STRING {
             yyerror("Unterminated string.");
             }
@@ -216,7 +227,7 @@ variable:   ID {
 
         |    ID '[' expression ']' {
                 CTableEntry * cur_entry = symbol_table.Lookup($1);
-                if (cur_entry == NULL) 
+                if (cur_entry == NULL)
                 {
                   std::string errString = "unknown variable '";
                   errString += $1;
@@ -232,7 +243,7 @@ variable:   ID {
         }
         |   ID '.' SIZE '(' ')' {
                 CTableEntry * cur_entry = symbol_table.Lookup($1);
-                if (cur_entry == NULL) 
+                if (cur_entry == NULL)
                 {
                   std::string errString = "unknown variable '";
                   errString += $1;
@@ -244,7 +255,7 @@ variable:   ID {
             }
         |   ID '.' RESIZE '(' expression ')' {
                 CTableEntry * cur_entry = symbol_table.Lookup($1);
-                if (cur_entry == NULL) 
+                if (cur_entry == NULL)
                 {
                   std::string errString = "unknown variable '";
                   errString += $1;
@@ -272,7 +283,7 @@ variable:   ID {
 ;
 
 operation:
-       expression '+' expression { 
+       expression '+' expression {
               $$ = new ASTNodeMath2($1, $3, '+');
               $$->SetLineNum(line_num);
              }
@@ -299,10 +310,10 @@ operation:
              }
  /* |    expression '?' expression ':' expression {}
   }
-   */           
-             
-compare: 
-       
+   */
+
+compare:
+
        expression COMP_NEQU expression {
                $$ = new ASTNodeMath2($1, $3, COMP_NEQU);
                $$->SetLineNum(line_num);
