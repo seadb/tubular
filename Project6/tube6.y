@@ -13,7 +13,6 @@
 extern int line_num;
 extern int yylex();
 extern std::string out_filename;
-extern int mode;
 
 CSymbolTable symbol_table;
 int error_count = 0;
@@ -63,22 +62,12 @@ variable command argument_list code_block if_start while_start flow_control//
 literal assignment operation compare negative not_
 %%
 
-program:    statement_list {
-               ICArray ic_array;             // Array to contain the IC
-               $1->CompileTubeIC(symbol_table, ic_array); //Fill IC array
-               std::ofstream out_file(out_filename.c_str());  // Open the output file
-
-               if(mode == 1)
-               {
-                  //$1->CompileTubeIC(symbol_table, ic_array); //Fill IC array
-                  //std::ofstream out_file(out_filename.c_str());  // Open the output file
-                  ic_array.PrintIC(out_file);             // Write ic to output file
-               }
-               else if(mode == 2)
-               {
-                ic_array.PrintAC(out_file);
-               }
-            }
+program:      statement_list {
+                 ICArray ic_array;             // Array to contain the IC
+                 $1->CompileTubeIC(symbol_table, ic_array); //Fill IC array
+                 std::ofstream out_file(out_filename.c_str());  // Open the output file
+                 ic_array.PrintIC(out_file);             // Write ic to output file
+              }
        ;
 
 statement_list:   {
@@ -241,7 +230,12 @@ variable:   ID {
                 $$ = new ASTNodeIndex(cur_entry,$3);
                 $$->SetLineNum(line_num);
         }
-        |   ID '.' SIZE '(' ')' {
+        |   ID '.' SIZE '(' ')'
+        {
+        //These are in the wrong spot. things in this section
+        //should be for left side of the equation only
+        //id.size() = 3; is an invalid expression and should throw an error..
+
                 CTableEntry * cur_entry = symbol_table.Lookup($1);
                 if (cur_entry == NULL)
                 {
@@ -279,7 +273,18 @@ variable:   ID {
                 yyerror(errString);
                 exit(1);
                 }
-
+        | expression '[' expression ']' {
+                int type_id = $3->GetType();
+                if(type_id!=Type::INT_ARRAY && type_id !=Type::CHAR_ARRAY)
+                {
+                  std::string type_str = Type::AsString($3->GetType());
+		  std::string errString = "array methods cannot be run on type  '";
+		  errString += type_str;
+		  errString += "'";
+		  yyerror(errString);
+		  exit(1);
+		}
+        }
 ;
 
 operation:

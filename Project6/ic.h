@@ -25,6 +25,9 @@
 #include <vector>
 #include <map>
 
+
+class ICArray ;
+
 class ICEntry {
 private:
   // Variables for converting to assembly
@@ -34,31 +37,42 @@ private:
     ICArg_Base() { ; }
     virtual ~ICArg_Base() { ; }
 
-    virtual void AssemblyRead(std::ostream ofs) { }
-    virtual void AssemblyWrite(std::ostream ofs) { }
+    virtual void AssemblyRead(std::ostream & ofs, std::string lit, char reg) { }
+    virtual void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) { }
 
-    virtual std::string AsString() = 0;
+    virtual std::string GetReg() = 0;
     virtual int GetID() { return -1; }
 
     virtual bool IsScalar() { return false; }
     virtual bool IsConst() { return false; }
+    std::string As_String(char c){
+      std::stringstream temp;
+      temp << c;
+      return temp.str();
+}
     //virtual bool IsArray() { return false; }
   };
 
   class ICArg_VarScalar : public ICArg_Base {
   private:
     int mVarID;
+    std::string mReg;
   public:
-    ICArg_VarScalar(int _id) : mVarID(_id) { ; }
+    ICArg_VarScalar(int _id) : mVarID(_id), mReg(""){ ; }
     ~ICArg_VarScalar() { ; }
 
-    void AssemblyRead(std::ostream ofs) { }
-    void AssemblyWrite(std::ostream ofs) { }
+    void AssemblyRead(std::ostream & ofs, std::string lit, char reg) {
+      mReg = "reg" + As_String(reg);
+      ofs << "  load " << lit << " reg" << As_String(reg) << std::endl;
+    }
+    void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) {
 
-    std::string AsString() {
-      std::stringstream out_str;
-      out_str << "s" << mVarID;
-      return out_str.str();
+      ofs << "  store " << As_String(reg) << " " << lit << std::endl;
+
+    }
+
+    std::string GetReg() {
+        return mReg;
     }
     int GetID() { return mVarID; }
 
@@ -73,10 +87,10 @@ private:
     ICArg_Const(std::string val) : mValue(val) { ; }
     ~ICArg_Const() { ; }
 
-    void AssemblyRead(std::ostream ofs) { }
-    void AssemblyWrite(std::ostream ofs) { }
+    void AssemblyRead(std::ostream & ofs, std::string lit, char reg) { }
+    void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) {  }
 
-    std::string AsString() { return mValue; }
+    std::string GetReg() { return mValue; }
 
     bool IsConst() { return true; }
   };
@@ -89,10 +103,10 @@ private:
     ICArg_VarArray(int _id) : mVarID(_id) { ; }
     ~ICArg_VarArray() { ; }
 
-    void AssemblyRead(std::ostream ofs) { }
-    void AssemblyWrite(std::ostream ofs) { }
+    void AssemblyRead(std::ostream & ofs, std::string lit, char reg){}
+    void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) {  }
 
-    std::string AsString() {
+    std::string GetReg() {
       std::stringstream out_str;
       out_str << "a" << mVarID;
       return out_str.str();
@@ -102,6 +116,7 @@ private:
     //virtual bool IsArray() { return true; }
   };
 
+  ICArray * mArray;
   std::string mInst;
   std::string label;
   std::string comment;
@@ -110,7 +125,7 @@ private:
 // END OF PRIVATE ICEntry
 
 public:
-  ICEntry(std::string inInst="", std::string in_label="") : mInst(inInst), label(in_label) { ; }
+  ICEntry(std::string inInst, std::string in_label, ICArray * array) : mInst(inInst), label(in_label), mArray(array) { ; }
   ~ICEntry() { ; }
 
   const std::string & GetInstName() const { return mInst; }
@@ -126,7 +141,6 @@ public:
   void SetComment(std::string cmt) { comment = cmt; }
 
   void PrintIC(std::ostream & ofs);
-  void PrintAC(std::ostream & ofs);
 };
 
 //END OF ICEntry
@@ -134,7 +148,8 @@ public:
 class ICArray {
 private:
   std::vector <ICEntry*> mICArray;
-
+  std::map<std::string, int> mMemoryMap;
+  int mMemPosition;
   // There are three types of argument requirements for instructions:
   // * VALUE  - This arg is an input value: literal numbers or chars, scalars, labels, etc.
   // * SCALAR - This arg is an output scalar variable that gets written to.
@@ -159,7 +174,7 @@ private:
   void AddArg(ICEntry * entry, const std::string & in_arg, ArgType::type expected_type);
 
 public:
-  ICArray() {
+  ICArray() : mMemPosition(1) {
     // Fill out the arg types for each mInstruction
     SetupArgs("val_copy",    ArgType::VALUE,  ArgType::SCALAR, ArgType::NONE);
     SetupArgs("add",         ArgType::VALUE,  ArgType::VALUE,  ArgType::SCALAR);
@@ -194,6 +209,17 @@ public:
 
   ICEntry& AddLabel(std::string label_id, std::string cmt="");
 
+  void AddEntry(std::string key){
+    mMemoryMap[key] = mMemPosition;
+    mMemPosition = mMemPosition + 1;
+  }
+
+  int SearchMemMap(std::string key){
+    if(mMemoryMap.find(key) != mMemoryMap.end()){
+      return mMemoryMap[key];
+    }
+    else return -1;
+  }
   // All forms of Add() method.
   // Arguments can either be variables (where an int represents the variable ID) or
   // constant values (where a string holds the constant's lexeme).  And 'a' or 's' will
@@ -222,7 +248,6 @@ public:
                                std::string arg3, std::string cmt="");
 
   void PrintIC(std::ostream & ofs);
-  void PrintAC(std::ostream & ofs);
 };
 
 #endif

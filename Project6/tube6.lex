@@ -10,8 +10,6 @@
 
 // Two global variables (not clean, but works...)
 int line_num = 1;
-enum eMode { IC=1, AC=2 };
-int mode = 0;
 std::string out_filename = "";
 int MAX_STR_CONST=1000;
 char string_buf[1000];
@@ -150,15 +148,7 @@ void LexMain(int argc, char * argv[])
     }
 
     // PROCESS OTHER ARGUMENTS HERE IF YOU ADD THEM
-    else if (cur_arg == "-i")
-    {
-      mode = 1;
-    }
 
-    else if (cur_arg == "-a")
-    {
-      mode = 2;
-    }
     // If the next argument begins with a dash, assume it's an unknown flag...
     if (cur_arg[0] == '-') {
       std::cerr << "ERROR: Unknown command-line flag: " << cur_arg << std::endl;
@@ -188,7 +178,7 @@ void LexMain(int argc, char * argv[])
 
   // Make sure we've loaded input and output filemNames before we finish...
   if (input_found == false || out_filename == "") {
-    std::cerr << "Format: " << argv[0] << "[flags] [input filename] [output filename]" << std::endl;
+    std::cerr << "Format: " << argv[0] << "[flags] [input filemName] [output filemName]" << std::endl;
     std::cerr << "Type '" << argv[0] << " -h' for help." << std::endl;
     exit(1);
   }

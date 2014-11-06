@@ -4,46 +4,35 @@
  *****************************************/
 
 
+
 void ICEntry::PrintIC(std::ostream & ofs)
 {
-  std::stringstream out_line;
+  //std::stringstream out_line;
 
+  std::cout << "PRINT IC" << std::endl;
   // If there is a label, include it in the output.
-  if (label != "") { out_line << label << ": "; }
-  else { out_line << "  "; }
+  if (label != "") { ofs << label << ": "; }
 
   if (mInst != "") {
-    out_line << mInst << " ";
-    for (int i = 0; i < (int) args.size(); i++) {
-      out_line << args[i]->AsString() << " ";
+    if(mInst == "val_copy"){
+
+      args[0]->AssemblyRead(ofs,1,'A');
+      ofs << "  val_copy " << As_String(1) << " " << args[0]->GetReg() << std::endl;
+      args[0]->AssemblyWrite(ofs,1,'C');
     }
+    //out_line << mInst << " ";
+    //for (int i = 0; i < (int) args.size(); i++) {
+      //out_line << args[i]->GetReg() << " ";
+    //}
   }
 
   // If there is a comment, print it!
-  if (comment != "") {
-    while (out_line.str().size() < 40) out_line << " "; // Align comments for easy reading.
-    out_line << "# " << comment;
-  }
+  //if (comment != "") {
+    //while (out_line.str().size() < 40) out_line << " "; // Align comments for easy reading.
+    //out_line << "# " << comment;
+ // }
 
-  ofs << out_line.str() << std::endl;
-}
-
-void ICEntry::PrintAC(std::ostream & ofs)
-{
-  std::stringstream out;
-
-  if (mInst != ""){
-    if(mInst == "val_copy")
-    {
-      out << mInst << " ";
-      out << args[0]->AsString() << " ";
-      out << "regB" << std::endl;
-      out << "store " << "regB" << args[1]->AsString();
-    }
-  }
-
-  ofs << out.str() << std::endl;
-
+  //ofs << out_line.str() << std::endl;
 }
 
 /***************************************************
@@ -52,7 +41,7 @@ void ICEntry::PrintAC(std::ostream & ofs)
 
 ICEntry& ICArray::AddLabel(std::string label_id, std::string cmt)
 {
-  ICEntry * new_entry = new ICEntry();
+  ICEntry * new_entry = new ICEntry("","",this);
   new_entry->SetLabel(label_id);
   new_entry->SetComment(cmt);
   mICArray.push_back(new_entry);
@@ -117,7 +106,7 @@ void ICArray::AddArg(ICEntry * entry, const std::string & in_arg, ArgType::type 
 // arguments should be scalars, arrays, or none based on type layout.
 ICEntry& ICArray::Add(std::string inst_name, int arg1, int arg2, int arg3, std::string cmt)
 {
-  ICEntry * new_entry = new ICEntry(inst_name);
+  ICEntry * new_entry = new ICEntry(inst_name, "", this);
   if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
     std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
@@ -132,7 +121,7 @@ ICEntry& ICArray::Add(std::string inst_name, int arg1, int arg2, int arg3, std::
 
 ICEntry& ICArray::Add(std::string inst_name, int arg1, int arg2, std::string arg3, std::string cmt)
 {
-  ICEntry * new_entry = new ICEntry(inst_name);
+  ICEntry * new_entry = new ICEntry(inst_name,"", this);
   if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
     std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
@@ -147,7 +136,7 @@ ICEntry& ICArray::Add(std::string inst_name, int arg1, int arg2, std::string arg
 
 ICEntry& ICArray::Add(std::string inst_name, int arg1, std::string arg2, int arg3, std::string cmt)
 {
-  ICEntry * new_entry = new ICEntry(inst_name);
+  ICEntry * new_entry = new ICEntry(inst_name, "", this);
   if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
     std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
@@ -162,7 +151,7 @@ ICEntry& ICArray::Add(std::string inst_name, int arg1, std::string arg2, int arg
 
 ICEntry& ICArray::Add(std::string inst_name, int arg1, std::string arg2, std::string arg3, std::string cmt)
 {
-  ICEntry * new_entry = new ICEntry(inst_name);
+  ICEntry * new_entry = new ICEntry(inst_name, "", this);
   if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
     std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
@@ -177,7 +166,7 @@ ICEntry& ICArray::Add(std::string inst_name, int arg1, std::string arg2, std::st
 
 ICEntry& ICArray::Add(std::string inst_name, std::string arg1, int arg2, int arg3, std::string cmt)
 {
-  ICEntry * new_entry = new ICEntry(inst_name);
+  ICEntry * new_entry = new ICEntry(inst_name, "", this);
   if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
     std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
@@ -192,7 +181,7 @@ ICEntry& ICArray::Add(std::string inst_name, std::string arg1, int arg2, int arg
 
 ICEntry& ICArray::Add(std::string inst_name, std::string arg1, int arg2, std::string arg3, std::string cmt)
 {
-  ICEntry * new_entry = new ICEntry(inst_name);
+  ICEntry * new_entry = new ICEntry(inst_name, "", this);
   if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
     std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
@@ -207,7 +196,7 @@ ICEntry& ICArray::Add(std::string inst_name, std::string arg1, int arg2, std::st
 
 ICEntry& ICArray::Add(std::string inst_name, std::string arg1, std::string arg2, int arg3, std::string cmt)
 {
-  ICEntry * new_entry = new ICEntry(inst_name);
+  ICEntry * new_entry = new ICEntry(inst_name, "", this);
   if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
     std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
@@ -222,7 +211,7 @@ ICEntry& ICArray::Add(std::string inst_name, std::string arg1, std::string arg2,
 
 ICEntry& ICArray::Add(std::string inst_name, std::string arg1, std::string arg2, std::string arg3, std::string cmt)
 {
-  ICEntry * new_entry = new ICEntry(inst_name);
+  ICEntry * new_entry = new ICEntry(inst_name, "", this);
   if (mArgTypeMap.find(inst_name) == mArgTypeMap.end()) {
     std::cerr << "INTERNAL ERROR: Unknown instruction '" << inst_name << "'." << std::endl;
   }
@@ -244,11 +233,4 @@ void ICArray::PrintIC(std::ostream & ofs)
   }
 }
 
-void ICArray::PrintAC(std::ostream & ofs)
-{
-  for (int i=0; i< (int) mICArray.size(); i++)
-  {
-    mICArray[i]->PrintAC(ofs);
-  }
-}
 
