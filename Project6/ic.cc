@@ -18,21 +18,24 @@ int convert_variable(std::string variable_name)
 
 void ICEntry::PrintIC(std::ostream & ofs)
 {
-  //std::stringstream out_line;
 
   // If there is a label, include it in the output.
   if (label != "") { ofs << label << ": "; }
 
   if (mInst != "") {
+    // Print intermediate code as comment
+    std::stringstream out_line;
+    out_line << '#' << mInst << " ";
+    for (int i = 0; i < (int) args.size(); i++) {
+      out_line << args[i]->AsString() << " ";
+    }
+    ofs << out_line.str() << std::endl;
+
     if(mInst == "val_copy"){
       args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
       //ofs << "  val_copy " << As_String(1) << " " << args[0]->GetReg() << std::endl;
       args[0]->AssemblyWrite(ofs, args[0]->GetID(), 'C');
     }
-    //out_line << mInst << " ";
-    //for (int i = 0; i < (int) args.size(); i++) {
-      //out_line << args[i]->GetReg() << " ";
-    //}
   }
 
   // If there is a comment, print it!
