@@ -76,6 +76,26 @@ void ICEntry::PrintIC(std::ostream & ofs)
       ofs << "  " << mInst << " regA" << std::endl;
       args[0]->AssemblyWrite(ofs, args[0]->GetID(), 'A');
     }
+    else if(mInst == "ar_get_idx" || mInst == "ar_set_idx") {
+      ofs << "  load " << args[0]->GetID() << " regA" << std::endl;
+      args[1]->AssemblyRead(ofs, args[1]->GetID(), 'B');
+      ofs << "  add regA 1 regA" << std::endl;
+      ofs << "  add regA regB regA" << std::endl;
+      if(mInst == "ar_get_idx") {
+        ofs << "  mem_copy regA " << args[2]->GetID() << std::endl;
+      }
+      else {
+        ofs << "  mem_copy " << args[2]->GetID() << " regA" << std::endl;
+      }
+    }
+    else if(mInst == "ar_get_size") {
+      ofs << "  load " << args[0]->GetID() << " regA" << std::endl;
+      ofs << "  mem_copy regA " << args[1]->GetID() << std::endl;
+    }
+    else if(mInst == "ar_set_size") {
+    }
+    else if(mInst == "ar_copy") {
+    }
 
   }
 
