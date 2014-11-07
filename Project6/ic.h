@@ -40,6 +40,7 @@ private:
     virtual void AssemblyRead(std::ostream & ofs, std::string lit, char reg) { }
     virtual void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) { }
 
+    virtual std::string AsString() = 0;
     virtual std::string GetReg() = 0;
     virtual int GetID() { return -1; }
 
@@ -72,7 +73,13 @@ private:
     }
 
     std::string GetReg() {
-        return mReg;
+      return mReg;
+    }
+
+    std::string AsString() {
+      std::stringstream out_str;
+      out_str << "s" << mVarID;
+      return out_str.str();
     }
     int GetID() { return mVarID; }
 
@@ -90,6 +97,8 @@ private:
     void AssemblyRead(std::ostream & ofs, std::string lit, char reg) { }
     void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) {  }
 
+    std::string AsString() { return mValue; }
+
     std::string GetReg() { return mValue; }
 
     bool IsConst() { return true; }
@@ -105,6 +114,12 @@ private:
 
     void AssemblyRead(std::ostream & ofs, std::string lit, char reg){}
     void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) {  }
+
+    std::string AsString() {
+      std::stringstream out_str;
+      out_str << "a" << mVarID;
+      return out_str.str();
+    }
 
     std::string GetReg() {
       std::stringstream out_str;

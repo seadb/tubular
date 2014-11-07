@@ -9,16 +9,14 @@ void ICEntry::PrintIC(std::ostream & ofs)
 {
   //std::stringstream out_line;
 
-  std::cout << "PRINT IC" << std::endl;
   // If there is a label, include it in the output.
   if (label != "") { ofs << label << ": "; }
 
   if (mInst != "") {
     if(mInst == "val_copy"){
-
-      args[0]->AssemblyRead(ofs,1,'A');
-      ofs << "  val_copy " << As_String(1) << " " << args[0]->GetReg() << std::endl;
-      args[0]->AssemblyWrite(ofs,1,'C');
+      args[0]->AssemblyRead(ofs , args[0]->AsString(), 'A');
+      //ofs << "  val_copy " << As_String(1) << " " << args[0]->GetReg() << std::endl;
+      args[0]->AssemblyWrite(ofs, args[0]->AsString(), 'C');
     }
     //out_line << mInst << " ";
     //for (int i = 0; i < (int) args.size(); i++) {
