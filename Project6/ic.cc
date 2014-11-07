@@ -18,9 +18,10 @@ int convert_variable(std::string variable_name)
 
 void ICEntry::PrintIC(std::ostream & ofs)
 {
-
   // If there is a label, include it in the output.
-  if (label != "") { ofs << label << ": "; }
+  if (label != "") {
+    ofs << label << ": " << std::endl << "  nop" << std::endl;
+  }
 
   if (mInst != "") {
     // Print intermediate code as comment
@@ -37,43 +38,43 @@ void ICEntry::PrintIC(std::ostream & ofs)
       args[1]->AssemblyWrite(ofs, args[1]->GetID(), 'B');
     }
 
-    else if(mInst == "add" || mInst == "sub" || mInst == "mult" || mInst == "div"
-            || mInst == "mod") {
+    else if(mInst == "add" || mInst == "sub" || mInst == "mult" ||
+            mInst == "div" || mInst == "mod" || mInst == "test_less" ||
+            mInst == "test_gtr" || mInst == "test_equ" ||
+            mInst == "test_nequ" || mInst == "test_lte" ||
+            mInst == "test_lte" || mInst == "test_gte") {
       args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
       args[1]->AssemblyRead(ofs, args[1]->GetID(), 'B');
       ofs << "  " << mInst << " " << args[0]->AsAssemblyString() << " ";
       ofs <<  args[1]->AsAssemblyString() << " regC" << std::endl;
       args[1]->AssemblyWrite(ofs, args[2]->GetID(), 'C');
     } 
-    else if(mInst == "test_less") {
+    else if(mInst == "jump" || mInst == "out_int" || mInst == "out_char") {
+      args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
+      ofs << "  " << mInst << " " << args[0]->AsAssemblyString() << " " << std::endl;
     }
-    else if(mInst == "test_gtr") {
-    } 
-    else if(mInst == "test_equ") {
-    }
-    else if(mInst == "test_nequ") {
-    }
-    else if(mInst == "test_lte") {
-    }
-    else if(mInst == "test_gte") {
-    }
-    else if(mInst == "jump") {
-    }
-    else if(mInst == "jump_if_0") {
-    }
-    else if(mInst == "jump_if_n0") {
+    else if(mInst == "jump_if_0" || mInst == "jump_if_n0") {
+      args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
+      args[1]->AssemblyRead(ofs, args[1]->GetID(), 'A');
+      ofs << "  " << mInst << " " << args[0]->AsAssemblyString() << " ";
+      ofs <<  args[1]->AsAssemblyString() << std::endl;
     }
     else if(mInst == "random") {
-    }
-    else if(mInst == "out_int") {
-    }
-    else if(mInst == "out_char") {
+      args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
+      ofs << "  " << mInst << " " << args[0]->AsAssemblyString() << " ";
+      ofs << args[1]->AsAssemblyString() << " regB" << std::endl;
+      args[1]->AssemblyWrite(ofs, args[1]->GetID(), 'B');
     }
     else if(mInst == "nop") {
+      ofs << "  nop" << std::endl;
     }
     else if(mInst == "push") {
+      args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
+      ofs << "  " << mInst << " " << args[0]->AsAssemblyString();
     }
     else if(mInst == "pop") {
+      ofs << "  " << mInst << " regA" << std::endl;
+      args[0]->AssemblyWrite(ofs, args[0]->GetID(), 'A');
     }
 
   }
