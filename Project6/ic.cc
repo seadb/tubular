@@ -33,8 +33,15 @@ void ICEntry::PrintIC(std::ostream & ofs)
 
     if(mInst == "val_copy"){
       args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
-      //ofs << "  val_copy " << As_String(1) << " " << args[0]->GetReg() << std::endl;
-      args[0]->AssemblyWrite(ofs, args[0]->GetID(), 'C');
+      if(args[0]->IsConst()) {
+        ofs << "  val_copy " << args[0]->AsString() << " regA" << std::endl;
+        args[1]->AssemblyWrite(ofs, args[1]->GetID(), 'A');
+      }
+      else if(args[0]->IsScalar()) {
+        ofs << "  val_copy " << args[0]->GetReg() << " regB" << std::endl;
+        args[1]->AssemblyWrite(ofs, args[1]->GetID(), 'B');
+      }
+
     }
   }
 

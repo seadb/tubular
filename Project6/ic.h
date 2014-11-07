@@ -70,7 +70,7 @@ private:
     }
     void AssemblyWrite(std::ostream & ofs, int lit, char reg) {
 
-      ofs << "  store " << As_String(reg) << " " << lit << std::endl;
+      ofs << "  store reg" << As_String(reg) << " " << lit << std::endl;
 
     }
 
