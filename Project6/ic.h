@@ -43,6 +43,7 @@ private:
     virtual void AssemblyWrite(std::ostream & ofs, int lit, char reg) { }
 
     virtual std::string AsString() = 0;
+    virtual std::string AsAssemblyString() = 0;
     virtual std::string GetReg() = 0;
     virtual int GetID() { return -1; }
 
@@ -69,9 +70,7 @@ private:
       ofs << "  load " << lit << " reg" << As_String(reg) << std::endl;
     }
     void AssemblyWrite(std::ostream & ofs, int lit, char reg) {
-
       ofs << "  store reg" << As_String(reg) << " " << lit << std::endl;
-
     }
 
     std::string GetReg() {
@@ -82,6 +81,9 @@ private:
       std::stringstream out_str;
       out_str << "s" << mVarID;
       return out_str.str();
+    }
+    std::string AsAssemblyString() {
+      return mReg;
     }
     int GetID() { return mVarID; }
 
@@ -100,7 +102,9 @@ private:
     void AssemblyWrite(std::ostream & ofs, int lit, char reg) {  }
 
     std::string AsString() { return mValue; }
-
+    std::string AsAssemblyString() {
+      return mValue;
+    }
     std::string GetReg() { return mValue; }
 
     bool IsConst() { return true; }
@@ -123,6 +127,9 @@ private:
       return out_str.str();
     }
 
+    std::string AsAssemblyString() {
+      return std::string(""); // Place holder!
+    }
     std::string GetReg() {
       std::stringstream out_str;
       out_str << "a" << mVarID;

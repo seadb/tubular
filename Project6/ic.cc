@@ -33,16 +33,49 @@ void ICEntry::PrintIC(std::ostream & ofs)
 
     if(mInst == "val_copy"){
       args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
-      if(args[0]->IsConst()) {
-        ofs << "  val_copy " << args[0]->AsString() << " regA" << std::endl;
-        args[1]->AssemblyWrite(ofs, args[1]->GetID(), 'A');
-      }
-      else if(args[0]->IsScalar()) {
-        ofs << "  val_copy " << args[0]->GetReg() << " regB" << std::endl;
-        args[1]->AssemblyWrite(ofs, args[1]->GetID(), 'B');
-      }
-
+      ofs << "  val_copy " << args[0]->AsAssemblyString() << " regB" << std::endl;
+      args[1]->AssemblyWrite(ofs, args[1]->GetID(), 'B');
     }
+
+    else if(mInst == "add" || mInst == "sub" || mInst == "mult" || mInst == "div"
+            || mInst == "mod") {
+      args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
+      args[1]->AssemblyRead(ofs, args[1]->GetID(), 'B');
+      ofs << "  " << mInst << " " << args[0]->AsAssemblyString() << " ";
+      ofs <<  args[1]->AsAssemblyString() << " regC" << std::endl;
+      args[1]->AssemblyWrite(ofs, args[2]->GetID(), 'C');
+    } 
+    else if(mInst == "test_less") {
+    }
+    else if(mInst == "test_gtr") {
+    } 
+    else if(mInst == "test_equ") {
+    }
+    else if(mInst == "test_nequ") {
+    }
+    else if(mInst == "test_lte") {
+    }
+    else if(mInst == "test_gte") {
+    }
+    else if(mInst == "jump") {
+    }
+    else if(mInst == "jump_if_0") {
+    }
+    else if(mInst == "jump_if_n0") {
+    }
+    else if(mInst == "random") {
+    }
+    else if(mInst == "out_int") {
+    }
+    else if(mInst == "out_char") {
+    }
+    else if(mInst == "nop") {
+    }
+    else if(mInst == "push") {
+    }
+    else if(mInst == "pop") {
+    }
+
   }
 
   // If there is a comment, print it!
