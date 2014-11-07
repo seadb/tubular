@@ -3,21 +3,16 @@
  * BEGIN ICEntry
  *****************************************/
 
-int convert_variable(std::string variable_name)
-{
-  std::stringstream ending_number("");
-  for(int i = 0; i < variable_name.length(); i++)
-  {
-    if(variable_name[i] >= '0' && variable_name[i] <= '9')
-    {
-      ending_number << variable_name[i];
-    }
-  }
-  return std::atoi(ending_number.str().c_str());
-}
+bool first_run = true;
+int label_num = 0;
 
 void ICEntry::PrintIC(std::ostream & ofs)
 {
+  if(first_run) {
+    ofs << "  store " << mArray->static_memory_size << " 0" << std::endl;
+    first_run = false;
+  }
+
   // If there is a label, include it in the output.
   if (label != "") {
     ofs << label << ": " << std::endl << "  nop" << std::endl;
@@ -85,7 +80,13 @@ void ICEntry::PrintIC(std::ostream & ofs)
         ofs << "  mem_copy regA " << args[2]->GetID() << std::endl;
       }
       else {
-        ofs << "  mem_copy " << args[2]->GetID() << " regA" << std::endl;
+        if(args[2]->IsScalar()) {
+          ofs << "  mem_copy " << args[2]->GetID() << " regA" << std::endl;
+        }
+        else {
+          ofs << "  val_copy " << args[2]->AsString() << " regC" << std::endl;
+          ofs << "  store regC regA" << std::endl;
+        }
       }
     }
     else if(mInst == "ar_get_size") {
@@ -93,6 +94,32 @@ void ICEntry::PrintIC(std::ostream & ofs)
       ofs << "  mem_copy regA " << args[1]->GetID() << std::endl;
     }
     else if(mInst == "ar_set_size") {
+      ofs << "  load " << args[0]->GetID() << " regA" << std::endl;
+      if(args[1]->IsScalar()) {
+        ofs << "  load " << args[1]->GetID() << " regB" << std::endl;
+      }
+      else {
+        ofs << "  val_copy " << args[1]->AsString() << " regB" << std::endl;
+      }
+      ofs << "  load regA regC" << std::endl;
+      ofs << "  store regB regA" << std::endl;
+      ofs << "  test_lte regB regC regD" << std::endl;
+      ofs << "  jump_if_n0 regD resize_end_" << label_num + 1 << std::endl;
+      ofs << "  load 0 regD" << std::endl;
+      ofs << "  add regD 1 regE" << std::endl;
+      ofs << "  add regE regB regE" << std::endl;
+      ofs << "  store regE 0" << std::endl;
+      ofs << "  store regD " << args[0]->GetID() << std::endl;
+      ofs << "  store regB regD" << std::endl;
+      ofs << "resize_start_" << label_num++ << ":" << std::endl;
+      ofs << "  add regA 1 regA" << std::endl;
+      ofs << "  add regD 1 regD" << std::endl;
+      ofs << "  test_gtr regD regE regF" << std::endl;
+      ofs << "  jump_if_n0 regF resize_end_" << label_num << std::endl;
+      ofs << "  mem_copy regA regD" << std::endl;
+      ofs << "  jump resize_start_" << label_num - 1 << std::endl;
+      ofs << "resize_end_" << label_num++ << ":" << std::endl;
+      ofs << "  nop" << std::endl;
     }
     else if(mInst == "ar_copy") {
     }

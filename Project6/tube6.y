@@ -66,6 +66,7 @@ program:      statement_list {
                  ICArray ic_array;             // Array to contain the IC
                  $1->CompileTubeIC(symbol_table, ic_array); //Fill IC array
                  std::ofstream out_file(out_filename.c_str());  // Open the output file
+                 ic_array.static_memory_size = symbol_table.GetTempVarID();
                  ic_array.PrintIC(out_file);             // Write ic to output file
               }
        ;

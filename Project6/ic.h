@@ -198,6 +198,7 @@ private:
   void AddArg(ICEntry * entry, const std::string & in_arg, ArgType::type expected_type);
 
 public:
+  int static_memory_size;
   ICArray() : mMemPosition(1) {
     // Fill out the arg types for each mInstruction
     SetupArgs("val_copy",    ArgType::VALUE,  ArgType::SCALAR, ArgType::NONE);
