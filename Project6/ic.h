@@ -45,11 +45,6 @@ private:
 
     virtual bool IsScalar() { return false; }
     virtual bool IsConst() { return false; }
-    std::string As_String(char c){
-      std::stringstream temp;
-      temp << c;
-      return temp.str();
-}
     //virtual bool IsArray() { return false; }
   };
 
@@ -60,6 +55,9 @@ private:
   public:
     ICArg_VarScalar(int _id) : mVarID(_id), mReg(""){ ; }
     ~ICArg_VarScalar() { ; }
+
+   std::string As_String(char c) { std::stringstream temp;
+                                 temp << c;  return temp.str(); }
 
     void AssemblyRead(std::ostream & ofs, std::string lit, char reg) {
       mReg = "reg" + As_String(reg);

@@ -16,9 +16,9 @@ void ICEntry::PrintIC(std::ostream & ofs)
   if (mInst != "") {
     if(mInst == "val_copy"){
 
-      args[0]->AssemblyRead(ofs,1,'A');
-      ofs << "  val_copy " << As_String(1) << " " << args[0]->GetReg() << std::endl;
-      args[0]->AssemblyWrite(ofs,1,'C');
+      args[0]->AssemblyRead(ofs,"1",'A');
+      ofs << "  val_copy " << 1 << " " << args[0]->GetReg() << std::endl;
+      args[0]->AssemblyWrite(ofs,"1",'C');
     }
     //out_line << mInst << " ";
     //for (int i = 0; i < (int) args.size(); i++) {

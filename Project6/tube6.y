@@ -230,61 +230,19 @@ variable:   ID {
                 $$ = new ASTNodeIndex(cur_entry,$3);
                 $$->SetLineNum(line_num);
         }
-        |   ID '.' SIZE '(' ')'
-        {
-        //These are in the wrong spot. things in this section
-        //should be for left side of the equation only
-        //id.size() = 3; is an invalid expression and should throw an error..
-
-                CTableEntry * cur_entry = symbol_table.Lookup($1);
-                if (cur_entry == NULL)
-                {
-                  std::string errString = "unknown variable '";
-                  errString += $1;
-                  errString += "'";
-                  yyerror(errString);
-                  exit(1);
-                }
-                $$ = new ASTNodeSize(cur_entry);
-            }
-        |   ID '.' RESIZE '(' expression ')' {
-                CTableEntry * cur_entry = symbol_table.Lookup($1);
-                if (cur_entry == NULL)
-                {
-                  std::string errString = "unknown variable '";
-                  errString += $1;
-                  errString += "'";
-                  yyerror(errString);
-                  exit(1);
-                }
-                $$ = new ASTNodeResize(cur_entry, $5);
-            }
-	|   ID '.' ID '(' ')' {
-		std::string errString = "unknown method '";
-		errString += $3;
-		errString += "'";
-		yyerror(errString);
-		exit(1);
-		}
-	|   ID '.' ID '(' expression ')' {
-                std::string errString = "unknown method '";
-                errString += $3;
+        |    expression '[' expression ']' {
+              int type_id = $3->GetType();
+              if(type_id!=Type::INT_ARRAY && type_id !=Type::CHAR_ARRAY)
+              {
+                std::string type_str = Type::AsString($3->GetType());
+                std::string errString = "array methods cannot be run on type  '";
+                errString += type_str;
                 errString += "'";
                 yyerror(errString);
                 exit(1);
-                }
-        | expression '[' expression ']' {
-                int type_id = $3->GetType();
-                if(type_id!=Type::INT_ARRAY && type_id !=Type::CHAR_ARRAY)
-                {
-                  std::string type_str = Type::AsString($3->GetType());
-		  std::string errString = "array methods cannot be run on type  '";
-		  errString += type_str;
-		  errString += "'";
-		  yyerror(errString);
-		  exit(1);
-		}
-        }
+              }
+          }
+
 ;
 
 operation:
@@ -312,7 +270,49 @@ operation:
 
   |    COMMAND_RANDOM '(' expression ')'{
               $$ = new ASTNodeRandom($3);
-             }
+              }
+  |   ID '.' SIZE '(' ')'
+        {
+            CTableEntry * cur_entry = symbol_table.Lookup($1);
+            if (cur_entry == NULL)
+            {
+              std::string errString = "unknown variable '";
+              errString += $1;
+              errString += "'";
+              yyerror(errString);
+              exit(1);
+            }
+            $$ = new ASTNodeSize(cur_entry);
+          }
+  |   ID '.' RESIZE '(' expression ')' {
+        //These are in the wrong spot. things in this section
+        //should be for left side of the equation only
+        //id.size() = 3; is an invalid expression and should throw an error..
+          CTableEntry * cur_entry = symbol_table.Lookup($1);
+          if (cur_entry == NULL)
+          {
+            std::string errString = "unknown variable '";
+            errString += $1;
+            errString += "'";
+            yyerror(errString);
+            exit(1);
+          }
+          $$ = new ASTNodeResize(cur_entry, $5);
+      }
+  |   ID '.' ID '(' ')' {
+          std::string errString = "unknown method '";
+          errString += $3;
+          errString += "'";
+          yyerror(errString);
+          exit(1);
+          }
+  |   ID '.' ID '(' expression ')' {
+          std::string errString = "unknown method '";
+          errString += $3;
+          errString += "'";
+          yyerror(errString);
+          exit(1);
+          }
  /* |    expression '?' expression ':' expression {}
   }
    */
