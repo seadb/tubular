@@ -24,7 +24,9 @@
 #include <sstream>
 #include <vector>
 #include <map>
-
+#include <cstdlib>
+#include <cctype>
+#include <cstring>
 
 class ICArray ;
 

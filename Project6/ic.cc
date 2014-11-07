@@ -3,8 +3,18 @@
  * BEGIN ICEntry
  *****************************************/
 
-std::map<std::string, int> mmap;
-int mpos = 1;
+int convert_variable(std::string variable_name)
+{
+  std::stringstream ending_number("");
+  for(int i = 0; i < variable_name.length(); i++)
+  {
+    if(variable_name[i] >= '0' && variable_name[i] <= '9')
+    {
+      ending_number << variable_name[i];
+    }
+  }
+  return std::atoi(ending_number.str().c_str());
+}
 
 void ICEntry::PrintIC(std::ostream & ofs)
 {
@@ -15,10 +25,10 @@ void ICEntry::PrintIC(std::ostream & ofs)
 
   if (mInst != "") {
     if(mInst == "val_copy"){
-      mmap[args[0]->AsString()] = mpos++;
-      args[0]->AssemblyRead(ofs, mmap[args[0]->AsString()], 'A');
+      std::cout << convert_variable(args[0]->AsString()) << std::endl;
+      args[0]->AssemblyRead(ofs, convert_variable(args[0]->AsString()), 'A');
       //ofs << "  val_copy " << As_String(1) << " " << args[0]->GetReg() << std::endl;
-      args[0]->AssemblyWrite(ofs, mmap[args[0]->AsString()], 'C');
+      args[0]->AssemblyWrite(ofs, convert_variable(args[0]->AsString()), 'C');
     }
     //out_line << mInst << " ";
     //for (int i = 0; i < (int) args.size(); i++) {
