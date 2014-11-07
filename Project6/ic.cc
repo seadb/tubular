@@ -25,10 +25,9 @@ void ICEntry::PrintIC(std::ostream & ofs)
 
   if (mInst != "") {
     if(mInst == "val_copy"){
-      std::cout << convert_variable(args[0]->AsString()) << std::endl;
-      args[0]->AssemblyRead(ofs, convert_variable(args[0]->AsString()), 'A');
+      args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
       //ofs << "  val_copy " << As_String(1) << " " << args[0]->GetReg() << std::endl;
-      args[0]->AssemblyWrite(ofs, convert_variable(args[0]->AsString()), 'C');
+      args[0]->AssemblyWrite(ofs, args[0]->GetID(), 'C');
     }
     //out_line << mInst << " ";
     //for (int i = 0; i < (int) args.size(); i++) {
