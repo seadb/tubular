@@ -37,8 +37,8 @@ private:
     ICArg_Base() { ; }
     virtual ~ICArg_Base() { ; }
 
-    virtual void AssemblyRead(std::ostream & ofs, std::string lit, char reg) { }
-    virtual void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) { }
+    virtual void AssemblyRead(std::ostream & ofs, int lit, char reg) { }
+    virtual void AssemblyWrite(std::ostream & ofs, int lit, char reg) { }
 
     virtual std::string AsString() = 0;
     virtual std::string GetReg() = 0;
@@ -62,11 +62,11 @@ private:
     ICArg_VarScalar(int _id) : mVarID(_id), mReg(""){ ; }
     ~ICArg_VarScalar() { ; }
 
-    void AssemblyRead(std::ostream & ofs, std::string lit, char reg) {
+    void AssemblyRead(std::ostream & ofs, int lit, char reg) {
       mReg = "reg" + As_String(reg);
       ofs << "  load " << lit << " reg" << As_String(reg) << std::endl;
     }
-    void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) {
+    void AssemblyWrite(std::ostream & ofs, int lit, char reg) {
 
       ofs << "  store " << As_String(reg) << " " << lit << std::endl;
 
@@ -94,8 +94,8 @@ private:
     ICArg_Const(std::string val) : mValue(val) { ; }
     ~ICArg_Const() { ; }
 
-    void AssemblyRead(std::ostream & ofs, std::string lit, char reg) { }
-    void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) {  }
+    void AssemblyRead(std::ostream & ofs, int lit, char reg) { }
+    void AssemblyWrite(std::ostream & ofs, int lit, char reg) {  }
 
     std::string AsString() { return mValue; }
 
@@ -112,8 +112,8 @@ private:
     ICArg_VarArray(int _id) : mVarID(_id) { ; }
     ~ICArg_VarArray() { ; }
 
-    void AssemblyRead(std::ostream & ofs, std::string lit, char reg){}
-    void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) {  }
+    void AssemblyRead(std::ostream & ofs, int lit, char reg){}
+    void AssemblyWrite(std::ostream & ofs, int lit, char reg) {  }
 
     std::string AsString() {
       std::stringstream out_str;

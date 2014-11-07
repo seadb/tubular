@@ -3,7 +3,8 @@
  * BEGIN ICEntry
  *****************************************/
 
-
+std::map<std::string, int> mmap;
+int mpos = 1;
 
 void ICEntry::PrintIC(std::ostream & ofs)
 {
@@ -14,9 +15,10 @@ void ICEntry::PrintIC(std::ostream & ofs)
 
   if (mInst != "") {
     if(mInst == "val_copy"){
-      args[0]->AssemblyRead(ofs , args[0]->AsString(), 'A');
+      mmap[args[0]->AsString()] = mpos++;
+      args[0]->AssemblyRead(ofs, mmap[args[0]->AsString()], 'A');
       //ofs << "  val_copy " << As_String(1) << " " << args[0]->GetReg() << std::endl;
-      args[0]->AssemblyWrite(ofs, args[0]->AsString(), 'C');
+      args[0]->AssemblyWrite(ofs, mmap[args[0]->AsString()], 'C');
     }
     //out_line << mInst << " ";
     //for (int i = 0; i < (int) args.size(); i++) {
