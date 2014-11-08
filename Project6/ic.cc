@@ -42,7 +42,7 @@ void ICEntry::PrintIC(std::ostream & ofs)
       args[1]->AssemblyRead(ofs, args[1]->GetID(), 'B');
       ofs << "  " << mInst << " " << args[0]->AsAssemblyString() << " ";
       ofs <<  args[1]->AsAssemblyString() << " regC" << std::endl;
-      args[1]->AssemblyWrite(ofs, args[2]->GetID(), 'C');
+      args[2]->AssemblyWrite(ofs, args[2]->GetID(), 'C');
     } 
     else if(mInst == "jump" || mInst == "out_int" || mInst == "out_char") {
       args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
@@ -75,7 +75,7 @@ void ICEntry::PrintIC(std::ostream & ofs)
       ofs << "  load " << args[0]->GetID() << " regA" << std::endl;
       args[1]->AssemblyRead(ofs, args[1]->GetID(), 'B');
       ofs << "  add regA 1 regA" << std::endl;
-      ofs << "  add regA regB regA" << std::endl;
+      ofs << "  add regA " << args[1]->AsAssemblyString() << " regA" << std::endl;
       if(mInst == "ar_get_idx") {
         ofs << "  mem_copy regA " << args[2]->GetID() << std::endl;
       }
@@ -101,10 +101,12 @@ void ICEntry::PrintIC(std::ostream & ofs)
       else {
         ofs << "  val_copy " << args[1]->AsString() << " regB" << std::endl;
       }
+      ofs << "  jump_if_0 regA do_resize" << label_num << std::endl;
       ofs << "  load regA regC" << std::endl;
       ofs << "  store regB regA" << std::endl;
       ofs << "  test_lte regB regC regD" << std::endl;
       ofs << "  jump_if_n0 regD resize_end_" << label_num + 1 << std::endl;
+      ofs << "do_resize" << label_num << ":" << std::endl;
       ofs << "  load 0 regD" << std::endl;
       ofs << "  add regD 1 regE" << std::endl;
       ofs << "  add regE regB regE" << std::endl;
