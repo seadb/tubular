@@ -124,6 +124,52 @@ void ICEntry::PrintIC(std::ostream & ofs)
       ofs << "  nop" << std::endl;
     }
     else if(mInst == "ar_copy") {
+      // Set size
+      ofs << "  load " << args[0]->GetID() << " regA" << std::endl;
+      ofs << "  load regA regB" << std::endl;
+      ofs << "  load " << args[1]->GetID() << " regA" << std::endl;
+      ofs << "  jump_if_0 regA do_resize" << label_num << std::endl;
+      ofs << "  load regA regC" << std::endl;
+      ofs << "  store regB regA" << std::endl;
+      ofs << "  test_lte regB regC regD" << std::endl;
+      ofs << "  jump_if_n0 regD resize_end_" << label_num + 1 << std::endl;
+      ofs << "do_resize" << label_num << ":" << std::endl;
+      ofs << "  load 0 regD" << std::endl;
+      ofs << "  add regD 1 regE" << std::endl;
+      ofs << "  add regE regB regE" << std::endl;
+      ofs << "  store regE 0" << std::endl;
+      ofs << "  store regD " << args[1]->GetID() << std::endl;
+      ofs << "  store regB regD" << std::endl;
+      ofs << "resize_start_" << label_num++ << ":" << std::endl;
+      ofs << "  add regA 1 regA" << std::endl;
+      ofs << "  add regD 1 regD" << std::endl;
+      ofs << "  test_gtr regD regE regF" << std::endl;
+      ofs << "  jump_if_n0 regF resize_end_" << label_num << std::endl;
+      ofs << "  mem_copy regA regD" << std::endl;
+      ofs << "  jump resize_start_" << label_num - 1 << std::endl;
+      ofs << "resize_end_" << label_num++ << ":" << std::endl;
+      ofs << "  nop" << std::endl;
+
+      // Copy contents
+      ofs << "  load " << args[0]->GetID() << " regA" << std::endl;
+      ofs << "  load " << args[1]->GetID() << " regB" << std::endl;
+      ofs << "  load regA regC" << std::endl;
+      //ofs << "  out_int regC" << std::endl;
+      ofs << "  add 1 regA regA" << std::endl;
+      ofs << "  add 1 regB regB" << std::endl;
+      ofs << "  val_copy 0 regD" << std::endl;
+      ofs << "copy_start" << label_num << ":" << std::endl;
+      //ofs << "  out_int regD" << std::endl;
+      //ofs << "  out_char '\\n'" << std::endl;
+      ofs << "  test_gte regD regC regE" << std::endl;
+      ofs << "  jump_if_n0 regE copy_end" << label_num << std::endl;
+      ofs << "  mem_copy regA regB" << std::endl;
+      ofs << "  add 1 regA regA" << std::endl;
+      ofs << "  add 1 regB regB" << std::endl;
+      ofs << "  add 1 regD regD" << std::endl;
+      ofs << "  jump copy_start" << label_num << std::endl;
+      ofs << "copy_end" << label_num << ":" << std::endl;
+      ofs << "  nop" << std::endl;
     }
 
   }
