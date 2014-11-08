@@ -14,6 +14,7 @@ std::string out_filename = "";
 int MAX_STR_CONST=1000;
 char string_buf[1000];
 char *string_buf_ptr;
+bool debug = false;
 %}
 
 %option nounput
@@ -143,19 +144,24 @@ void LexMain(int argc, char * argv[])
            << std::endl
            << "Available Flags:" << std::endl
            << "  -h  :  Help (this information)" << std::endl
+           << "  -d  :  Debug Mode" << std::endl
         ;
       exit(0);
     }
 
     // PROCESS OTHER ARGUMENTS HERE IF YOU ADD THEM
-
+    if (cur_arg == "-d") {
+        std::cout << "Debug mode" << std::endl;
+        debug = true;
+        continue;
+    }
     // If the next argument begins with a dash, assume it's an unknown flag...
-    if (cur_arg[0] == '-') {
+    else if (cur_arg[0] == '-') {
       std::cerr << "ERROR: Unknown command-line flag: " << cur_arg << std::endl;
       exit(1);
     }
 
-    // Assume the current argument is a filemName (first input, then output)
+    // Assume the current argument is a filename (first input, then output)
     if (!input_found) {
       file = fopen(argv[arg_id], "r");
       if (!file) {
@@ -178,7 +184,7 @@ void LexMain(int argc, char * argv[])
 
   // Make sure we've loaded input and output filemNames before we finish...
   if (input_found == false || out_filename == "") {
-    std::cerr << "Format: " << argv[0] << "[flags] [input filemName] [output filemName]" << std::endl;
+    std::cerr << "Format: " << argv[0] << "[flags] [input filename] [output filename]" << std::endl;
     std::cerr << "Type '" << argv[0] << " -h' for help." << std::endl;
     exit(1);
   }

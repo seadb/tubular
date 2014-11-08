@@ -35,22 +35,25 @@ protected:
   int mType;                         // What type should this node pass up?
   int mLineNum;                     // What line of the source program generated this node?
   std::vector<ASTNode *> mChildren;  // What sub-trees does this node have?
+  bool mDebug;
 
   void SetType(int new_type) { mType = new_type; } // Use inside constructor only!
 public:
-  ASTNode(int in_type) : mType(in_type), mLineNum(-1) { ; }
+  ASTNode(int in_type) : mType(in_type), mLineNum(-1), mDebug(false) { ; }
   virtual ~ASTNode() {
     for (int i = 0; i < (int) mChildren.size(); i++) delete mChildren[i];
   }
 
   int GetType()              { return mType; }
   int GetLineNum()           { return mLineNum; }
+  int GetDebug()             { return mDebug; }
   ASTNode * GetChild(int id) { return mChildren[id]; }
   int GetNumChildren()       { return mChildren.size(); }
 
-  void SetLineNum(int _in) { mLineNum = _in; }
+  void SetLineNum(int _in)                 { mLineNum = _in; }
+  void SetDebug(bool inDebug)              { mDebug = inDebug; }
   void SetChild(int id, ASTNode * in_node) { mChildren[id] = in_node; }
-  void AddChild(ASTNode * in_child) { mChildren.push_back(in_child); }
+  void AddChild(ASTNode * in_child)        { mChildren.push_back(in_child); }
   void TransferChildren(ASTNode * in_node);
 
   // Convert a single node to TubeIC and return information about the
@@ -91,7 +94,7 @@ class ASTNodeIndex : public ASTNode {
     CTableEntry * mArray;
     ASTNode * mIndex;
   public:
-    ASTNodeIndex(CTableEntry * entry, ASTNode * index);
+    ASTNodeIndex(CTableEntry * entry, ASTNode * index, bool debug);
     ASTNode * GetIndex() { return mIndex; }
     CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 
@@ -108,12 +111,12 @@ class ASTNodeSize : public ASTNode {
 class ASTNodeResize : public ASTNode {
   private:
     CTableEntry * mArray;
-    ASTNode *mSize;
+    ASTNode * mSize;
   public:
     ASTNodeResize(CTableEntry * entry, ASTNode *size);
     CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
-                  
+
 class ASTNodeLiteral : public ASTNode {
 private:
  std::string mLexeme;     // When we print, how should this node look?

@@ -32,9 +32,10 @@ protected:
   int mVarID;        // What is the intermediate code ID for this variable?
   CTableEntry * mNext; // A pointer to another entry that this one is shadowing
   CTableEntry * mIndex; // Is there an index associated with this var
-  CTableEntry * mArray; // Is there an array? 
+  CTableEntry * mArray; // Is there an array?
+  int mSize;
 
-  CTableEntry(int inType) 
+  CTableEntry(int inType)
     : mTypeID (inType)
     , mName("__TEMP__")
     , mScope(-1)
@@ -65,6 +66,7 @@ public:
   int GetScope()           const { return mScope; }
   bool GetTemp()           const { return mIsTemp; }
   int GetVarID()           const { return mVarID; }
+  int GetSize()            const { return mSize; }
   CTableEntry * GetIndex() const { return mIndex;}
   CTableEntry * GetNext()  const { return mNext; }
   CTableEntry * GetArray() const { return mArray; }
@@ -72,6 +74,7 @@ public:
   void SetName(std::string inName)     { mName = inName; }
   void SetScope(int inScope)           { mScope = inScope; }
   void SetVarID(int inID)              { mVarID = inID; }
+  void SetSize(int inSize)             { mSize = inSize; }
   void SetNext(CTableEntry * inNext)   { mNext = inNext; }
   void SetIndex(CTableEntry * inIndex) { mIndex = inIndex; }
   void SetArray(CTableEntry * inArray ) { mArray = inArray;  }
@@ -92,7 +95,7 @@ private:
   // Figure out the next memory position to use.  Ideally, we should be recycling these!!
   int GetNextID() { return mNextVarID++; }
 public:
-  CSymbolTable() : mCurrentScope(0), mNextVarID(1), mNextLabelID(0) { 
+  CSymbolTable() : mCurrentScope(0), mNextVarID(1), mNextLabelID(0) {
     mScopeInfo.push_back(new std::vector<CTableEntry *>);
   }
   ~CSymbolTable() {
@@ -103,11 +106,11 @@ public:
 
   int GetSize()     const { return (int) mTableMap.size(); }
   int GetCurScope() const { return mCurrentScope; }
-  const std::vector<CTableEntry *> & GetScopeVars(int scope) 
+  const std::vector<CTableEntry *> & GetScopeVars(int scope)
   {
     if (scope < 0 || scope >= (int) mScopeInfo.size()) {
-      std::cerr << "Internal Compiler Error: Requesting vars from scope #" 
-        << scope << ", but only " << mScopeInfo.size() << " scopes exist." 
+      std::cerr << "Internal Compiler Error: Requesting vars from scope #"
+        << scope << ", but only " << mScopeInfo.size() << " scopes exist."
         << std::endl;
     }
     return *(mScopeInfo[scope]);
@@ -153,7 +156,7 @@ public:
   void PushWhileEndLabel(const std::string & end_label) { mWhileEndStack.push_back(end_label); }
   const std::string & GetWhileEndLabel() { return mWhileEndStack.back(); }
   void PopWhileEndLabel() { mWhileEndStack.pop_back(); }
-      
+
   // Lookup will find an entry and return it.  If that entry is not in the table, it will return NULL
   CTableEntry * Lookup(std::string inName) {
     if (mTableMap.find(inName) == mTableMap.end()) return NULL;
