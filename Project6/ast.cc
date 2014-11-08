@@ -156,6 +156,8 @@ CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, ICArray & ica)
     std::stringstream s;
     std::stringstream ss;
     ss << mLexeme.size(); //convert the size to a string
+    CTableEntry * sizeVar = table.AddTempEntry(Type::INT);
+    ica.Add("val_copy", ss.str(), sizeVar->GetVarID());
     ica.Add("ar_set_size", outVar->GetVarID(), ss.str());
     outVar->SetSize(mLexeme.size());
     for(int i=0; i < mLexeme.size(); i++ )
@@ -194,6 +196,9 @@ CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, ICArray & ica)
           s << "'" <<  mLexeme[i] << "'";
           break;
       }
+      //CTableEntry * posVar = table.AddTempEntry(Type::INT);
+      //ica.Add("val_copy", ss.str(), posVar->GetVarID());
+      //ica.Add("ar_set_idx", outVar->GetVarID(), posVar->GetVarID(), s.str());
       ica.Add("ar_set_idx", outVar->GetVarID(), ss.str(), s.str());
     }
   }
