@@ -1,9 +1,10 @@
 #ifndef AST_H
 #define AST_H
 
-////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //
-//  The classes in this file hold info about the nodes that form the Abstract Syntax Tree (AST)
+//  The classes in this file hold info about the nodes that form the Abstract
+//                                                             Syntax Tree (AST)
 //
 //  ASTNode : The base class for all of the others, with useful virtual functions.
 //
@@ -11,14 +12,18 @@
 //  ASTNodeBlock : Blocks of statements, including the overall program.
 //  ASTNodeVariable : Leaf node containing a variable.
 //  ASTNodeLiteral : Leaf node contiaing a literal value.
-//  ASTNodeAssign : Assignements
+//  ASTNodeAssign : Assignments
 //  ASTNodeMath1 : One-input math operations (unary '-' and '!')
-//  ASTNodeMath2 : Two-input math operations ('+', '-', '*', '/', '%', and comparisons)
+//  ASTNodeMath2 : Two-input math operations ('+', '-', '*', '/', '%', compare)
 //  ASTNodeBool2 : Two-input bool operations ('&&' and '||')
-//  ASTNodeIf : If-conditional node.
+//  ASTNodeIf    : If-conditional node.
 //  ASTNodeWhile : While-loop node.
 //  ASTNodeBreak : Break node
 //  ASTNodePrint : Print command
+//  ASTNodeRandom : Random command
+//  ASTNodeIndex : Indexing into an array
+//  ASTNodeSize  : The size method of array
+//  ASTNodeResize : Resize method of array
 //
 
 #include <iostream>
@@ -33,24 +38,27 @@
 class ASTNode {
 protected:
   int mType;                         // What type should this node pass up?
-  int mLineNum;                     // What line of the source program generated this node?
+  int mLineNum;         // What line of the source program generated this node?
   std::vector<ASTNode *> mChildren;  // What sub-trees does this node have?
+  bool mDebug;
 
   void SetType(int new_type) { mType = new_type; } // Use inside constructor only!
 public:
-  ASTNode(int in_type) : mType(in_type), mLineNum(-1) { ; }
+  ASTNode(int in_type) : mType(in_type), mLineNum(-1), mDebug(false) { ; }
   virtual ~ASTNode() {
     for (int i = 0; i < (int) mChildren.size(); i++) delete mChildren[i];
   }
 
   int GetType()              { return mType; }
   int GetLineNum()           { return mLineNum; }
+  bool GetDebug()            { return mDebug; }
   ASTNode * GetChild(int id) { return mChildren[id]; }
   int GetNumChildren()       { return mChildren.size(); }
 
-  void SetLineNum(int _in) { mLineNum = _in; }
+  void SetLineNum(int _in)                 { mLineNum = _in; }
+  void SetDebug(bool inDebug)              { mDebug = inDebug; }
   void SetChild(int id, ASTNode * in_node) { mChildren[id] = in_node; }
-  void AddChild(ASTNode * in_child) { mChildren.push_back(in_child); }
+  void AddChild(ASTNode * in_child)        { mChildren.push_back(in_child); }
   void TransferChildren(ASTNode * in_node);
 
   // Convert a single node to TubeIC and return information about the
@@ -91,7 +99,7 @@ class ASTNodeIndex : public ASTNode {
     CTableEntry * mArray;
     ASTNode * mIndex;
   public:
-    ASTNodeIndex(CTableEntry * entry, ASTNode * index);
+    ASTNodeIndex(CTableEntry * entry, ASTNode * index, bool debug);
     ASTNode * GetIndex() { return mIndex; }
     CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 
@@ -108,12 +116,12 @@ class ASTNodeSize : public ASTNode {
 class ASTNodeResize : public ASTNode {
   private:
     CTableEntry * mArray;
-    ASTNode *mSize;
+    ASTNode * mSize;
   public:
-    ASTNodeResize(CTableEntry * entry, ASTNode *size);
+    ASTNodeResize(CTableEntry * entry, ASTNode *size, bool debug);
     CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
-                  
+
 class ASTNodeLiteral : public ASTNode {
 private:
  std::string mLexeme;     // When we print, how should this node look?
@@ -124,13 +132,7 @@ public:
   ASTNodeLiteral(int in_type, char * in_char);
   CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
-/*
-class ASTNodeArray : public ASTNode {
-  public:
-    ASTNodeArray(std::string in_array);
-    ASTNodeArray(int * in_array);
-    CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
-}*/
+
 // Math...
 
 class ASTNodeAssign : public ASTNode {

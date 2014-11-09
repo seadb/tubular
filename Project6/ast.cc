@@ -127,7 +127,7 @@ ASTNodeLiteral::ASTNodeLiteral(int in_type, std::string in_lex)
   }
   else
     mLexeme = in_lex;
-}  
+}
 
 ASTNodeLiteral::ASTNodeLiteral(int in_type, char * in_char)
                             : ASTNode(in_type), mCharArray(in_char)
@@ -137,37 +137,34 @@ ASTNodeLiteral::ASTNodeLiteral(int in_type, char * in_char)
 CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 {
   CTableEntry * outVar = table.AddTempEntry(mType);
-  if (mType == Type::INT || mType == Type::CHAR) 
-  {
-    std::cout << "mLexeme" << mLexeme << std::endl;
+  if (mType == Type::INT || mType == Type::CHAR) {
     ica.Add("val_copy", mLexeme, outVar->GetVarID());
+    if (mType == Type::INT) {
+      int intLex = atoi(mLexeme.c_str());
+      outVar->SetSize(intLex);
+    }
+    else {  // mType == Type::CHAR
+      outVar->SetSize(1);
+    }
   }
-  else if (mType == Type::INT_ARRAY || mType == Type::CHAR_ARRAY)
-  {
-    //std::cout << "mCharArray" << mCharArray << std::endl; 
+  else if (mType == Type::INT_ARRAY || mType == Type::CHAR_ARRAY) {
     std::stringstream s;
     std::stringstream ss;
     ss << mLexeme.size(); //convert the size to a string
     CTableEntry * sizeVar = table.AddTempEntry(Type::INT);
     ica.Add("val_copy", ss.str(), sizeVar->GetVarID());
     ica.Add("ar_set_size", outVar->GetVarID(), ss.str());
-    for(int i=0; i < mLexeme.size(); i++ )
-    {
+    outVar->SetSize(mLexeme.size());
+    for(int i=0; i < mLexeme.size(); i++ ) {
       ss.str(""); ss.clear();
       ss << i; //convert the index to string
       s.str(""); s.clear();
-      switch (mLexeme[i])
-      {
+      switch (mLexeme[i]) {
         case '\\':
-          //yyerror("Unknown escape char in string.");
           s << "'\\'";
           break;
-        //case "\\":
-        //break;
         case '\r':
           yyerror("Unknown escape char in string.");
-          //s << "'\\r'";
-          //break;
         case '\n':
           s << "'\\n'";
           break;
@@ -184,7 +181,7 @@ CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, ICArray & ica)
           s << "'\\\"'";
           break;
         default:
-          s << "'" <<  mLexeme[i] << "'"; 
+          s << "'" <<  mLexeme[i] << "'";
           break;
       }
       //CTableEntry * posVar = table.AddTempEntry(Type::INT);
@@ -192,11 +189,8 @@ CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, ICArray & ica)
       //ica.Add("ar_set_idx", outVar->GetVarID(), posVar->GetVarID(), s.str());
       ica.Add("ar_set_idx", outVar->GetVarID(), ss.str(), s.str());
     }
-    //TODO: add intermediate code to ica
   }
-  // --- Add code to deal with other literal types here! ---
-  else 
-  {
+  else {
     std::cerr << "INTERNAL ERROR: Unknown type!" << std::endl;
   }
 
@@ -209,7 +203,7 @@ CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 
 ASTNodeAssign::ASTNodeAssign(ASTNode * left, ASTNode * right)
                                  : ASTNode(left->GetType())
-{ 
+{
   if (left->GetType() != right->GetType()) {
     std::string err_message = "types do not match for assignment (lhs='";
     err_message += Type::AsString(left->GetType());
@@ -230,25 +224,25 @@ CTableEntry * ASTNodeAssign::CompileTubeIC(CSymbolTable & table,
   CTableEntry * right = mChildren[1]->CompileTubeIC(table, ica);
 
   if (mType == Type::INT || mType == Type::CHAR) {
-    if(left->GetIndex() != NULL)
-    {
+    if (left->GetIndex() != NULL) {
       std::stringstream arrayID, rightID, index;
       arrayID << left->GetArray()->GetVarID();
       rightID << right->GetVarID();
       index << left->GetIndex();
       //ica.Add("ar_copy", right->GetVarID(), left->GetVarID());
-      ica.Add("ar_set_idx", left->GetArray()->GetVarID(), left->GetIndex()->GetVarID(), right->GetVarID()); 
+      ica.Add("ar_set_idx", left->GetArray()->GetVarID(), left->GetIndex()->GetVarID(), right->GetVarID());
     }
-    else
-    {
+    else {
       ica.Add("val_copy", right->GetVarID(), left->GetVarID());
+      left->SetSize(right->GetSize());
     }
   }
-  else if (mType == Type::INT_ARRAY || mType == Type::CHAR_ARRAY){
+  else if (mType == Type::INT_ARRAY || mType == Type::CHAR_ARRAY) {
     ica.Add("ar_copy", right->GetVarID(), left->GetVarID());
+    left->SetSize(right->GetSize());
   }
   // --- Add code to deal with other types of assignments here! ---
-  
+
   else {
     std::cerr << "Internal Compiler ERROR: Unknown type in Assign!" << std::endl;
     exit(1);
@@ -284,12 +278,15 @@ CTableEntry * ASTNodeMath1::CompileTubeIC(CSymbolTable & table, ICArray & ica)
   switch (mMathOp) {
   case '-':
     ica.Add("mult", in->GetVarID(), "-1", outVar->GetVarID());
+    outVar->SetNegative(true);
+    outVar->SetSize(-1*in->GetSize());
     break;
   case '!':
     ica.Add("test_equ", in->GetVarID(), "0", outVar->GetVarID());
     break;
   default:
-    std::cerr << "Internal compiler error: unknown Math1 operation '" << mMathOp << "'." << std::endl;
+    std::cerr << "Internal compiler error: unknown Math1 operation '"
+      << mMathOp << "'." << std::endl;
     exit(1);
   };
 
@@ -308,7 +305,6 @@ ASTNodeMath2::ASTNodeMath2(ASTNode * in1, ASTNode * in2, int op)
   bool rel_op = (op==COMP_EQU) || (op==COMP_NEQU) || (op==COMP_LESS) || (op==COMP_LTE) ||
     (op==COMP_GTR) || (op==COMP_GTE);
 
-
   ASTNode * in_test = (in1->GetType() != Type::INT) ? in1 : in2;
   if (in_test->GetType() != Type::INT) {
     if (!rel_op || in_test->GetType() != Type::CHAR) {
@@ -317,7 +313,9 @@ ASTNodeMath2::ASTNodeMath2(ASTNode * in1, ASTNode * in2, int op)
       err_message += "' in mathematical expressions";
       yyerror(err_message);
       exit(1);
-    } else if (rel_op && (in1->GetType() != Type::CHAR || in2->GetType() != Type::CHAR)) {
+    }
+
+    else if (rel_op && (in1->GetType() != Type::CHAR || in2->GetType() != Type::CHAR)) {
       std::string err_message = "types do not match for relationship operator (lhs='";
       err_message += Type::AsString(in1->GetType());
       err_message += "', rhs='";
@@ -342,12 +340,25 @@ CTableEntry * ASTNodeMath2::CompileTubeIC(CSymbolTable & table, ICArray & ica)
   int i1 = in1->GetVarID();
   int i2 = in2->GetVarID();
   int o3 = outVar->GetVarID();
+  int size;
 
-  // Determine the correct operation...  
-  if (mMathOp == '+') { ica.Add("add", i1, i2, o3); }
-  else if (mMathOp == '-') { ica.Add("sub",  i1, i2, o3); }
-  else if (mMathOp == '*') { ica.Add("mult", i1, i2, o3); }
-  else if (mMathOp == '/') { ica.Add("div",  i1, i2, o3); }
+  // Determine the correct operation...
+  if (mMathOp == '+') {
+      ica.Add("add", i1, i2, o3);
+      size = in1->GetSize() + in2->GetSize();
+  }
+  else if (mMathOp == '-') {
+      ica.Add("sub",  i1, i2, o3);
+      size = in1->GetSize() - in2->GetSize();
+  }
+  else if (mMathOp == '*') {
+      ica.Add("mult", i1, i2, o3);
+      size = in1->GetSize() * in2->GetSize();
+  }
+  else if (mMathOp == '/') {
+      ica.Add("div",  i1, i2, o3);
+      size = in1->GetSize() / in2->GetSize();
+  }
   else if (mMathOp == '%') { ica.Add("mod",  i1, i2, o3); }
   else if (mMathOp == COMP_EQU)  { ica.Add("test_equ",  i1, i2, o3); }
   else if (mMathOp == COMP_NEQU) { ica.Add("test_nequ", i1, i2, o3); }
@@ -362,6 +373,9 @@ CTableEntry * ASTNodeMath2::CompileTubeIC(CSymbolTable & table, ICArray & ica)
   // Cleanup symbol table.
   if (in1->GetTemp() == true) table.RemoveEntry( in1 );
   if (in2->GetTemp() == true) table.RemoveEntry( in2 );
+
+  outVar->SetNegative(size < 0);
+  outVar->SetSize(size);
 
   return outVar;
 }
@@ -396,7 +410,7 @@ CTableEntry * ASTNodeBool2::CompileTubeIC(CSymbolTable & table, ICArray & ica)
   // Convert the first answer to a 0 or 1 and put it in outVar.
   ica.Add("test_nequ", in1->GetVarID(), "0", outVar->GetVarID());
 
-  // Determine the correct operation for short-circuiting...  
+  // Determine the correct operation for short-circuiting...
   if (mBoolOp == '&') {
     ica.Add("jump_if_0", outVar->GetVarID(), end_label, -1, "AND!");
   }
@@ -645,17 +659,17 @@ CTableEntry * ASTNodePrint::CompileTubeIC(CSymbolTable & table, ICArray & ica)
     if (cur_var->GetTemp() == true) table.RemoveEntry( cur_var );
   }
   ica.Add("out_char", "'\\n'", -1, -1, "End print statements with a newline.");
-  
+
   return NULL;
 }
 
 /////////////////////////
 // ASTNodeIndex
 
-ASTNodeIndex::ASTNodeIndex(CTableEntry * array, ASTNode * index) 
-    : ASTNode(array->GetType()), mArray(array) 
+ASTNodeIndex::ASTNodeIndex(CTableEntry * array, ASTNode * index, bool debug)
+    : ASTNode(array->GetType()), mArray(array)
 {
-  
+
   int indexType = index->GetType();
   if( indexType != Type::INT  )
     {
@@ -663,10 +677,11 @@ ASTNodeIndex::ASTNodeIndex(CTableEntry * array, ASTNode * index)
       yyerror(errString);
       exit(1);
     }
-  mIndex = index; 
+  mIndex = index;
+  mIndex->SetDebug(debug);
 
-  int idType = array->GetType();           
-  if (idType != Type::INT_ARRAY && idType != Type::CHAR_ARRAY) 
+  int idType = array->GetType();
+  if (idType != Type::INT_ARRAY && idType != Type::CHAR_ARRAY)
   {
     std::string errString = "cannot index into a non-array type";
     yyerror(errString);
@@ -680,37 +695,48 @@ ASTNodeIndex::ASTNodeIndex(CTableEntry * array, ASTNode * index)
   else
   {
     mType = Type::CHAR;
-  } 
+  }
 }
 
 CTableEntry * ASTNodeIndex::CompileTubeIC(CSymbolTable & table, ICArray & ica)
-{ 
+{
   CTableEntry * index = mIndex->CompileTubeIC(table, ica);
   CTableEntry * outVar = table.AddTempEntry(mType);
-  
+  if (mIndex->GetDebug()==true)
+  {
+    //std::cout << mArray->GetSize();
+    if (index->GetSize() > mArray->GetSize()-1)
+    {
+      std::string errString = "index out-of-bounds";
+      yyerror(errString);
+      exit(1);
+    }
+  }
+
   int i2 = mArray->GetVarID();
   int o3 = outVar->GetVarID();
-  
+
   std::stringstream ss;
-  ss << index->GetVarID(); 
-  
+  ss << index->GetVarID();
+
   outVar->SetIndex(index);
   outVar->SetArray(mArray);
+  outVar->SetSize(1);
 
   ica.Add("ar_get_idx", mArray->GetVarID(), index->GetVarID(), o3);
-  
-  return outVar; 
+
+  return outVar;
 
 }
 
 /////////////////////////
 // ASTNodeSize
 
-ASTNodeSize::ASTNodeSize(CTableEntry * array) 
-    : ASTNode(Type::INT), mArray(array) 
+ASTNodeSize::ASTNodeSize(CTableEntry * array)
+    : ASTNode(Type::INT), mArray(array)
 {
-  int idType = array->GetType();           
-  if (idType != Type::INT_ARRAY && idType != Type::CHAR_ARRAY) 
+  int idType = array->GetType();
+  if (idType != Type::INT_ARRAY && idType != Type::CHAR_ARRAY)
   {
     std::string errString = "cannot get size of non-array type";
     yyerror(errString);
@@ -719,45 +745,53 @@ ASTNodeSize::ASTNodeSize(CTableEntry * array)
 }
 
 CTableEntry * ASTNodeSize::CompileTubeIC(CSymbolTable & table, ICArray & ica)
-{ 
+{
   CTableEntry * outVar = table.AddTempEntry(Type::INT);
-  
+  outVar->SetSize(mArray->GetSize());
+
   ica.Add("ar_get_size", mArray->GetVarID(), outVar->GetVarID());
-  
-  return outVar; 
+
+  return outVar;
 
 }
 
 /////////////////////////
 // ASTNodeResize
 
-ASTNodeResize::ASTNodeResize(CTableEntry * array, ASTNode *size) 
+ASTNodeResize::ASTNodeResize(CTableEntry * array, ASTNode *size, bool debug)
     : ASTNode(array->GetType()), mArray(array)
 {
-  int idType = array->GetType();           
-  if (idType != Type::INT_ARRAY && idType != Type::CHAR_ARRAY) 
-  {
+  int idType = array->GetType();
+  if (idType != Type::INT_ARRAY && idType != Type::CHAR_ARRAY) {
     std::string errString = "cannot get size of non-array type";
     yyerror(errString);
     exit(1);
   }
 
   int sizeType = size->GetType();
-  if( sizeType != Type::INT  )
-    {
+  if( sizeType != Type::INT ) {
       std::string errString = "argument one must be of type int";
       yyerror(errString);
       exit(1);
     }
+
   mSize = size;
+  mSize->SetDebug(debug);
 }
 
 CTableEntry * ASTNodeResize::CompileTubeIC(CSymbolTable & table, ICArray & ica)
-{ 
+{
   CTableEntry * size = mSize->CompileTubeIC(table, ica);
-
+  if ( mSize->GetDebug() ) {
+      if (size->GetNegative()) {
+          std::string errString = "invalid memory request";
+          yyerror(errString);
+          exit(1);
+      }
+  }
+  mArray->SetSize(size->GetSize());
   ica.Add("ar_set_size", mArray->GetVarID(), size->GetVarID());
-  
-  return NULL; 
+
+  return NULL;
 
 }
