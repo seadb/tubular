@@ -155,6 +155,7 @@ CTableEntry * ASTNodeLiteral::CompileTubeIC(CSymbolTable & table, ICArray & ica)
     ica.Add("val_copy", ss.str(), sizeVar->GetVarID());
     ica.Add("ar_set_size", outVar->GetVarID(), ss.str());
     outVar->SetSize(mLexeme.size());
+    outVar->SetContent(mLexeme);
     for(int i=0; i < mLexeme.size(); i++ ) {
       ss.str(""); ss.clear();
       ss << i; //convert the index to string
@@ -240,6 +241,7 @@ CTableEntry * ASTNodeAssign::CompileTubeIC(CSymbolTable & table,
   else if (mType == Type::INT_ARRAY || mType == Type::CHAR_ARRAY) {
     ica.Add("ar_copy", right->GetVarID(), left->GetVarID());
     left->SetSize(right->GetSize());
+    left->SetContent(right->GetContent());
   }
   // --- Add code to deal with other types of assignments here! ---
 
@@ -721,8 +723,9 @@ CTableEntry * ASTNodeIndex::CompileTubeIC(CSymbolTable & table, ICArray & ica)
 
   outVar->SetIndex(index);
   outVar->SetArray(mArray);
-  outVar->SetSize(1);
-
+  std::string array = mArray->GetContent();
+  int size = index->GetSize();
+  outVar->SetSize(array[size]);
   ica.Add("ar_get_idx", mArray->GetVarID(), index->GetVarID(), o3);
 
   return outVar;

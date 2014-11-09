@@ -49,7 +49,11 @@ private:
 
     virtual bool IsScalar() { return false; }
     virtual bool IsConst() { return false; }
-    //virtual bool IsArray() { return false; }
+    std::string As_String(char c){
+            std::stringstream temp;
+            temp << c;
+            return temp.str();
+    }
   };
 
   class ICArg_VarScalar : public ICArg_Base {

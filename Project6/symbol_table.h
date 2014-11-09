@@ -26,7 +26,7 @@ class CTableEntry {
   friend class CSymbolTable;
 protected:
   int mTypeID;       // What is the type of this variable?
-  std::string mName;  // Variable mName used by sourcecode.
+  std::string mName;  // Variable name used by sourcecode.
   int mScope;         // What mScope was this variable declared at?
   bool mIsTemp;      // Is this variable just temporary (internal to compiler)
   int mVarID;        // What is the intermediate code ID for this variable?
@@ -35,6 +35,7 @@ protected:
   CTableEntry * mArray; // Is there an array?
   int mSize;
   bool mNegative;
+  std::string mContent;
 
   CTableEntry(int inType)
     : mTypeID (inType)
@@ -45,6 +46,8 @@ protected:
     , mNext(NULL)
     , mIndex(NULL)
     , mArray(NULL)
+    , mSize(0)
+    , mNegative(false)
   {
   }
 
@@ -57,6 +60,8 @@ protected:
     , mNext(NULL)
     , mIndex(NULL)
     , mArray(NULL)
+    , mSize(0)
+    , mNegative(false)
   {
   }
   virtual ~CTableEntry() { ; }
@@ -72,6 +77,7 @@ public:
   CTableEntry * GetIndex() const { return mIndex;}
   CTableEntry * GetNext()  const { return mNext; }
   CTableEntry * GetArray() const { return mArray; }
+  std::string GetContent() const { return mContent; }
 
   void SetName(std::string inName)     { mName = inName; }
   void SetScope(int inScope)           { mScope = inScope; }
@@ -81,6 +87,7 @@ public:
   void SetNext(CTableEntry * inNext)   { mNext = inNext; }
   void SetIndex(CTableEntry * inIndex) { mIndex = inIndex; }
   void SetArray(CTableEntry * inArray ) { mArray = inArray;  }
+  void SetContent(std::string inContent) { mContent = inContent; }
 };
 
 
@@ -138,7 +145,7 @@ public:
         mTableMap[oldEntry->GetName()] = oldEntry->GetNext();
       }
 
-      // Otherwise just remove it from being an active variable mName.
+      // Otherwise just remove it from being an active variable name.
       else {
         mTableMap.erase(oldEntry->GetName());
       }
@@ -179,7 +186,7 @@ public:
     newEntry->SetVarID( GetNextID() );
     newEntry->SetScope(mCurrentScope);
 
-    // If an old entry exists by this mName, shadow it.
+    // If an old entry exists by this name, shadow it.
     CTableEntry * oldEntry = Lookup(inName);
     if (oldEntry) newEntry->SetNext(oldEntry);
 
