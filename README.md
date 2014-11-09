@@ -8,23 +8,11 @@ Sources:
 http://stackoverflow.com/questions/17015970/how-does-c-compiler-convert-escape-sequence-to-actual-bytes
 http://flex.sourceforge.net/manual/Start-Conditions.html
 
+Extra Credit Status:
+Debugging mode is implemented with both *index out-of-bounds* and *invalid memory request*
+
 Test Results
 ==========
-- [x] extra.00.tube
-- [x] extra.01.tube
-- [x] extra.02.tube
-- [x] extra.03.tube
-- [x] extra.04.tube
-- [x] fail.01.tube
-- [x] fail.02.tube
-- [x] fail.03.tube
-- [x] fail.04.tube
-- [x] fail.05.tube
-- [x] fail.06.tube
-- [x] fail.07.tube
-- [x] fail.08.tube
-- [x] fail.09.tube
-- [x] fail.10.tube
 - [x] good.01.tube
 - [x] good.02.tube
 - [x] good.03.tube
@@ -43,7 +31,18 @@ Test Results
 - [x] good.16.tube
 - [x] good.17.tube
 - [x] good.18.tube
-- [ ] good.999.tube
+- [x] good.19.tube
+- [x] good.999.tube
+- [x] fail.01.tube
+- [x] fail.02.tube
+- [x] fail.03.tube
+- [x] fail.04.tube
+- [x] fail.05.tube
+- [x] fail.06.tube
+- [x] fail.07.tube
+- [x] fail.08.tube
+- [x] fail.09.tube
+- [x] fail.10.tube
 
 Required Error Messages 
 ====================

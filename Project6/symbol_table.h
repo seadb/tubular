@@ -92,7 +92,7 @@ private:
   // Figure out the next memory position to use.  Ideally, we should be recycling these!!
   int GetNextID() { return mNextVarID++; }
 public:
-  CSymbolTable() : mCurrentScope(0), mNextVarID(0), mNextLabelID(0) { 
+  CSymbolTable() : mCurrentScope(0), mNextVarID(1), mNextLabelID(0) { 
     mScopeInfo.push_back(new std::vector<CTableEntry *>);
   }
   ~CSymbolTable() {

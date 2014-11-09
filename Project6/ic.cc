@@ -3,27 +3,175 @@
  * BEGIN ICEntry
  *****************************************/
 
-
+bool first_run = true;
+int label_num = 0;
 
 void ICEntry::PrintIC(std::ostream & ofs)
 {
-  //std::stringstream out_line;
+  if(first_run) {
+    ofs << "  store " << mArray->static_memory_size << " 0" << std::endl;
+    first_run = false;
+  }
 
-  std::cout << "PRINT IC" << std::endl;
   // If there is a label, include it in the output.
-  if (label != "") { ofs << label << ": "; }
+  if (label != "") {
+    ofs << label << ": " << std::endl << "  nop" << std::endl;
+  }
 
   if (mInst != "") {
-    if(mInst == "val_copy"){
-
-      args[0]->AssemblyRead(ofs,"1",'A');
-      ofs << "  val_copy " << 1 << " " << args[0]->GetReg() << std::endl;
-      args[0]->AssemblyWrite(ofs,"1",'C');
+    // Print intermediate code as comment
+    std::stringstream out_line;
+    out_line << '#' << mInst << " ";
+    for (int i = 0; i < (int) args.size(); i++) {
+      out_line << args[i]->AsString() << " ";
     }
-    //out_line << mInst << " ";
-    //for (int i = 0; i < (int) args.size(); i++) {
-      //out_line << args[i]->GetReg() << " ";
-    //}
+    ofs << out_line.str() << std::endl;
+
+    if(mInst == "val_copy"){
+      args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
+      ofs << "  val_copy " << args[0]->AsAssemblyString() << " regB" << std::endl;
+      args[1]->AssemblyWrite(ofs, args[1]->GetID(), 'B');
+    }
+
+    else if(mInst == "add" || mInst == "sub" || mInst == "mult" ||
+            mInst == "div" || mInst == "mod" || mInst == "test_less" ||
+            mInst == "test_gtr" || mInst == "test_equ" ||
+            mInst == "test_nequ" || mInst == "test_lte" ||
+            mInst == "test_lte" || mInst == "test_gte") {
+      args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
+      args[1]->AssemblyRead(ofs, args[1]->GetID(), 'B');
+      ofs << "  " << mInst << " " << args[0]->AsAssemblyString() << " ";
+      ofs <<  args[1]->AsAssemblyString() << " regC" << std::endl;
+      args[2]->AssemblyWrite(ofs, args[2]->GetID(), 'C');
+    }
+    else if(mInst == "jump" || mInst == "out_int" || mInst == "out_char") {
+      args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
+      ofs << "  " << mInst << " " << args[0]->AsAssemblyString() << " " << std::endl;
+    }
+    else if(mInst == "jump_if_0" || mInst == "jump_if_n0") {
+      args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
+      args[1]->AssemblyRead(ofs, args[1]->GetID(), 'A');
+      ofs << "  " << mInst << " " << args[0]->AsAssemblyString() << " ";
+      ofs <<  args[1]->AsAssemblyString() << std::endl;
+    }
+    else if(mInst == "random") {
+      args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
+      ofs << "  " << mInst << " " << args[0]->AsAssemblyString() << " ";
+      ofs << args[1]->AsAssemblyString() << " regB" << std::endl;
+      args[1]->AssemblyWrite(ofs, args[1]->GetID(), 'B');
+    }
+    else if(mInst == "nop") {
+      ofs << "  nop" << std::endl;
+    }
+    else if(mInst == "push") {
+      args[0]->AssemblyRead(ofs, args[0]->GetID(), 'A');
+      ofs << "  " << mInst << " " << args[0]->AsAssemblyString();
+    }
+    else if(mInst == "pop") {
+      ofs << "  " << mInst << " regA" << std::endl;
+      args[0]->AssemblyWrite(ofs, args[0]->GetID(), 'A');
+    }
+    else if(mInst == "ar_get_idx" || mInst == "ar_set_idx") {
+      ofs << "  load " << args[0]->GetID() << " regA" << std::endl;
+      args[1]->AssemblyRead(ofs, args[1]->GetID(), 'B');
+      ofs << "  add regA 1 regA" << std::endl;
+      ofs << "  add regA " << args[1]->AsAssemblyString() << " regA" << std::endl;
+      if(mInst == "ar_get_idx") {
+        ofs << "  mem_copy regA " << args[2]->GetID() << std::endl;
+      }
+      else {
+        if(args[2]->IsScalar()) {
+          ofs << "  mem_copy " << args[2]->GetID() << " regA" << std::endl;
+        }
+        else {
+          ofs << "  val_copy " << args[2]->AsString() << " regC" << std::endl;
+          ofs << "  store regC regA" << std::endl;
+        }
+      }
+    }
+    else if(mInst == "ar_get_size") {
+      ofs << "  load " << args[0]->GetID() << " regA" << std::endl;
+      ofs << "  mem_copy regA " << args[1]->GetID() << std::endl;
+    }
+    else if(mInst == "ar_set_size") {
+      ofs << "  load " << args[0]->GetID() << " regA" << std::endl;
+      if(args[1]->IsScalar()) {
+        ofs << "  load " << args[1]->GetID() << " regB" << std::endl;
+      }
+      else {
+        ofs << "  val_copy " << args[1]->AsString() << " regB" << std::endl;
+      }
+      ofs << "  jump_if_0 regA do_resize" << label_num << std::endl;
+      ofs << "  load regA regC" << std::endl;
+      ofs << "  store regB regA" << std::endl;
+      ofs << "  test_lte regB regC regD" << std::endl;
+      ofs << "  jump_if_n0 regD resize_end_" << label_num + 1 << std::endl;
+      ofs << "do_resize" << label_num << ":" << std::endl;
+      ofs << "  load 0 regD" << std::endl;
+      ofs << "  add regD 1 regE" << std::endl;
+      ofs << "  add regE regB regE" << std::endl;
+      ofs << "  store regE 0" << std::endl;
+      ofs << "  store regD " << args[0]->GetID() << std::endl;
+      ofs << "  store regB regD" << std::endl;
+      ofs << "resize_start_" << label_num++ << ":" << std::endl;
+      ofs << "  add regA 1 regA" << std::endl;
+      ofs << "  add regD 1 regD" << std::endl;
+      ofs << "  test_gtr regD regE regF" << std::endl;
+      ofs << "  jump_if_n0 regF resize_end_" << label_num << std::endl;
+      ofs << "  mem_copy regA regD" << std::endl;
+      ofs << "  jump resize_start_" << label_num - 1 << std::endl;
+      ofs << "resize_end_" << label_num++ << ":" << std::endl;
+      ofs << "  nop" << std::endl;
+    }
+    else if(mInst == "ar_copy") {
+      // Set size
+      ofs << "  load " << args[0]->GetID() << " regA" << std::endl;
+      ofs << "  load regA regB" << std::endl;
+      ofs << "  load " << args[1]->GetID() << " regA" << std::endl;
+      ofs << "  jump_if_0 regA do_resize" << label_num << std::endl;
+      ofs << "  load regA regC" << std::endl;
+      ofs << "  store regB regA" << std::endl;
+      ofs << "  test_lte regB regC regD" << std::endl;
+      ofs << "  jump_if_n0 regD resize_end_" << label_num + 1 << std::endl;
+      ofs << "do_resize" << label_num << ":" << std::endl;
+      ofs << "  load 0 regD" << std::endl;
+      ofs << "  add regD 1 regE" << std::endl;
+      ofs << "  add regE regB regE" << std::endl;
+      ofs << "  store regE 0" << std::endl;
+      ofs << "  store regD " << args[1]->GetID() << std::endl;
+      ofs << "  store regB regD" << std::endl;
+      ofs << "resize_start_" << label_num++ << ":" << std::endl;
+      ofs << "  add regA 1 regA" << std::endl;
+      ofs << "  add regD 1 regD" << std::endl;
+      ofs << "  test_gtr regD regE regF" << std::endl;
+      ofs << "  jump_if_n0 regF resize_end_" << label_num << std::endl;
+      ofs << "  mem_copy regA regD" << std::endl;
+      ofs << "  jump resize_start_" << label_num - 1 << std::endl;
+      ofs << "resize_end_" << label_num++ << ":" << std::endl;
+      ofs << "  nop" << std::endl;
+
+      // Copy contents
+      ofs << "  load " << args[0]->GetID() << " regA" << std::endl;
+      ofs << "  load " << args[1]->GetID() << " regB" << std::endl;
+      ofs << "  load regA regC" << std::endl;
+      //ofs << "  out_int regC" << std::endl;
+      ofs << "  add 1 regA regA" << std::endl;
+      ofs << "  add 1 regB regB" << std::endl;
+      ofs << "  val_copy 0 regD" << std::endl;
+      ofs << "copy_start" << label_num << ":" << std::endl;
+      //ofs << "  out_int regD" << std::endl;
+      //ofs << "  out_char '\\n'" << std::endl;
+      ofs << "  test_gte regD regC regE" << std::endl;
+      ofs << "  jump_if_n0 regE copy_end" << label_num << std::endl;
+      ofs << "  mem_copy regA regB" << std::endl;
+      ofs << "  add 1 regA regA" << std::endl;
+      ofs << "  add 1 regB regB" << std::endl;
+      ofs << "  add 1 regD regD" << std::endl;
+      ofs << "  jump copy_start" << label_num << std::endl;
+      ofs << "copy_end" << label_num << ":" << std::endl;
+      ofs << "  nop" << std::endl;
+    }
+
   }
 
   // If there is a comment, print it!

@@ -24,7 +24,9 @@
 #include <sstream>
 #include <vector>
 #include <map>
-
+#include <cstdlib>
+#include <cctype>
+#include <cstring>
 
 class ICArray ;
 
@@ -37,9 +39,11 @@ private:
     ICArg_Base() { ; }
     virtual ~ICArg_Base() { ; }
 
-    virtual void AssemblyRead(std::ostream & ofs, std::string lit, char reg) { }
-    virtual void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) { }
+    virtual void AssemblyRead(std::ostream & ofs, int lit, char reg) { }
+    virtual void AssemblyWrite(std::ostream & ofs, int lit, char reg) { }
 
+    virtual std::string AsString() = 0;
+    virtual std::string AsAssemblyString() = 0;
     virtual std::string GetReg() = 0;
     virtual int GetID() { return -1; }
 
@@ -56,21 +60,25 @@ private:
     ICArg_VarScalar(int _id) : mVarID(_id), mReg(""){ ; }
     ~ICArg_VarScalar() { ; }
 
-   std::string As_String(char c) { std::stringstream temp;
-                                 temp << c;  return temp.str(); }
-
-    void AssemblyRead(std::ostream & ofs, std::string lit, char reg) {
+    void AssemblyRead(std::ostream & ofs, int lit, char reg) {
       mReg = "reg" + As_String(reg);
       ofs << "  load " << lit << " reg" << As_String(reg) << std::endl;
     }
-    void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) {
-
-      ofs << "  store " << As_String(reg) << " " << lit << std::endl;
-
+    void AssemblyWrite(std::ostream & ofs, int lit, char reg) {
+      ofs << "  store reg" << As_String(reg) << " " << lit << std::endl;
     }
 
     std::string GetReg() {
-        return mReg;
+      return mReg;
+    }
+
+    std::string AsString() {
+      std::stringstream out_str;
+      out_str << "s" << mVarID;
+      return out_str.str();
+    }
+    std::string AsAssemblyString() {
+      return mReg;
     }
     int GetID() { return mVarID; }
 
@@ -85,9 +93,13 @@ private:
     ICArg_Const(std::string val) : mValue(val) { ; }
     ~ICArg_Const() { ; }
 
-    void AssemblyRead(std::ostream & ofs, std::string lit, char reg) { }
-    void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) {  }
+    void AssemblyRead(std::ostream & ofs, int lit, char reg) { }
+    void AssemblyWrite(std::ostream & ofs, int lit, char reg) {  }
 
+    std::string AsString() { return mValue; }
+    std::string AsAssemblyString() {
+      return mValue;
+    }
     std::string GetReg() { return mValue; }
 
     bool IsConst() { return true; }
@@ -101,9 +113,18 @@ private:
     ICArg_VarArray(int _id) : mVarID(_id) { ; }
     ~ICArg_VarArray() { ; }
 
-    void AssemblyRead(std::ostream & ofs, std::string lit, char reg){}
-    void AssemblyWrite(std::ostream & ofs, std::string lit, char reg) {  }
+    void AssemblyRead(std::ostream & ofs, int lit, char reg){}
+    void AssemblyWrite(std::ostream & ofs, int lit, char reg) {  }
 
+    std::string AsString() {
+      std::stringstream out_str;
+      out_str << "a" << mVarID;
+      return out_str.str();
+    }
+
+    std::string AsAssemblyString() {
+      return std::string(""); // Place holder!
+    }
     std::string GetReg() {
       std::stringstream out_str;
       out_str << "a" << mVarID;
@@ -172,6 +193,7 @@ private:
   void AddArg(ICEntry * entry, const std::string & in_arg, ArgType::type expected_type);
 
 public:
+  int static_memory_size;
   ICArray() : mMemPosition(1) {
     // Fill out the arg types for each mInstruction
     SetupArgs("val_copy",    ArgType::VALUE,  ArgType::SCALAR, ArgType::NONE);
