@@ -34,6 +34,7 @@ protected:
   CTableEntry * mIndex; // Is there an index associated with this var
   CTableEntry * mArray; // Is there an array?
   int mSize;
+  bool mNegative;
 
   CTableEntry(int inType)
     : mTypeID (inType)
@@ -67,6 +68,7 @@ public:
   bool GetTemp()           const { return mIsTemp; }
   int GetVarID()           const { return mVarID; }
   int GetSize()            const { return mSize; }
+  bool GetNegative()       const { return mNegative; }
   CTableEntry * GetIndex() const { return mIndex;}
   CTableEntry * GetNext()  const { return mNext; }
   CTableEntry * GetArray() const { return mArray; }
@@ -75,6 +77,7 @@ public:
   void SetScope(int inScope)           { mScope = inScope; }
   void SetVarID(int inID)              { mVarID = inID; }
   void SetSize(int inSize)             { mSize = inSize; }
+  void SetNegative(bool inNegative)        { mNegative = inNegative; }
   void SetNext(CTableEntry * inNext)   { mNext = inNext; }
   void SetIndex(CTableEntry * inIndex) { mIndex = inIndex; }
   void SetArray(CTableEntry * inArray ) { mArray = inArray;  }

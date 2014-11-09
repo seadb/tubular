@@ -174,23 +174,9 @@ literal:
              }
   |    STRING_LIT {
               std::string literal = $1;
-              bool good = (literal[0] == '"');
-              good = good && (literal[literal.size() - 1] == '"');
-              good = good && (literal[literal.size() - 2] != '\\');
-              for(int i = 1; i < literal.size() - 1; i++)
-              {
-                if(literal[i] == '"' && literal[i - 1] != '\\')
-                 good = false;
-              }
-              if(!good)
-                yyerror("Unterminated string.");
               $$ = new ASTNodeLiteral(Type::CHAR_ARRAY,
-                        literal.substr(1,literal.size()-2));
+              literal.substr(1,literal.size()-2));
               $$->SetLineNum(line_num);
-            }
-
-  |    UNTERM_STRING {
-            yyerror("Unterminated string.");
             }
 negative:    '-' expression %prec UMINUS {
                $$ = new ASTNodeMath1($2, '-');
@@ -202,90 +188,87 @@ not_:         '!' expression %prec UMINUS {
                $$->SetLineNum(line_num);
              }
 
-variable:   ID {
-                CTableEntry * cur_entry = symbol_table.Lookup($1);
-                if (cur_entry == NULL) {
-                  std::string errString = "unknown variable '";
-                  errString += $1;
-                  errString += "'";
-                  yyerror(errString);
-                  exit(1);
-                }
-                $$ = new ASTNodeVariable(cur_entry);
-                $$->SetLineNum(line_num);
-             }
-
-        |    ID '[' expression ']' {
-                CTableEntry * cur_entry = symbol_table.Lookup($1);
-                if (cur_entry == NULL)
-                {
-                  std::string errString = "unknown variable '";
-                  errString += $1;
-                  errString += "'";
-                  yyerror(errString);
-                  exit(1);
-                }
-
-                //$$ = new ASTNodeVariable(cur_entry);
-
-                $$ = new ASTNodeIndex(cur_entry,$3,debug);
-                $$->SetLineNum(line_num);
+ /* things in this section can be on the left hand side of assignment */
+variable:
+        ID {
+            CTableEntry * cur_entry = symbol_table.Lookup($1);
+            if (cur_entry == NULL) {
+              std::string errString = "unknown variable '";
+              errString += $1;
+              errString += "'";
+              yyerror(errString);
+              exit(1);
+            }
+            $$ = new ASTNodeVariable(cur_entry);
+            $$->SetLineNum(line_num);
         }
-                | expression '[' expression ']' {
-                int type_id = $1->GetType();
-                if(type_id!=Type::INT_ARRAY && type_id !=Type::CHAR_ARRAY)
-                {
-                  std::string type_str = Type::AsString($3->GetType());
-		  std::string errString = "array methods cannot be run on type  '";
-		  errString += type_str;
-		  errString += "'";
-		  yyerror(errString);
-		  exit(1);
-		}
+
+    |   ID '[' expression ']' {
+            CTableEntry * cur_entry = symbol_table.Lookup($1);
+            if (cur_entry == NULL)
+            {
+              std::string errString = "unknown variable '";
+              errString += $1;
+              errString += "'";
+              yyerror(errString);
+              exit(1);
+            }
+
+            $$ = new ASTNodeIndex(cur_entry,$3,debug);
+            $$->SetLineNum(line_num);
+        }
+    |   expression '[' expression ']' {
+            int type_id = $1->GetType();
+            if(type_id!=Type::INT_ARRAY && type_id !=Type::CHAR_ARRAY)
+            {
+              std::string type_str = Type::AsString($3->GetType());
+              std::string errString = "array methods cannot be run on type  '";
+              errString += type_str;
+              errString += "'";
+              yyerror(errString);
+              exit(1);
+            }
         }
 ;
 
 operation:
-       expression '+' expression {
+      expression '+' expression {
               $$ = new ASTNodeMath2($1, $3, '+');
               $$->SetLineNum(line_num);
-             }
-  |    expression '-' expression {
+      }
+  |   expression '-' expression {
               $$ = new ASTNodeMath2($1, $3, '-');
               $$->SetLineNum(line_num);
-             }
-  |    expression '*' expression {
+      }
+  |   expression '*' expression {
               $$ = new ASTNodeMath2($1, $3, '*');
               $$->SetLineNum(line_num);
-             }
-  |    expression '/' expression {
+      }
+  |   expression '/' expression {
               $$ = new ASTNodeMath2($1, $3, '/');
               $$->SetLineNum(line_num);
-             }
-  |    expression '%' expression {
+      }
+  |   expression '%' expression {
               $$ = new ASTNodeMath2($1, $3, '%');
               $$->SetLineNum(line_num);
-             }
-  |    '(' expression ')' { $$ = $2; } // Ignore parens used for order
+      }
+  |   '(' expression ')' { // ignore parenthesis used for order
+              $$ = $2;
+      }
 
-  |    COMMAND_RANDOM '(' expression ')'{
+  |   COMMAND_RANDOM '(' expression ')' {
               $$ = new ASTNodeRandom($3);
-             }
-  |   ID '.' SIZE '(' ')'
-  {
-  //These are in the wrong spot. things in this section
-  //should be for left side of the equation only
-  //id.size() = 3; is an invalid expression and should throw an error..
-
+      }
+  |   ID '.' SIZE '(' ')' {
           CTableEntry * cur_entry = symbol_table.Lookup($1);
-          if (cur_entry == NULL)
-          {
+          if (cur_entry == NULL) {
             std::string errString = "unknown variable '";
             errString += $1;
             errString += "'";
             yyerror(errString);
             exit(1);
           }
+
           $$ = new ASTNodeSize(cur_entry);
       }
   |   ID '.' RESIZE '(' expression ')' {
@@ -298,7 +281,7 @@ operation:
             yyerror(errString);
             exit(1);
           }
-          $$ = new ASTNodeResize(cur_entry, $5);
+          $$ = new ASTNodeResize(cur_entry, $5, debug);
       }
   |   ID '.' ID '(' ')' {
           std::string errString = "unknown method '";
@@ -306,14 +289,14 @@ operation:
           errString += "'";
           yyerror(errString);
           exit(1);
-          }
+      }
   |   ID '.' ID '(' expression ')' {
           std::string errString = "unknown method '";
           errString += $3;
           errString += "'";
           yyerror(errString);
           exit(1);
-          }
+      }
 
  /* |    expression '?' expression ':' expression {}
   }

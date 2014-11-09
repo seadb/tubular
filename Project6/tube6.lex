@@ -16,22 +16,19 @@ char string_buf[1000];
 char *string_buf_ptr;
 bool debug = false;
 %}
-
+%x str
 %option nounput
 
-%x str
 
 type		int|char|string
 id	        [_a-zA-Z][a-zA-Z0-9_]*
 int_lit         [0-9]+
 char_lit        '(.|(\\[\\'nt]))'
-string_lit      \"(.|\n\t|(\\[\\nt]))*\"
+string_lit      \"(.|\n\t|(\\["\\nt]))*\"
 comment		#.*
 whitespace	[ \t\r]
 passthrough	[+\-*/%=(),!{}[\].;]
 
-  //unterminated_string    \"(.|\n\t|(\\[\\"nt]))*
-  //{unterminated_string} {yylval.lexeme = strdup(yytext);  return UNTERM_STRING; }
 %%
 
 "print" { return COMMAND_PRINT; }
@@ -72,8 +69,9 @@ passthrough	[+\-*/%=(),!{}[\].;]
 \n  { line_num++; }
 
 
-
-\"      string_buf_ptr = string_buf; BEGIN(str);
+                 char string_buf[MAX_STR_CONST];
+                 char *string_buf_ptr;
+\"               string_buf_ptr = string_buf; BEGIN(str);
 
 <str>\"        { /* saw closing quote - all done */
                 BEGIN(INITIAL);
@@ -85,7 +83,7 @@ passthrough	[+\-*/%=(),!{}[\].;]
 
 <str>\n|;   {
               std::cout << "ERROR(line " << line_num <<
-              "): Unterminated string." << std::endl; exit(1);
+              "): Unterminated string. lex" << std::endl; exit(1);
                /* error - unterminated string constant */
                /* generate error message */
             }
@@ -139,19 +137,21 @@ void LexMain(int argc, char * argv[])
     std::string cur_arg(argv[arg_id]);
 
     if (cur_arg == "-h") {
-      std::cout << "Tubular Compiler v. 0.4 (Project 4)"  << std::endl
-           << "Format: " << argv[0] << "[flags] [filemName]" << std::endl
+      std::cout << std::endl
+           << "Tubular Compiler v. 0.6 (Project 6)"  << std::endl
+           << "Format: " << argv[0]
+           << " [flags] [input filename] [output filename]"
+           << std::endl
            << std::endl
            << "Available Flags:" << std::endl
            << "  -h  :  Help (this information)" << std::endl
-           << "  -d  :  Debug Mode" << std::endl
+           << "  -d  :  Debug Mode" << std::endl << std::endl
         ;
       exit(0);
     }
 
     // PROCESS OTHER ARGUMENTS HERE IF YOU ADD THEM
     if (cur_arg == "-d") {
-        std::cout << "Debug mode" << std::endl;
         debug = true;
         continue;
     }

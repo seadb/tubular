@@ -1,9 +1,10 @@
 #ifndef AST_H
 #define AST_H
 
-////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //
-//  The classes in this file hold info about the nodes that form the Abstract Syntax Tree (AST)
+//  The classes in this file hold info about the nodes that form the Abstract
+//                                                             Syntax Tree (AST)
 //
 //  ASTNode : The base class for all of the others, with useful virtual functions.
 //
@@ -11,14 +12,18 @@
 //  ASTNodeBlock : Blocks of statements, including the overall program.
 //  ASTNodeVariable : Leaf node containing a variable.
 //  ASTNodeLiteral : Leaf node contiaing a literal value.
-//  ASTNodeAssign : Assignements
+//  ASTNodeAssign : Assignments
 //  ASTNodeMath1 : One-input math operations (unary '-' and '!')
-//  ASTNodeMath2 : Two-input math operations ('+', '-', '*', '/', '%', and comparisons)
+//  ASTNodeMath2 : Two-input math operations ('+', '-', '*', '/', '%', compare)
 //  ASTNodeBool2 : Two-input bool operations ('&&' and '||')
-//  ASTNodeIf : If-conditional node.
+//  ASTNodeIf    : If-conditional node.
 //  ASTNodeWhile : While-loop node.
 //  ASTNodeBreak : Break node
 //  ASTNodePrint : Print command
+//  ASTNodeRandom : Random command
+//  ASTNodeIndex : Indexing into an array
+//  ASTNodeSize  : The size method of array
+//  ASTNodeResize : Resize method of array
 //
 
 #include <iostream>
@@ -33,7 +38,7 @@
 class ASTNode {
 protected:
   int mType;                         // What type should this node pass up?
-  int mLineNum;                     // What line of the source program generated this node?
+  int mLineNum;         // What line of the source program generated this node?
   std::vector<ASTNode *> mChildren;  // What sub-trees does this node have?
   bool mDebug;
 
@@ -46,7 +51,7 @@ public:
 
   int GetType()              { return mType; }
   int GetLineNum()           { return mLineNum; }
-  int GetDebug()             { return mDebug; }
+  bool GetDebug()            { return mDebug; }
   ASTNode * GetChild(int id) { return mChildren[id]; }
   int GetNumChildren()       { return mChildren.size(); }
 
@@ -113,7 +118,7 @@ class ASTNodeResize : public ASTNode {
     CTableEntry * mArray;
     ASTNode * mSize;
   public:
-    ASTNodeResize(CTableEntry * entry, ASTNode *size);
+    ASTNodeResize(CTableEntry * entry, ASTNode *size, bool debug);
     CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
 
@@ -127,13 +132,7 @@ public:
   ASTNodeLiteral(int in_type, char * in_char);
   CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
 };
-/*
-class ASTNodeArray : public ASTNode {
-  public:
-    ASTNodeArray(std::string in_array);
-    ASTNodeArray(int * in_array);
-    CTableEntry * CompileTubeIC(CSymbolTable & table, ICArray & ica);
-}*/
+
 // Math...
 
 class ASTNodeAssign : public ASTNode {
