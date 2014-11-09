@@ -232,6 +232,7 @@ CTableEntry * ASTNodeAssign::CompileTubeIC(CSymbolTable & table,
       index << left->GetIndex();
       //ica.Add("ar_copy", right->GetVarID(), left->GetVarID());
       ica.Add("ar_set_idx", left->GetArray()->GetVarID(), left->GetIndex()->GetVarID(), right->GetVarID());
+      left->SetSize(right->GetSize());
     }
     else {
       ica.Add("val_copy", right->GetVarID(), left->GetVarID());
@@ -692,7 +693,6 @@ ASTNodeIndex::ASTNodeIndex(CTableEntry * array, ASTNode * index, bool debug)
   else if( idType == Type::INT_ARRAY)
   {
     mType = Type::INT;
-
   }
   else
   {
@@ -725,6 +725,7 @@ CTableEntry * ASTNodeIndex::CompileTubeIC(CSymbolTable & table, ICArray & ica)
   outVar->SetArray(mArray);
   std::string array = mArray->GetContent();
   int size = index->GetSize();
+  std::cout << "element: " << array;
   outVar->SetSize(array[size]);
   ica.Add("ar_get_idx", mArray->GetVarID(), index->GetVarID(), o3);
 
