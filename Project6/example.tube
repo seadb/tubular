@@ -1,0 +1,5 @@
+array(int) num;
+num.resize(1);
+num[0] = 5;
+array(char) str = "hello";
+str[num[0]];
