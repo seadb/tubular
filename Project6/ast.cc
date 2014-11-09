@@ -725,7 +725,7 @@ CTableEntry * ASTNodeIndex::CompileTubeIC(CSymbolTable & table, ICArray & ica)
   outVar->SetArray(mArray);
   std::string array = mArray->GetContent();
   int size = index->GetSize();
-  std::cout << "element: " << array;
+  //std::cout << "element: " << array;
   outVar->SetSize(array[size]);
   ica.Add("ar_get_idx", mArray->GetVarID(), index->GetVarID(), o3);
 
