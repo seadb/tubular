@@ -1,0 +1,186 @@
+# Adaptation of public domain program pi8.c by Carey Bloodworth
+
+# The variable pi_size contains the number of digits of pi to calculate.
+# The default is 1000 digits, but there is no limit.
+# However, after 4000 digits, the accuracy of the calculation 
+# may be limited by the size of integer used in the interpreter.
+
+int pi_size = 100;
+int BASE = 100;
+int BASEDIGITS = 2;
+array(int) pi;
+array(int) powers;
+array(int) term;
+int x;
+int reg_size;
+
+define array(int) array_zeros ( int ar_siz ) {
+    array(int) ar_to_fill;
+    ar_to_fill.resize(ar_siz);
+    int fz = 0;
+    while (fz < ar_siz) {
+        ar_to_fill[fz] = 0;
+        fz += 1;
+    }
+    return ar_to_fill;
+}
+
+define int print_array ( array(int) ar_to_print, int num_blocks ) {
+
+    string digs = "0123456789";
+    string line_blk = "                                                                                ";
+    int c1;
+    int c2;
+    int c3;
+
+    print "PI = 3.";
+
+    num_blocks-=1;
+    c3 = 1;
+    while (c3 < num_blocks) {
+        line_blk = "                                                                                ";
+        c2 = 0;
+        c1 = 0;
+        while ( c2 < 40 && c3 < num_blocks ) {
+    	    line_blk[c1] = digs[(ar_to_print[c3] / 10)];
+    	    line_blk[c1 + 1] = digs[(ar_to_print[c3] % 10)]; 
+    	    c1 += 2;
+	    c2 += 1;
+    	    c3 += 1;
+        }
+        print line_blk;
+    }
+
+    return 1;
+}
+
+define int arctan ( int multiplier, int denom, int sign ) {
+
+    int remain; 
+    int temp;
+    int divisor;
+    int denom2;
+    int NotZero = 1;
+    int adv;
+    int carry;
+    int borrow;
+    int sum;
+    int y;
+
+    powers = array_zeros ( reg_size );
+
+    divisor = 1;
+    denom2 = denom;
+    denom2 *= denom2;
+    adv = 0;
+
+    remain = multiplier * denom;
+    while (NotZero)
+    {
+        y = adv;
+        while (y < reg_size) {
+            temp = powers[y] + remain;
+            powers[y] = temp / denom2;
+            remain = (temp - (denom2 * powers[y])) * BASE;
+            y += 1;
+        }
+
+        remain = 0;
+        y = adv;
+        while (y < reg_size) {
+            temp = powers[y] + remain;
+            term[y] = temp / divisor;
+            remain = (temp - (divisor * term[y])) * BASE;
+            y += 1;
+        }
+        remain = 0;
+
+        if (sign > 0)
+        {
+            carry = 0;
+            y = reg_size - 1;
+            while (y >=0) {
+
+                sum = pi[y] + term[y] + carry;
+
+                carry = 0;
+                if (sum >= BASE)
+                {
+                    carry = 1;
+                    sum -= BASE;
+                }
+                pi[y] = sum;
+
+                y -= 1;
+            }
+        }
+        else
+        {
+            borrow = 0;
+
+            y = reg_size - 1;
+            while (y >=0) {
+
+                sum = pi[y] - term[y] - borrow;
+
+                borrow = 0;
+                if (sum < 0)
+                {
+                    borrow = 1;
+                    sum += BASE;
+                }
+                pi[y] = sum;
+
+                y -= 1;
+            }
+        }
+
+        sign = -sign;
+        divisor += 2;
+        NotZero = 0;
+        y = adv;
+
+        while (y < reg_size) {
+            if (powers[y])
+            {
+                NotZero = 1;
+                break;
+            }
+            y += 1;
+        }
+
+        if (NotZero)
+        {
+            while (powers[adv] == 0) {
+		adv += 1;
+	    }
+        }
+        # We can skip ones that are already 0
+
+    }
+    return 0;
+}
+
+
+if (pi_size > 100) print "\nCalculating ", pi_size, " digits of pi.  It may take a few seconds.\n";
+
+reg_size = ((pi_size + 2*BASEDIGITS - 1) / BASEDIGITS) + 1;
+
+pi.resize(reg_size);
+powers.resize(reg_size);
+term.resize(reg_size);
+
+pi = array_zeros ( reg_size );
+
+# Machin formula
+x = arctan(16, 5, 1);
+
+if (pi_size > 200) print "Still calculating...\n";
+
+x = arctan(4, 239, -1);
+
+
+# Print(pi);
+
+x = print_array ( pi, reg_size );
+

@@ -1,0 +1,7 @@
+# Function is called matching declare, but then define is a mis-match.
+
+declare int fail6();
+
+print fail6();
+
+define int fail6(int x) { return 2 * x; }

@@ -1,0 +1,205 @@
+# Adaptation of public domain program pi8.c by Carey Bloodworth
+
+# The variable pi_size contains the number of digits of pi to calculate.
+# The default is 1000 digits, but there is no limit.
+# However, after 4000 digits, the accuracy of the calculation 
+# may be limited by the size of integer used in the interpreter.
+
+int pi_size = 100;
+int BASE = 100;
+int BASEDIGITS = 2;
+array(int) pi;
+array(int) powers;
+array(int) term;
+int x;
+int reg_size;
+
+if (pi_size > 100) print "\nCalculating ", pi_size, " digits of pi.  It may take a few seconds.\n";
+
+reg_size = ((pi_size + 2*BASEDIGITS - 1) / BASEDIGITS) + 1;
+
+pi.resize(reg_size);
+powers.resize(reg_size);
+term.resize(reg_size);
+
+x = 0;
+while (x < reg_size) {
+    pi[x] = 0;
+    x += 1;
+}
+
+# Machin formula
+# arctan(16, 5, 1);
+# arctan(4, 239, -1);
+
+int multiplier;
+int denom;
+int sign;
+
+int remain; 
+int temp;
+int divisor;
+int denom2;
+int NotZero;
+int adv;
+int carry;
+int borrow;
+int sum;
+int arctan = 0;
+while ( arctan < 2 ){
+    if ( arctan == 0 ){
+        multiplier = 16;
+        denom = 5;
+        sign = 1;
+    }
+    else {
+        multiplier = 4;
+        denom = 239;
+        sign = -1;
+    }
+
+    x = 0;
+    while (x < reg_size) {
+        powers[x] = 0;
+        x += 1;
+    }
+
+    NotZero = 1;
+    divisor = 1;
+    denom2 = denom;
+    denom2 *= denom2;
+    adv = 0;
+
+    remain = multiplier * denom;
+    while (NotZero)
+    {
+        x = adv;
+        while (x < reg_size) {
+            temp = powers[x] + remain;
+            powers[x] = temp / denom2;
+            remain = (temp - (denom2 * powers[x])) * BASE;
+            x += 1;
+        }
+
+        remain = 0;
+        x = adv;
+        while (x < reg_size) {
+            temp = powers[x] + remain;
+            term[x] = temp / divisor;
+            remain = (temp - (divisor * term[x])) * BASE;
+            x += 1;
+        }
+        remain = 0;
+
+        if (sign > 0)
+        {
+            carry = 0;
+            x = reg_size - 1;
+            while (x >=0) {
+
+                sum = pi[x] + term[x] + carry;
+
+                carry = 0;
+                if (sum >= BASE)
+                {
+                    carry = 1;
+                    sum -= BASE;
+                }
+                pi[x] = sum;
+
+                x -= 1;
+            }
+        }
+        else
+        {
+            borrow = 0;
+
+            x = reg_size - 1;
+            while (x >=0) {
+
+                sum = pi[x] - term[x] - borrow;
+
+                borrow = 0;
+                if (sum < 0)
+                {
+                    borrow = 1;
+                    sum += BASE;
+                }
+                pi[x] = sum;
+
+                x -= 1;
+            }
+        }
+
+        sign = -sign;
+        divisor += 2;
+        NotZero = 0;
+        x = adv;
+
+        while (x < reg_size) {
+            if (powers[x])
+            {
+                NotZero = 1;
+                break;
+            }
+            x += 1;
+        }
+
+        if (NotZero)
+        {
+            while (powers[adv] == 0) {
+		adv += 1;
+	    }
+        }
+        # We can skip ones that are already 0
+
+    }
+    arctan += 1;
+
+    if (arctan == 1 && pi_size > 200) print "Still calculating...\n";
+}
+
+#      Print(pi);
+
+array(char) digs;
+digs.resize(10);
+digs[0]='0';
+digs[1]='1';
+digs[2]='2';
+digs[3]='3';
+digs[4]='4';
+digs[5]='5';
+digs[6]='6';
+digs[7]='7';
+digs[8]='8';
+digs[9]='9';
+
+array(char) line_blk;
+line_blk.resize(80);
+int c1;
+int c2;
+
+print "PI = 3.";
+
+reg_size-=1;
+x = 1;
+while (x < reg_size) {
+    c1 = 0;
+    while (c1 < 80) {
+    	line_blk[c1] = ' ';
+    	c1 += 1;
+    }
+    c2 = 0;
+    c1 = 0;
+    while ( c2 < 40 && x < reg_size ) {
+    	line_blk[c1] = digs[(pi[x] / 10)];
+    	line_blk[c1 + 1] = digs[(pi[x] % 10)]; 
+    	c1 += 2;
+	c2 += 1;
+    	x += 1;
+    }
+    print line_blk;
+}
+
+
+

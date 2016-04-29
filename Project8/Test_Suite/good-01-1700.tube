@@ -1,0 +1,9 @@
+# Simple test of declare
+
+declare int TestFun(int a);
+
+print TestFun(12);
+
+define int TestFun(int a) {
+  return a * 2;
+}

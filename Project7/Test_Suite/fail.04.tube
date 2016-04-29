@@ -1,0 +1,7 @@
+# A return outside of a function.
+
+define int Fail4(int x) {
+  return x + x/2;
+}
+
+return 7;

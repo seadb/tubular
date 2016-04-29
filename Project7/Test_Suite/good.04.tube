@@ -1,0 +1,9 @@
+# Testing expression in function call and
+# printing straight from functions.
+
+define int Good(int x) {
+  return x % 2;
+}
+
+int t = 16;
+print Good(21+t%3);

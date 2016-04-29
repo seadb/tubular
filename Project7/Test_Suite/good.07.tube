@@ -1,0 +1,17 @@
+# Testing functions with multiple arguments and functions that return arrays.
+
+define array(int) Fill(int value, int array_size) {
+  array(int) temp;
+  temp.resize(array_size);
+
+  int i = 0;
+  while (i < array_size) {
+    temp[i] = value;
+    i += 1;
+  }
+
+  return temp;
+}
+
+array(int) x = Fill(7, 20);
+print x;

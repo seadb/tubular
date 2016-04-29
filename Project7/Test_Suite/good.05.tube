@@ -1,0 +1,12 @@
+# Testing one function calling another (but no actual recursion)
+
+define int Good4(int x) {
+  return x * 4;
+}
+
+define int Good5(int y) {
+  return Good4(y);
+}
+
+print Good5(25);
+

@@ -1,0 +1,6 @@
+# Fail because function is used before defined
+int x = fail1(4);
+
+define int fail1(int a) {
+ return a + 1;
+}

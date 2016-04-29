@@ -1,0 +1,6 @@
+# Testing functions all on one line without braces.
+
+define int Good(int x) return x / 2;
+
+int value = Good(72);
+print value;

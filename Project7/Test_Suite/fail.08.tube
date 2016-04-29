@@ -1,0 +1,7 @@
+# Incorrect arg type.
+
+define int Fail8(int a, int b) {
+  return a+b;
+}
+
+print Fail8('a',3);

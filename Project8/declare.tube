@@ -1,0 +1,10 @@
+declare int sum(int arg1, int arg2);
+
+int first = 22;
+int second = 10;
+print( sum(first, second) );
+
+define int sum(int arg1, int arg2) {
+  return arg1 + arg2;
+}
+

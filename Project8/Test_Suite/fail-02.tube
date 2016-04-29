@@ -1,0 +1,7 @@
+# Should fail due to mis-match argument between define and declare.
+
+declare int fail2(int x, string y);
+
+define int fail2(int x, int y) {
+  return x;
+}

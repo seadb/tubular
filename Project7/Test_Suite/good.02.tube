@@ -1,0 +1,9 @@
+# Basic test of functions...
+
+define int Inc(int x) {
+  return x + 1;
+}
+
+int value = Inc(72);
+print value;
+

@@ -1,5 +1,7 @@
-tube6
+tube7
+example.tube
 *.tic
+*.tca
 *.output
 test_prev.sh
 *-lexer.cc

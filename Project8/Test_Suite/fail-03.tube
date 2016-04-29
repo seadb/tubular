@@ -1,0 +1,5 @@
+# Fail because function is never defined.
+
+declare int fail3(int x);
+
+int a = fail3(5);

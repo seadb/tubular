@@ -1,0 +1,8 @@
+# Testing functions without arguments.
+
+declare int good2();
+
+int x = good2();
+print x;
+
+define int good2() { return 17; }

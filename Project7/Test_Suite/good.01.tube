@@ -1,0 +1,5 @@
+# A simple test of define w/out even calling the function...
+
+define int Inc(int x) {
+  return x + 1;
+}

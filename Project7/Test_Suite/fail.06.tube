@@ -1,0 +1,7 @@
+# Incorrect arg count.
+
+define int Fail6(int a, int b) {
+  return a+b;
+}
+
+print Fail6(3);

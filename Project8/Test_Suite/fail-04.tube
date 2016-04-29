@@ -1,0 +1,7 @@
+# Fail because function define has more args than its declare.
+
+declare int fail4(int x);
+
+define int fail4(int x, int y) {
+  return x + y * 2;
+}

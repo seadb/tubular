@@ -1,0 +1,8 @@
+# Should fail due to mis-match return between define and declare.
+
+declare int fail1(int x);
+
+define array(int) fail1(int x) {
+  array(int) y;
+  return y;
+}
